@@ -1,0 +1,81 @@
+﻿@page "/monitoring"
+
+<PageTitle>Monitoring</PageTitle>
+
+@using Cloud.Data
+@*@inject WeatherForecastService ForecastService*@
+
+<h1>Synchronization progression</h1>
+
+<p>Monitoring of cloud synchronization operations.</p>
+
+@if (false)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Direction</th>
+                <th>Sec.</th>
+                <th>UserId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var onCommand in CloudBox.CloudBox.LastInstance.OnCommands)
+            {
+                <tr>
+                    <td>@(onCommand.Command.ToString())</td>
+                    <td>@(onCommand.IsOutput ? "Out" : "In")</td>
+                    <td>@Math.Round(((DateTime.UtcNow - onCommand.Time).TotalSeconds))</td>
+                    <td>@onCommand.UserId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>Name</th>
+                <th>Hash</th>
+                <th>Part</th>
+                <th>Length</th>
+                <th>Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var file in CloudBox.CloudBox.LastInstance.TransferredFiles)
+            {
+                <tr>
+                    <td>@(file.TransferLaberl)</td>
+                    <td>@file.Name</td>
+                    <td>@file.Hash</td>
+                    <td>@(file.Part + "/" + file.Total + "#" ) </td>
+                    <td>@file.Length</td>
+                    <td>@file.Completed</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@functions {
+    void Update()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cloudBox = CloudBox.CloudBox.LastInstance;
+        cloudBox.TransferredFiles.OnUpdated = (int idx) => { Update(); }; // Action that works like an event that is triggered when the list needs to be updated
+        cloudBox.OnCommands.PreservedElement = 6;
+        cloudBox.OnCommands.OnCommandEvent = (CloudSync.Sync.Commands command, ulong? userId, bool isOutput) => { Update(); };
+    }
+}

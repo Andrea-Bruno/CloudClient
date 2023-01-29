@@ -1,0 +1,134 @@
+﻿@page "/"
+@using Cloud.Data
+@using Microsoft.Extensions.Logging
+@inject ILogger<Index> Logger
+
+<PageTitle>Index</PageTitle>
+
+<h1>Cloud</h1>
+<h3>Welcome to your Cloud Client Panel</h3>
+
+<SurveyPrompt Title="Connection to the cloud server" />
+
+<EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label for="QR">QR code</label>
+    <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
+
+
+    <label for="Pin">Pin</label>
+    <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
+    <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
+    <button class="btn btn-primary" type="submit">Submit</button>
+</EditForm>
+
+<br />
+<label id="ErrorComunication" class="card">@ErrorComunication</label>
+<br />
+
+
+<br />
+<label id="SyncStatus" class="card" style="background-color: @SyncStatusColor">@SyncStatus</label>
+<br />
+
+<pre>@Status</pre>
+
+<br />
+
+<button id="RefreshStatus" onclick="@RefreshStatus()">Refresh status</button>
+
+<style>
+    .e-input-eye:before {
+        content: '\01F441';
+        /*        font-family: e-icons; */
+        font-size: 32px;
+    }
+</style>
+
+
+@functions {
+
+    public void ShowPassword()
+    {
+        if (this.TxtType == "password")
+        {
+            this.TxtType = "text";
+        }
+        else
+        {
+            this.TxtType = "password";
+        }
+    }
+
+    bool RefreshStatus()
+    {
+        OldStatus = Status;
+        Status = CloudBox.CloudBox.LastInstance.Status;
+        if (Status != OldStatus)
+        {
+            InvokeAsync(StateHasChanged);
+        }
+        return true;
+    }
+
+    System.Threading.Timer timer;
+
+    void StartRefreshStatus()
+    {
+        timer = new System.Threading.Timer((object? state) =>
+        {
+            RefreshStatus();
+        }, null, 1000, 1000);
+    }
+
+    private LoginModel loginModel = new();
+
+    void OnSyncStatusChanges(CloudSync.Sync.SynchronizationStatus syncStatus, int pendingFiles)
+    {
+        SyncStatus = "Sync status: " + syncStatus.ToString();
+        if (syncStatus == CloudSync.Sync.SynchronizationStatus.Synchronized)
+        {
+            SyncStatusColor = "green";
+        }
+        else
+        {
+            SyncStatusColor = "red";
+        }
+    }
+
+    void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description) => ErrorComunication = errorId.ToString() + " (" + description + ")";
+
+}
+
+@code {
+    public Index()
+    {
+        Status = CloudBox.CloudBox.LastInstance?.Status;
+        StartRefreshStatus();
+    }
+
+    string? Status;
+    string? OldStatus;
+    static string? SyncStatus;
+    static string? SyncStatusColor;
+    static string? ErrorComunication;
+
+    string TxtType = "password";
+
+
+    private void HandleValidSubmit(EditContext editContext)
+    {
+        var form = editContext.Model as Cloud.Data.LoginModel;
+        var pin = form.Pin;
+        var qr = form.QR;
+        if (!CloudBox.CloudBox.LastInstance.Login(qr, pin))
+        {
+            return;
+        }
+        CloudBox.CloudBox.LastInstance.OnSyncStatusChangesAction = OnSyncStatusChanges;
+        CloudBox.CloudBox.LastInstance.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
+        //        StartRefreshStatus();
+    }
+}
