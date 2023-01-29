@@ -21,6 +21,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataRedundancy", "..\..\Ant
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntiGitLibrary", "..\..\AntiGit\AntiGit\AntiGitLibrary.csproj", "{7D368FD3-4FA2-44C2-A7AF-C376C34AA888}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementi di soluzione", "Elementi di soluzione", "{9768E645-5BC5-436E-A2F2-DFD383FF636A}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		DEBUG_A|Any CPU = DEBUG_A|Any CPU
