@@ -1,3 +1,4 @@
+using Cloud;
 using Cloud.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -20,7 +21,8 @@ if (entryPoint != null && entryPoint.Contains("test")) { Console.WriteLine("WARN
 #endif
 
 var CloudClient = new CloudBox.CloudBox(entryPoint, cloudPath);
-    
+BackupManager.Initialize(CloudBox.CloudBox.LastInstance.CloudPath);
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
