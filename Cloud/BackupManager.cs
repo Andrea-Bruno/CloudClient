@@ -11,7 +11,7 @@
             AntiGithub.SourceDir = sourceDir;
         }
         public static Action<string> Alert;
-        static private AntiGitLibrary.Context AntiGithub = new AntiGitLibrary.Context(Alert, null, false);
+        static private AntiGitLibrary.Context AntiGithub = new AntiGitLibrary.Context(Alert, false);
         // static private AntiGitLibrary.Context AntiGithub = new AntiGitLibrary.Context(Alert, File.CreateSymbolicLink, false);
         public static string Source { get => AntiGithub.SourceDir; set => AntiGithub.SourceDir = value; }
         public static string Target { get => AntiGithub.TargetDir; set => AntiGithub.TargetDir = value; }
