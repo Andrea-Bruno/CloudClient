@@ -1,4 +1,4 @@
-# Trastless claud client
+# Trustless claud client
 
 ## The project is centered with a military safety standard.
 
