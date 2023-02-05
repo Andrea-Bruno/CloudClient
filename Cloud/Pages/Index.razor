@@ -2,27 +2,49 @@
 @using Cloud.Data
 @using Microsoft.Extensions.Logging
 @inject ILogger<Index> Logger
-
+@{
+    if (Static.Client != null)
+        Static.Client.OnSyncStatusChangesAction = OnSyncStatusChanges;
+    if (Static.Client != null)
+        Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
+}
 <PageTitle>Index</PageTitle>
 
 <h1>Cloud</h1>
 <h3>Welcome to your Cloud Client Panel</h3>
 
-<SurveyPrompt Title="Connection to the cloud server" />
+@if (!Static.IsAdmin)
+{
+    <div class="alert alert-danger" role="alert">
+        For correct operation, the application must be run as an administrator.<br />
+        The role is required to keep the system date up to date and to generate hard links during backup.
+    </div>
+}
 
-<EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@if (Static.Client?.IsLogged == true)
+{
+    <button class="btn btn-primary my-3" @onclick="Logout">Logout</button>
+}
+else
+{
+    <button class="btn btn-primary my-3" @onclick="Exit">Exit</button>
 
-    <label for="QR">QR code</label>
-    <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
+    <SurveyPrompt Title="Connection to the cloud server" />
 
+    <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <label for="Pin">Pin</label>
-    <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
-    <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
-    <button class="btn btn-primary" type="submit">Submit</button>
-</EditForm>
+        <label for="QR">QR code</label>
+        <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
+
+        <label for="Pin">Pin</label>
+        <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
+
+        <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </EditForm>
+}
 
 <br />
 <label id="ErrorComunication" class="card">@ErrorComunication</label>
@@ -37,8 +59,6 @@
 
 <br />
 
-<button id="RefreshStatus" onclick="@RefreshStatus()">Refresh status</button>
-
 <style>
     .e-input-eye:before {
         content: '\01F441';
@@ -49,6 +69,16 @@
 
 
 @functions {
+
+    private void Logout()
+    {
+        Static.Client?.Logout();
+    }
+
+    private void Exit()
+    {
+        Environment.Exit(0);
+    }
 
     public void ShowPassword()
     {
@@ -65,7 +95,7 @@
     bool RefreshStatus()
     {
         OldStatus = Status;
-        Status = CloudBox.CloudBox.LastInstance.Status;
+        Status = Static.Client?.Status;
         if (Status != OldStatus)
         {
             InvokeAsync(StateHasChanged);
@@ -105,10 +135,9 @@
 @code {
     public Index()
     {
-        Status = CloudBox.CloudBox.LastInstance?.Status;
+        Status = Static.Client == null ? null : Static.Client.Status;
         StartRefreshStatus();
     }
-
     string? Status;
     string? OldStatus;
     static string? SyncStatus;
@@ -117,18 +146,11 @@
 
     string TxtType = "password";
 
-
     private void HandleValidSubmit(EditContext editContext)
     {
         var form = editContext.Model as Cloud.Data.LoginModel;
         var pin = form.Pin;
         var qr = form.QR;
-        if (!CloudBox.CloudBox.LastInstance.Login(qr, pin))
-        {
-            return;
-        }
-        CloudBox.CloudBox.LastInstance.OnSyncStatusChangesAction = OnSyncStatusChanges;
-        CloudBox.CloudBox.LastInstance.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
-        //        StartRefreshStatus();
+        Static.Login(qr, pin);
     }
 }
