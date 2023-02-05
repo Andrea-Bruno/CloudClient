@@ -9,6 +9,27 @@ This project has dependencies with other libraries which you can find open sourc
 Therefore, the projects not included can be added by searching for them on the github repository, some are also available as nughet packages (you can add them to the solution instead of the missing projects).
 If you don't have the Cloud Server, alternatively you can use this software with a network address as a remote repository (the path must be set in the "git" parameter under the backup settings), for example you can set a pen drive connected to your router (in this case, the samba network path of the pen drive must be entered in "git").
 
+## dependencies:
+
+The libraries that are the engine of this app (and represent a dependency), must be downloaded from here:
+
+* [Cloud Library](https://github.com/Andrea-Bruno/CloudLibraries) are libraries for the creation of symmetric cloud (with server and equal client).
+
+* [Encrypted Messenging](https://github.com/Andrea-Bruno/EncryptedMessaging) are Low-level libraries for trustless encrypted socket connection (derived from bitcoin technology)
+
+* [AntiGit](https://github.com/Andrea-Bruno/AntiGithub) , in this project you will find the libraries used for the data backup and redundancy functions.
+
+NOTE: Any other (possible) dependencies are on [our GitHub](https://github.com/Andrea-Bruno) in source format.
+
+The reasons that led to this project with dontnet is that it is an open source development environment, and effective security is achieved only by being able to inspect all parts of the code, including the development framework.
+* [.NET is open source](https://dotnet.microsoft.com/en-us/platform/open-source)
+
+Our target is very linux and unix oriented, and the partnership between Microsoft and Canonical ensure the highest standard of security and reliability.
+
+* [Microsoft and Canonical: partnering for security](https://ubuntu.com/blog/install-dotnet-on-ubuntu)
+
+* [Red Hat works with Microsoft to ensure new major versions and service releases are available in tandem with Microsoft releases](https://developers.redhat.com/products/dotnet/overview)
+
 Friendly projects for which we underline the importance of maintaining computer privacy:
 
 * [DuckDuckGo (DDG)](https://duckduckgo.com/) is an internet search engine that emphasizes protecting searchers' privacy and avoiding the filter bubble of personalized search results.
