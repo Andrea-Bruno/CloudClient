@@ -1,4 +1,4 @@
-# Trustless claud client
+# Trustless cloud client
 
 ## The project is centered with a military safety standard.
 
