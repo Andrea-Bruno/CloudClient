@@ -43,6 +43,14 @@ else
 
         <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
         <button class="btn btn-primary" type="submit">Submit</button>
+        @if (WrongQRcode)
+        {
+            <div class="alert alert-danger" role="alert">
+                Wrong QR code!<br />
+                There is no code for this application!
+            </div>
+        }
+
     </EditForm>
 }
 
@@ -140,6 +148,7 @@ else
     }
     string? Status;
     string? OldStatus;
+    static bool WrongQRcode;
     static string? SyncStatus;
     static string? SyncStatusColor;
     static string? ErrorComunication;
@@ -151,6 +160,8 @@ else
         var form = editContext.Model as Cloud.Data.LoginModel;
         var pin = form.Pin;
         var qr = form.QR;
-        Static.Login(qr, pin);
+        WrongQRcode = !Static.Login(qr, pin);
+        if (WrongQRcode)
+            InvokeAsync(StateHasChanged);
     }
 }

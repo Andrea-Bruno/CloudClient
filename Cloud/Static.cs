@@ -19,11 +19,17 @@ namespace Cloud
                 Client.CreateContext(connectToEntryPoint);
             }
         }
-        public static void Login(string qr, string pin)
+        /// <summary>
+        /// Login to cloud server
+        /// </summary>
+        /// <param name="qr"></param>
+        /// <param name="pin"></param>
+        /// <returns>True for Successful, or false if QR code is not valid (this routine don't check the pin)</returns>
+        public static bool Login(string qr, string pin)
         {
             if (Client == null)
                 CreateClient();
-            Client?.Login(qr, pin, EntryPoint);
+          return Client != null && Client.Login(qr, pin, EntryPoint);
         }
     }
 }
