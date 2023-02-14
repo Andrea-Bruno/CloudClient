@@ -1,11 +1,29 @@
 using Cloud;
-using Cloud.Data;
-using EncryptedMessaging;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
+
+if (!Debugger.IsAttached)
+{
+    var startupFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Startup));
+    // automatic start of the application, with the start of the operating system
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
+        var vbsFileName = Path.Combine(startupFolder.FullName, AppDomain.CurrentDomain.FriendlyName + ".vbs");
+        if (!File.Exists(vbsFileName))
+        {
+            if (!startupFolder.Exists)
+                startupFolder.Create();
+
+            var fullAppName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
+            string vbs = "Set WshShell = WScript.CreateObject(\"WScript.Shell\")" + Environment.NewLine +
+                         "Dim exeName" + Environment.NewLine +
+                         "Dim statusCode" + Environment.NewLine +
+                         "exeName = \"" + fullAppName + "\"" + Environment.NewLine +
+                         "statusCode = WshShell.Run(exeName, 1, true)";
+            File.WriteAllText(vbsFileName, vbs);
+        }
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,20 +39,17 @@ var configuration = app.Configuration;
 Static.CloudPath = (string)configuration.GetValue(typeof(string), "CloudPath", null);
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); ; // Used for release
 #if RELEASE
-if (entryPoint != null && entryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
+if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
 
 //var h1 = CloudSync.Util.HashFileName("Download/Sorgenti/Cloud/ClientMobile/cloud-storage-main/node_modules/unimodules-app-loader/android/build/intermediates/aapt_friendly_merged_manifests/debug/aapt/AndroidManifest.xml", false);
 //var h2 = CloudSync.Util.HashFileName("Download/Sorgenti/Cloud/ClientMobile/cloud-storage-main/node_modules/unimodules-app-loader/android/build/intermediates/compiled_local_resources/debug/out", true);
 
-
-var fileLastEntryPoint = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LastEntryPoint");
-if (File.Exists(fileLastEntryPoint))
+var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
+if (lastEntryPoint != null)
 {
-    var lastEntryPoint = File.ReadAllText(fileLastEntryPoint);
     Static.CreateClient(lastEntryPoint);
 }
-
 
 BackupManager.Initialize(CloudBox.CloudBox.GetCloudPath(Static.CloudPath, false));
 
@@ -46,7 +61,7 @@ BackupManager.Initialize(CloudBox.CloudBox.GetCloudPath(Static.CloudPath, false)
 var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-   Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + url, true);
+    EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + url, true);
 }
 #endif
 

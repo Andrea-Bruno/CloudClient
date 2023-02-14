@@ -5,7 +5,13 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>WinExe</OutputType>
+		<ApplicationIcon>Cloud.ico</ApplicationIcon>
+		<ApplicationManifest>C:\Users\andre\OneDrive\Sorgenti\Cloud\CloudClient\app.manifest</ApplicationManifest>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="Cloud.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />

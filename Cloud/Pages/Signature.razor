@@ -1,0 +1,57 @@
+﻿@page "/signature"
+
+<PageTitle>Digital signature of documents</PageTitle>
+
+@using Cloud.Data
+
+<h1>Digital signature of documents</h1>
+
+<br />
+@if (Static.Client != null)
+{
+    <div class="form-group m-3">
+        <label for="scope">Choose the reason why to put the signature:</label>
+        <select id="scope" @onchange=ChangeSelectScope>
+            <option selected="selected" value="Accept">Accept (Sign the document and I accept)</option>
+            <option value="Reject">Raject (he document has been submitted to me but I do not approve it)</option>
+            <option value="Viewed">Viewed (I have viewed the document without accepting or rejecting it)</option>
+        </select>
+    </div>
+    <div class="form-group m-3">
+        <label for="myfile">Select a PDF file to sign:</label>
+        <InputFile OnChange="@LoadFiles" accept=".pdf" multiple />
+    </div>
+}
+else
+{
+    <p>In order to use the digital signature, you must be logged into the system</p>
+}
+<br />
+
+@if (JsonBase64 != null)
+{
+    <a class="form-control btn btn-primary" href="data:text/plain;base64,@JsonBase64" download="@SignatureFileName" target="_blank">Download</a>
+}
+
+@code {
+    string? JsonBase64;
+    string? SignatureFileName;
+    CloudBox.DigitalSignature.Scope Scope;
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+
+        if (Static.Client != null)
+            using (var fr = e.File.OpenReadStream(e.File.Size))
+            {
+                var data = new byte[e.File.Size];
+                await fr.ReadAsync(data, 0, (int)e.File.Size);
+                var json = Static.Client.SignDocument(Scope, out SignatureFileName, e.File.Name, data);
+                JsonBase64 = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(json));
+            }
+    }
+    private void ChangeSelectScope(ChangeEventArgs args)
+    {
+        Scope = (CloudBox.DigitalSignature.Scope)Enum.Parse(typeof(CloudBox.DigitalSignature.Scope), (string)args.Value);
+        JsonBase64 = null;
+    }
+}
