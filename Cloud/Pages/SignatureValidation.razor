@@ -22,6 +22,7 @@
 
 @if (Sign != null)
 {
+    <span class="d-block p-2 bg-primary text-white">Scope of signature: @Sign.ScopeOfSignature</span>
     <span class="d-block p-2 bg-primary text-white">User Id: @Sign.UserId()</span>
     <span class="d-block p-2 bg-primary text-white">Public key: @Sign.PublicKey</span>
     <span class="d-block p-2 bg-primary text-white">Key base64: @Sign.PublicKeyBase64</span>
@@ -29,7 +30,7 @@
     <span class="d-block p-2 bg-primary text-white">Block time: @Sign.BlockTime()</span>
     @if (IsValid)
     {
-        <div class="alert alert-primary" role="alert">
+        <div class="alert alert-success" role="alert">
             The signature is authentic!
         </div>
     }
