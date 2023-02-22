@@ -20,7 +20,7 @@ namespace Cloud
             }
         }
         /// <summary>
-        /// Login to cloud server
+        /// Create a new account and login to cloud server
         /// </summary>
         /// <param name="qr"></param>
         /// <param name="pin"></param>
@@ -29,7 +29,19 @@ namespace Cloud
         {
             if (Client == null)
                 CreateClient();
-          return Client != null && Client.Login(qr, pin, EntryPoint);
+            return Client != null && Client.Login(qr, pin, EntryPoint);
+        }
+
+        /// <summary>
+        /// Recover an existing account
+        /// </summary>
+        /// <param name="qr"></param>
+        /// <param name="passphrase"></param>
+        /// <returns></returns>
+        public static bool Restore(string qr, string passphrase)
+        {
+            Client = new CloudBox.CloudBox(CloudPath);
+            return Client.CreateContext(qr, passphrase: passphrase);
         }
     }
 }

@@ -15,7 +15,10 @@ The libraries that are the engine of this app (and represent a dependency), must
 
 * [Cloud Library](https://github.com/Andrea-Bruno/CloudLibraries) are libraries for the creation of symmetric cloud (with server and equal client).
 
-* [Encrypted Messenging](https://github.com/Andrea-Bruno/EncryptedMessaging) are Low-level libraries for trustless encrypted socket connection (derived from bitcoin technology)
+* [Encrypted Messenging](https://github.com/Andrea-Bruno/EncryptedMessaging) are Low-level libraries for trustless encrypted socket connection (derived from bitcoin technology).
+
+* [Secure Storage](https://github.com/Andrea-Bruno/SecureStorage) It is a library used to save data and information produced by the application in an encrypted and inaccessible way.
+
 
 * [AntiGit](https://github.com/Andrea-Bruno/AntiGithub) , in this project you will find the libraries used for the data backup and redundancy functions.
 

@@ -1,0 +1,25 @@
+﻿@page "/utility"
+
+<PageTitle>Utility</PageTitle>
+
+<button class="btn btn-primary my-3" @onclick=OnExportClick>Export passphrase</button>
+@if (Passphrase != null)
+{
+    <div class="alert alert-info">
+        @Passphrase
+    </div>
+}
+
+
+@functions {
+    void OnExportClick()
+    {
+        Passphrase = Static.Client?.Context.My.GetPassphrase();
+        if (String.IsNullOrEmpty(Passphrase))
+            Passphrase = "The client is not logged in, so it is not possible to export the passphrase";
+    }
+}
+
+@code {
+    private string? Passphrase = null;
+}

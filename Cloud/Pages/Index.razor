@@ -38,7 +38,7 @@ else
         <label for="QR">QR code</label>
         <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
 
-        <label for="Pin">Pin</label>
+        <label for="Pin">Pin or phassphrase to restore account</label>
         <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
 
         <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
@@ -158,10 +158,18 @@ else
     private void HandleValidSubmit(EditContext editContext)
     {
         var form = editContext.Model as Cloud.Data.LoginModel;
-        var pin = form.Pin;
         var qr = form.QR;
-        WrongQRcode = !Static.Login(qr, pin);
-        if (WrongQRcode)
-            InvokeAsync(StateHasChanged);
+        var pin = form.Pin.Trim();
+        if (pin.Contains(' '))
+        {
+            var passphrase = pin;
+            WrongQRcode = !Static.Restore(qr, passphrase);
+        }
+        else
+        {
+            WrongQRcode = !Static.Login(qr, pin);
+            if (WrongQRcode)
+                InvokeAsync(StateHasChanged);
+        }
     }
 }
