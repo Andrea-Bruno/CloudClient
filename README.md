@@ -19,7 +19,6 @@ The libraries that are the engine of this app (and represent a dependency), must
 
 * [Secure Storage](https://github.com/Andrea-Bruno/SecureStorage) It is a library used to save data and information produced by the application in an encrypted and inaccessible way.
 
-
 * [AntiGit](https://github.com/Andrea-Bruno/AntiGithub) , in this project you will find the libraries used for the data backup and redundancy functions.
 
 NOTE: Any other (possible) dependencies are on [our GitHub](https://github.com/Andrea-Bruno) in source format.

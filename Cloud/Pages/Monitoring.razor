@@ -8,9 +8,9 @@
 
 <p>Monitoring of cloud synchronization operations.</p>
 
-@if (false)
+@if (CloudClient == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Waiting for connection...</em></p>
 }
 else
 {
@@ -24,7 +24,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var onCommand in CloudBox.CloudBox.LastInstance.OnCommands.ToArray())
+            @foreach (var onCommand in CloudClient.OnCommands.ToArray())
             {
                 <tr>
                     <td>@(onCommand.Command.ToString())</td>
@@ -48,7 +48,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var file in CloudBox.CloudBox.LastInstance.TransferredFiles.OrderBy( x => x.Completed))
+            @foreach (var file in CloudClient.TransferredFiles.OrderBy( x => x.Completed))
             {
                 <tr>
                     <td>@(file.TransferLaberl)</td>
@@ -70,11 +70,14 @@ else
 }
 @code {
 
+    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
     protected override async Task OnInitializedAsync()
     {
-        var cloudBox = CloudBox.CloudBox.LastInstance;
-        cloudBox.TransferredFiles.OnUpdated = (int idx) => { Update(); }; // Action that works like an event that is triggered when the list needs to be updated
-        cloudBox.OnCommands.PreservedElement = 6;
-        cloudBox.OnCommands.OnCommandEvent = (CloudSync.Sync.Commands command, ulong? userId, bool isOutput) => { Update(); };
+        if (CloudClient!= null)
+        {
+            CloudClient.TransferredFiles.OnUpdated = (int idx) => { Update(); }; // Action that works like an event that is triggered when the list needs to be updated
+            CloudClient.OnCommands.PreservedElement = 6;
+            CloudClient.OnCommands.OnCommandEvent = (CloudSync.Sync.Commands command, ulong? userId, bool isOutput) => { Update(); };
+        }
     }
 }

@@ -7,10 +7,23 @@
 		<OutputType>WinExe</OutputType>
 		<ApplicationIcon>Cloud.ico</ApplicationIcon>
 		<ApplicationManifest>C:\Users\andre\OneDrive\Sorgenti\Cloud\CloudClient\app.manifest</ApplicationManifest>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <Content Include="Cloud.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\LICENSE.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>

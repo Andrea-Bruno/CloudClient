@@ -21,13 +21,12 @@ var app = builder.Build();
 var configuration = app.Configuration;
 
 Static.CloudPath = (string)configuration.GetValue(typeof(string), "CloudPath", null);
-Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); ; // Used for release
+Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
+var port = (string)configuration.GetValue(typeof(string), "Port", null); // Used for release
+
 #if RELEASE
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
-
-//var h1 = CloudSync.Util.HashFileName("Download/Sorgenti/Cloud/ClientMobile/cloud-storage-main/node_modules/unimodules-app-loader/android/build/intermediates/aapt_friendly_merged_manifests/debug/aapt/AndroidManifest.xml", false);
-//var h2 = CloudSync.Util.HashFileName("Download/Sorgenti/Cloud/ClientMobile/cloud-storage-main/node_modules/unimodules-app-loader/android/build/intermediates/compiled_local_resources/debug/out", true);
 
 var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
 if (lastEntryPoint != null)
@@ -40,14 +39,21 @@ BackupManager.Initialize(CloudBox.CloudBox.GetCloudPath(Static.CloudPath, false)
 
 // Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
 
-#if RELEASE
-// Open the browser
+if (!string.IsNullOrEmpty(port))
+    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://localhost:" + port);
 var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
-if (url != null)
+//#if RELEASE
+if (lastEntryPoint == null || Debugger.IsAttached)
+{
+    // Open the browser
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-
         EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + url, true);
-#endif
+    if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop))){
+        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings.htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + url + @"""></HEAD>");
+    }
+}
+
+//#endif
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -62,4 +68,4 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-app.Run();
+app.Run(url);
