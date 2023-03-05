@@ -2,7 +2,10 @@
 
 <PageTitle>Utility</PageTitle>
 
+<button class="btn btn-primary my-3" @onclick=OnQuitClick>Quit</button>
+<br />
 <button class="btn btn-primary my-3" @onclick=OnExportClick>Export passphrase</button>
+
 @if (Passphrase != null)
 {
     <div class="alert alert-info">
@@ -10,6 +13,10 @@
     </div>
 }
 
+<div class="form-check form-switch">
+    <input class="form-check-input" checked="@AutoStart" @onchange=OnChangeAutoStart type="checkbox" id="flexSwitchCheckDefault">
+    <label class="form-check-label" for="flexSwitchCheckDefault">Auto start</label>
+</div>
 
 @functions {
     void OnExportClick()
@@ -18,8 +25,23 @@
         if (String.IsNullOrEmpty(Passphrase))
             Passphrase = "The client is not logged in, so it is not possible to export the passphrase";
     }
+    void OnQuitClick()
+    {
+        System.Environment.Exit(0);
+    }
+    void OnChangeAutoStart(ChangeEventArgs ea)
+    {
+        if (ea.Value is bool value)
+        {
+            if (value == true)
+                Cloud.AutoStart.SetAutoStartByActivity();
+            else
+                Cloud.AutoStart.StopAutoStartByActivity();
+        }
+    }
 }
 
 @code {
     private string? Passphrase = null;
+    static bool AutoStart = true;
 }

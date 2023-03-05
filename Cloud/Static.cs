@@ -9,6 +9,7 @@ namespace Cloud
     {
         public static string? EntryPoint;
         public static string? CloudPath;
+        public static string? Port;
         public static readonly bool IsAdmin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator) : Environment.UserName == "root";
         public static CloudBox.CloudBox? Client { get; private set; }
         public static void CreateClient(string? connectToEntryPoint = null)

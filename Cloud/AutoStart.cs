@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Cloud
@@ -8,6 +9,7 @@ namespace Cloud
     {
         private static string FullAppName => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
         private static string AppName => AppDomain.CurrentDomain.FriendlyName;
+        private static string TaskName => @"/tn AutoStart" + AppName  + Static.Port;
 
 
         public static void SetAutoStartByScript()
@@ -34,9 +36,11 @@ namespace Cloud
 
         public static void SetAutoStartByActivity()
         {
+            if (Debugger.IsAttached)
+                return;
             var xmlFileName = FullAppName + ".activity.xml";
-            if (!File.Exists(xmlFileName))
-            {
+            //if (!File.Exists(xmlFileName))
+            //{
                 // example and documentation: https://learn.microsoft.com/en-us/windows/win32/taskschd/boot-trigger-example--xml-/
                 var xml = @"<?xml version=""1.0"" ?>
 <!--
@@ -78,13 +82,17 @@ Schedules a task to start {0} when the system is booted.
                 File.WriteAllText(xmlFileName, formatted);
 
                 // schtasks /create /XML <path to the XML file containing the task definition> /tn <task name>
-                var taskName = "/tn AutoStart" + AppName;
-                var args = "/XML \"" + xmlFileName + "\" " + taskName;
+                var args = "/XML \"" + xmlFileName + "\" " + TaskName;
                 //EncryptedMessaging.Functions.ExecuteCommand("schtasks", "/delete " + args);
                 //EncryptedMessaging.Functions.ExecuteCommand("schtasks", "/create " + args);
-                EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "schtasks /delete " + taskName + " /F", true);
+                EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "schtasks /delete " + TaskName + " /F", true);
                 EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "schtasks /create " + args, true);
-            }
+            //}
+        }
+
+        public static void StopAutoStartByActivity()
+        {
+            EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "schtasks /delete " + TaskName + " /F", true);
         }
     }
 }

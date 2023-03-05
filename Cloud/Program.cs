@@ -2,11 +2,8 @@ using Cloud;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-if (!Debugger.IsAttached)
-{
-    // AutoStart.SetAutoStartByScript();
-    AutoStart.SetAutoStartByActivity();
-}
+AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
+
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command linee
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +19,9 @@ var configuration = app.Configuration;
 
 Static.CloudPath = (string)configuration.GetValue(typeof(string), "CloudPath", null);
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
-var port = (string)configuration.GetValue(typeof(string), "Port", null); // Used for release
+Static.Port = (string)configuration.GetValue(typeof(string), "Port", null); // Used for release
+                                                                          
+AutoStart.SetAutoStartByActivity();
 
 #if RELEASE
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
@@ -39,21 +38,19 @@ BackupManager.Initialize(CloudBox.CloudBox.GetCloudPath(Static.CloudPath, false)
 
 // Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
 
-if (!string.IsNullOrEmpty(port))
-    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://localhost:" + port);
+if (!string.IsNullOrEmpty(Static.Port))
+    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://localhost:" + Static.Port);
 var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
-//#if RELEASE
 if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + url, true);
-    if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop))){
-        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings.htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + url + @"""></HEAD>");
+    if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
+    {
+        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + url + @"""></HEAD>");
     }
 }
-
-//#endif
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

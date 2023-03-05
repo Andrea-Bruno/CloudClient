@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>WinExe</OutputType>
 		<ApplicationIcon>Cloud.ico</ApplicationIcon>
-		<ApplicationManifest>C:\Users\andre\OneDrive\Sorgenti\Cloud\CloudClient\app.manifest</ApplicationManifest>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
