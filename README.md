@@ -9,6 +9,11 @@ This project has dependencies with other libraries which you can find open sourc
 Therefore, the projects not included can be added by searching for them on the github repository, some are also available as nughet packages (you can add them to the solution instead of the missing projects).
 If you don't have the Cloud Server, alternatively you can use this software with a network address as a remote repository (the path must be set in the "git" parameter under the backup settings), for example you can set a pen drive connected to your router (in this case, the samba network path of the pen drive must be entered in "git").
 
+# Privacy Policy
+
+The application does not collect or send personal data, all communication is exclusively with your private cloud or cloud service.
+Since the privacy policy is trustless (you don't have to trust us but it is the code that demonstrates honesty), the source code irrefutably demonstrates that our work is sincere and loyal and that your data is protected, and the communications between client and Cloud server are impossible to intercept because they are covered by military-grade encryption systems with digitally signed packets to prevent "man in the middle" attacks in a preventive manner. The versions that we publish on the store are the same (without any modifications) that you can find here in source format.
+
 ## dependencies:
 
 The libraries that are the engine of this app (and represent a dependency), must be downloaded from here:

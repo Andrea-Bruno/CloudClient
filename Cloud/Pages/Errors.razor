@@ -23,7 +23,7 @@ else
             @foreach (var fileError in CloudClient.FileErrors)
             {
                 <tr>
-                    <td>@fileError.Time.ToLocalTime</td>
+                    <td>@fileError.Time.ToLocalTime()</td>
                     <td>@fileError.Error</td>
                     <td>@fileError.FileName</td>
                 </tr>

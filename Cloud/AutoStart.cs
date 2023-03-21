@@ -11,7 +11,6 @@ namespace Cloud
         private static string AppName => AppDomain.CurrentDomain.FriendlyName;
         private static string TaskName => @"/tn AutoStart" + AppName  + Static.Port;
 
-
         public static void SetAutoStartByScript()
         {
             var startupFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Startup));

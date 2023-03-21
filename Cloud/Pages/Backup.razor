@@ -2,17 +2,6 @@
 
 <PageTitle>Backup</PageTitle>
 <h1>Backup settings</h1>
-@{
-    BackupManager.Alert = SetAlert;
-}
-
-@if (Alert != null)
-{
-    <div class="alert alert-warning">
-        <strong>Warning!</strong>@Alert
-    </div>
-    <button type="button" class="btn btn-primary" @onclick="() => Alert = null">Reset alert</button>
-}
 
 <div class="input-group mb-3">
     <div class="input-group-prepend">
@@ -29,16 +18,14 @@
     <input type="text" @onchange="@OnTargetChange" value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
 </div>
 
-<SurveyPrompt Title="Network or local path of the archive synchronized in real time (redundant copy). If multiple machines connect to the same Git repository, a sophisticated merge algorithm will synchronize the changes to the documents." />
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text" id="inputGroup-sizing-default">Git</span>
-    </div>
-    <input type="text" @onchange="@OnGitChange" value="@BackupManager.Git" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
-</div>
+<button type="button" class="btn btn-primary" disabled=@BackupManager.BackupIsRunning @onclick="StartBackup">Start Backup</button>
 
-<button type="button" class="btn btn-primary" @onclick="StartBackup">Start Backup</button>
-<div>@StartOutcome</div>
+@if (BackupManager.BackupIsRunning)
+{
+    <div class="alert alert-success my-3" role="alert">
+        The backup is in progress, it will be completed soon!
+    </div>
+}
 
 <div class="alert alert-primary my-3" role="alert">
     If the application is running, daily backups will still be performed automatically.
@@ -52,26 +39,14 @@
             BackupManager.Target = value;
         }
     }
-    static void OnGitChange(Microsoft.AspNetCore.Components.ChangeEventArgs e)
-    {
-        if (e.Value is string value)
-        {
-            BackupManager.Target = value;
-        }
-    }
     static void StartBackup()
     {
         StartOutcome = BackupManager.StartBackup();
-    }
-    static void SetAlert(string text)
-    {
-        Alert = text;
     }
 }
 
 
 @code {
-    static string? Alert = null;
     static string? StartOutcome;
 }
 

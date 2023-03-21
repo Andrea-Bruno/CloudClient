@@ -17,7 +17,16 @@ var app = builder.Build();
 
 var configuration = app.Configuration;
 
-Static.CloudPath = (string)configuration.GetValue(typeof(string), "CloudPath", null);
+Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
+
+
+
+#if DEBUG
+Static.CloudPath = "C:\\Users\\andre\\OneDrive";
+#endif
+
+
+
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
 Static.Port = (string)configuration.GetValue(typeof(string), "Port", null); // Used for release
                                                                           
@@ -33,7 +42,7 @@ if (lastEntryPoint != null)
     Static.CreateClient(lastEntryPoint);
 }
 
-BackupManager.Initialize(CloudBox.CloudBox.GetCloudPath(Static.CloudPath, false));
+BackupManager.Initialize(Static.CloudPath);
 
 
 // Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
