@@ -9,6 +9,28 @@ This project has dependencies with other libraries which you can find open sourc
 Therefore, the projects not included can be added by searching for them on the github repository, some are also available as nughet packages (you can add them to the solution instead of the missing projects).
 If you don't have the Cloud Server, alternatively you can use this software with a network address as a remote repository (the path must be set in the "git" parameter under the backup settings), for example you can set a pen drive connected to your router (in this case, the samba network path of the pen drive must be entered in "git").
 
+# Description
+
+To use this software you need to have the relevant Private Cloud and compatible Cloud service (otherwise where does the cloud connect?).
+This program is an open source desktop cloud client to automatically synchronize, encrypted and with military grade security, files from your PC to your private cloud or cloud service.
+The synchronization algorithms are very fast and the software with hundreds of thousands of files does not go into crisis as it happens with similar products.
+This is an open source product and is published here in exactly the same source format version as you find here: https://github.com/Andrea-Bruno/CloudClient without any additions or modifications.
+Respect for your privacy is total, and the military level of security protects you and your data from hackers who would like to sneak into the cloud to access your personal data and information.
+
+Safety:
+We have transmitted our experience in the development of "non custodial wallet" bitcoins to this application so the underlying uses the same concepts and the same libraries, which are the foundations of the trustless technology used for the blockchain (the maximum current concept in terms of security) . The application generates a passphrase which creates a pair of cryptographic keys (public and private), which represent your digital identity and you can also sign documents with it. This digital identity is used by the server to recognize you, it is the underlying for encrypted communication. Using the passphrase you can restore your account on the client side, just like cryptocurrency wallets. Just like with bitcoin wallets, your account is client-side only, there is no website where you need to register or a place where your account is kept, which makes this application conceptually superior to all similar ones.
+
+As a bonus we have added some extra features:
+* Automatic virus detection (occurs at the same time as cloud file synchronization).
+* Daily automatic backup: To take advantage of this function you need to have an additional physical HD since the backup done on the same disk is useless because it does not protect against physical disk failure. The backup uses hard link functions so it doesn't take up much space, new backups only take up the difference of what has changed since the previous backup was done.
+* Versioning: A new backup is created every time a file is modified in order to keep its previous losses and allow rollback (very useful function for software developers).
+* Synchronization of the cloud area on the pen drive or disk attached to the router: You can specify the network path of your device connected to the router's USB port and have a real-time synchronized copy of all your data so if your computer were stolen or should you lose it, you will still have a copy of all your data.
+* Digital signature of documents, i.e. the software creates a digital identity with which you can sign documents and validate the signature affixed by others.
+
+The software needs to run in administrator mode for the following reasons:
+* Automatic date and time adjustment in your computer (if the date is wrong the files will be recorded with wrong dates and could be mistakenly mistaken as older than versions contained on the cloud).
+* Create hard links for backups (this saves a lot of space during backups).
+
 # Privacy Policy
 
 The application does not collect or send personal data, all communication is exclusively with your private cloud or cloud service.
