@@ -69,9 +69,9 @@ else
 
 <style>
     .e-input-eye:before {
-        content: '\01F441';
-        /*        font-family: e-icons; */
-        font-size: 32px;
+    content: '\01F441';
+    /*        font-family: e-icons; */
+    font-size: 32px;
     }
 </style>
 
@@ -136,7 +136,10 @@ else
         }
     }
 
-    void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description) => ErrorComunication = errorId.ToString() + " (" + description + ")";
+    void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description) {
+        ErrorComunication = errorId.ToString() + " (" + description + ")";
+        Static.Client?.AddFileError(ErrorComunication, null);
+    } 
 
 }
 

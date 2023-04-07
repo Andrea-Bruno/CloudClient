@@ -1,10 +1,14 @@
 ﻿@page "/utility"
 
 <PageTitle>Utility</PageTitle>
-
+<button class="btn btn-primary my-3" @onclick=SendContact>Send my contact</button>
+<br />
 <button class="btn btn-primary my-3" @onclick=OnQuitClick>Quit</button>
 <br />
 <button class="btn btn-primary my-3" @onclick=OnExportClick>Export passphrase</button>
+
+
+
 
 @if (Passphrase != null)
 {
@@ -28,6 +32,14 @@
     void OnQuitClick()
     {
         System.Environment.Exit(0);
+    }
+    void SendContact()
+    {
+        var context = Static.Client?.Context;
+        if (context != null)
+        {
+            context.Messaging.SendContact(context.My.Contact, Static.Client.ServerCloud, false);
+        }
     }
     void OnChangeAutoStart(ChangeEventArgs ea)
     {
