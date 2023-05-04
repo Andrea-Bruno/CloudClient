@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-//builder.Services.AddSingleton<WeatherForecastService>();
 
 var app = builder.Build();
 
@@ -19,12 +18,9 @@ var configuration = app.Configuration;
 
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
-
-
 #if DEBUG
-Static.CloudPath = "C:\\Users\\andre\\OneDrive";
+Static.CloudPath = @"C:\Test";
 #endif
-
 
 
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release

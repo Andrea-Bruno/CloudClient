@@ -4,9 +4,11 @@
 @inject ILogger<Index> Logger
 @{
     if (Static.Client != null)
+    {
         Static.Client.OnSyncStatusChangesAction = OnSyncStatusChanges;
-    if (Static.Client != null)
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
+        OnSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
+    }
 }
 <PageTitle>Index</PageTitle>
 
