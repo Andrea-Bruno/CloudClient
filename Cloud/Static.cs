@@ -26,11 +26,11 @@ namespace Cloud
         /// <param name="qr"></param>
         /// <param name="pin"></param>
         /// <returns>True for Successful, or false if QR code is not valid (this routine don't check the pin)</returns>
-        public static bool Login(string qr, string pin)
+        public static CloudBox.CloudBox.LoginResult Login(string qr, string pin)
         {
             if (Client == null)
                 CreateClient();
-            return Client != null && Client.Login(qr, pin, EntryPoint);
+            return Client == null ? CloudBox.CloudBox.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
         }
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace Cloud
         /// <param name="qr"></param>
         /// <param name="passphrase"></param>
         /// <returns></returns>
-        public static bool Restore(string qr, string passphrase)
+        public static CloudBox.CloudBox.LoginResult Restore(string qr, string passphrase)
         {
             Client = new CloudBox.CloudBox(CloudPath);
-            return Client.CreateContext(qr, passphrase: passphrase);
+            return Client.CreateContext(qr, passphrase: passphrase) ? CloudBox.CloudBox.LoginResult.Validated : CloudBox.CloudBox.LoginResult.WrongQR;
         }
     }
 }

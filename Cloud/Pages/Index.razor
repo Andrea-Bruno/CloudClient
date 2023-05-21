@@ -5,6 +5,7 @@
 @{
     if (Static.Client != null)
     {
+        Static.Client.OnNotificationAction = OnNotificationAction;
         Static.Client.OnSyncStatusChangesAction = OnSyncStatusChanges;
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
         OnSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
@@ -41,15 +42,22 @@ else
         <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
 
         <label for="Pin">Pin or phassphrase to restore account</label>
+        <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
         <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
 
-        <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
-        <button class="btn btn-primary" type="submit">Submit</button>
-        @if (WrongQRcode)
+        
+        <button class="btn btn-primary my-3" type="submit">Submit</button>
+        @if (LoginResult == CloudBox.CloudBox.LoginResult.WrongQR)
         {
             <div class="alert alert-danger" role="alert">
                 Wrong QR code!<br />
                 There is no code for this application!
+            </div>
+        }
+        else if (LoginResult == CloudBox.CloudBox.LoginResult.WrongPassword)
+        {
+            <div class="alert alert-danger" role="alert">
+                Wrong pin!
             </div>
         }
 
@@ -60,10 +68,14 @@ else
 <label id="ErrorComunication" class="card">@ErrorComunication</label>
 <br />
 
+<br />
+<label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
+<br />
 
 <br />
 <label id="SyncStatus" class="card" style="background-color: @SyncStatusColor">@SyncStatus</label>
 <br />
+
 
 <pre>@Status</pre>
 
@@ -125,6 +137,19 @@ else
 
     private LoginModel loginModel = new();
 
+    void OnNotificationAction(ulong? fromUserId, CloudSync.Sync.Notice notice)
+    {
+        Notification = "Notification: " + notice.ToString();
+        if (notice == CloudSync.Sync.Notice.LoginError)
+        {
+            NotificationColor = "red";
+        }
+        else
+        {
+            NotificationColor = "green";
+        }
+    }
+
     void OnSyncStatusChanges(CloudSync.Sync.SynchronizationStatus syncStatus, int pendingFiles)
     {
         SyncStatus = "Sync status: " + syncStatus.ToString();
@@ -153,9 +178,14 @@ else
     }
     string? Status;
     string? OldStatus;
-    static bool WrongQRcode;
+    static CloudBox.CloudBox.LoginResult LoginResult;
+  
+    static string? Notification;
+    static string? NotificationColor;
+    
     static string? SyncStatus;
     static string? SyncStatusColor;
+    
     static string? ErrorComunication;
 
     string TxtType = "password";
@@ -168,12 +198,12 @@ else
         if (pin.Contains(' '))
         {
             var passphrase = pin;
-            WrongQRcode = !Static.Restore(qr, passphrase);
+            LoginResult = Static.Restore(qr, passphrase);
         }
         else
         {
-            WrongQRcode = !Static.Login(qr, pin);
-            if (WrongQRcode)
+            LoginResult = Static.Login(qr, pin);
+            if (LoginResult != CloudBox.CloudBox.LoginResult.Validated)
                 InvokeAsync(StateHasChanged);
         }
     }
