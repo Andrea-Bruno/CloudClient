@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 
-
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command linee
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,5 +68,9 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+#if !DEBUG // --- start beta
+Thread.Sleep(5000); // should prevent restarting the instance after the crash, which otherwise gives this error: "Failed to bind to address: address already in use."
+#endif     // --- end beta
 
 app.Run(url);

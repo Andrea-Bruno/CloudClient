@@ -27,6 +27,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="QRCoder" Version="1.4.3" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
 		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
 	</ItemGroup>

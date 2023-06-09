@@ -1,4 +1,5 @@
-﻿using CloudSync;
+﻿using Cloud.Pages;
+using CloudSync;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -30,7 +31,21 @@ namespace Cloud
         {
             if (Client == null)
                 CreateClient();
-            return Client == null ? CloudBox.CloudBox.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
+            var result = Client == null ? CloudBox.CloudBox.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
+            if (result == CloudBox.CloudBox.LoginResult.Validated)
+            {
+                Client?.Context.SecureStorage.Values.Set("QR", qr);
+            } 
+            return result;
+        }
+
+        /// <summary>
+        /// Disconnect from the cloud
+        /// </summary>
+        public static void Logout()
+        {
+            Client?.Context.SecureStorage.Values.Set("QR", null);
+            Client?.Logout();
         }
 
         /// <summary>

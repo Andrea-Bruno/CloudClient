@@ -1,13 +1,23 @@
-﻿namespace Cloud
+﻿using static System.Net.Mime.MediaTypeNames;
+
+namespace Cloud
 {
     public static class Util
     {
+        /// <summary>
+        /// Event that is executed when the application crashes, to create a log on file of the event, useful for diagnostics, and restarts the application after it has gone into error
+        /// </summary>
+        /// <param name="sender">Sender object</param>
+        /// <param name="e">Unhandled exception event args</param>
         public static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception exception)
             {
                 RecordError(exception);
             }
+            // Restart application after crash
+            if (Environment.ProcessPath != null)
+                System.Diagnostics.Process.Start(Environment.ProcessPath);
         }
 
 

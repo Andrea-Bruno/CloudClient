@@ -45,7 +45,7 @@ else
         <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
         <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
 
-        
+
         <button class="btn btn-primary my-3" type="submit">Submit</button>
         @if (LoginResult == CloudBox.CloudBox.LoginResult.WrongQR)
         {
@@ -83,9 +83,9 @@ else
 
 <style>
     .e-input-eye:before {
-    content: '\01F441';
-    /*        font-family: e-icons; */
-    font-size: 32px;
+        content: '\01F441';
+        /*        font-family: e-icons; */
+        font-size: 32px;
     }
 </style>
 
@@ -94,7 +94,7 @@ else
 
     private void Logout()
     {
-        Static.Client?.Logout();
+        Static.Logout();
     }
 
     private void Exit()
@@ -142,11 +142,13 @@ else
         Notification = "Notification: " + notice.ToString();
         if (notice == CloudSync.Sync.Notice.LoginError)
         {
-            NotificationColor = "red";
+            NotificationColor = nameof(System.Drawing.Color.Red);
         }
+        else if (notice == CloudSync.Sync.Notice.Authentication || notice == CloudSync.Sync.Notice.LoggedOut)
+            NotificationColor = nameof(System.Drawing.Color.Yellow);
         else
         {
-            NotificationColor = "green";
+            NotificationColor = nameof(System.Drawing.Color.Green);
         }
     }
 
@@ -155,18 +157,19 @@ else
         SyncStatus = "Sync status: " + syncStatus.ToString();
         if (syncStatus == CloudSync.Sync.SynchronizationStatus.Synchronized)
         {
-            SyncStatusColor = "green";
+            SyncStatusColor = nameof(System.Drawing.Color.Green);
         }
         else
         {
-            SyncStatusColor = "aqua";
+            SyncStatusColor = nameof(System.Drawing.Color.Aqua);
         }
     }
 
-    void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description) {
+    void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description)
+    {
         ErrorComunication = errorId.ToString() + " (" + description + ")";
         Static.Client?.AddFileError(ErrorComunication, null);
-    } 
+    }
 
 }
 
@@ -179,13 +182,13 @@ else
     string? Status;
     string? OldStatus;
     static CloudBox.CloudBox.LoginResult LoginResult;
-  
+
     static string? Notification;
     static string? NotificationColor;
-    
+
     static string? SyncStatus;
     static string? SyncStatusColor;
-    
+
     static string? ErrorComunication;
 
     string TxtType = "password";

@@ -60,6 +60,15 @@
                 <span class="oi oi-command" aria-hidden="true"></span> Utility
             </NavLink>
         </div>
+        @if (Cloud.Static.Client?.Context.SecureStorage.Values.Get("QR", null) != null)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="qr">
+                    <span class="oi oi-command" aria-hidden="true"></span> Connect
+                </NavLink>
+            </div>
+        }
+
 
     </nav>
 </div>
