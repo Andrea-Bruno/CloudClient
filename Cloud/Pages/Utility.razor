@@ -45,15 +45,12 @@
     {
         if (ea.Value is bool value)
         {
-            if (value == true)
-                Cloud.AutoStart.SetAutoStartByActivity();
-            else
-                Cloud.AutoStart.StopAutoStartByActivity();
+            SystemExtra.Util.AutoStart = value;
         }
     }
 }
 
 @code {
     private string? Passphrase = null;
-    static bool AutoStart = true;
+    static bool AutoStart = SystemExtra.Util.AutoStart == null ? false : (bool)SystemExtra.Util.AutoStart;
 }

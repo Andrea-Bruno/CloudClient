@@ -11,13 +11,16 @@ namespace Cloud
         /// <param name="e">Unhandled exception event args</param>
         public static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+#if RELEASE
             if (e.ExceptionObject is Exception exception)
             {
                 RecordError(exception);
             }
             // Restart application after crash
+            Thread.Sleep(60000);
             if (Environment.ProcessPath != null)
                 System.Diagnostics.Process.Start(Environment.ProcessPath);
+# endif
         }
 
 

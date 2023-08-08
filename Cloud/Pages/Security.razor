@@ -1,0 +1,126 @@
+﻿@page "/security"
+@{
+    var buttonLabel = Blocked ? "Unblock access to files" : "Lock and hide files";
+}
+
+<PageTitle>Security</PageTitle>
+
+<h1>Security</h1>
+<h3>Securely block access to all files in the cloud from this pc</h3>
+
+<label for="Password">Password</label>
+<input id="Password" style="text-security:disc; -webkit-text-security:disc;" class="form-control @vp" @bind="Password" @oninput=OnPasswordChange />
+@if (!Blocked)
+{
+    <div class="progress">
+        <div class="progress-bar @(percolor)" role="progressbar" style="width: @(per)%" aria-valuenow="@per" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <label for="RepeatPassword">Repeat password</label>
+    <input id="RepeatPassword" style="text-security:disc; -webkit-text-security:disc;" class="form-control @vr" @bind="RepeatPassword" @oninput=OnRepeatChange />
+}
+
+<button class="btn btn-primary my-3" disabled="@(!ButtonEnabled)" @onclick="@ButtonClick">@buttonLabel</button>
+
+@if (Notification != null)
+{
+    <style>
+        .hideAfter5Seconds{
+            animation: hideAnimation 0s ease-in 5s;
+            animation-fill-mode: forwards;
+        }
+
+        @@keyframes hideAnimation {
+            from {
+                visibility: visible;
+            }
+            to {
+                visibility: hidden;
+            }
+        }
+    </style>
+    <div class="hideAfter5Seconds 5s alert alert-success alert-dismissible" role="alert">
+        <strong>Notify:</strong> @Notification
+    </div>
+}
+
+@functions {
+    void ButtonClick()
+    {
+        if (Blocked)
+        {
+            if (Password != Static.Storage.Values.Get("vhdpw", null))
+            {
+                vp = "is-invalid";
+                return;
+            }
+            vp = null;
+            Static.MountVirtualDisk(Password);
+            Notification = "File access has been re-enabled";
+        }
+        else
+        {
+            if (Password.Length < chrs)
+                return;
+            Static.Storage.Values.Set("vhdpw", Password);
+            Static.UnmountVirtualDisk(Password);
+            Notification = "Access blocked access to files. Use the password to access the files again.";
+        }
+        Reload();
+    }
+
+    void OnPasswordChange(ChangeEventArgs args)
+    {
+        Password = (string)args.Value;
+        if (Blocked)
+        {
+            ButtonEnabled = Password.Length >= chrs;
+        }
+        else
+        {
+            ButtonEnabled = Password == RepeatPassword && Password.Length >= chrs;
+            vp = Password.Length < chrs ? "is-invalid" : "is-valid";
+            per = (int)(((double)Password.Length / chrs) * 100);
+            if (per > 100)
+                per = 100;
+            if (per < 50)
+                percolor = "bg-danger";
+            else if (per < 100)
+                percolor = "bg-warning";
+            else
+                percolor = "bg-success";
+        }
+    }
+
+    void OnRepeatChange(ChangeEventArgs args)
+    {
+        RepeatPassword = (string)args.Value;
+        ButtonEnabled = Password == RepeatPassword && Password.Length >= chrs;
+        vr = RepeatPassword != Password ? "is-invalid" : "is-valid";
+    }
+    void Reload()
+    {
+        Blocked = !Static.LastMountVirtualDiskStatus;
+        per = 0;
+        percolor = null;
+        vp = null;
+        vr = null;
+        ButtonEnabled = false;
+        Password = null;
+        RepeatPassword = null;
+        InvokeAsync(StateHasChanged);
+    }
+
+}
+
+@code {
+    const int chrs = 8;
+    private int per;
+    private string? percolor = null;
+    private string? vp = null;
+    private string? vr = null;
+    private bool ButtonEnabled;
+    private bool Blocked = !Static.LastMountVirtualDiskStatus;
+    private string? Password;
+    private string? RepeatPassword;
+    private string? Notification;
+}

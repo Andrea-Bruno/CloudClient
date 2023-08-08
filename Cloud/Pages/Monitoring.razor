@@ -17,20 +17,25 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>Sec.</th>
                 <th>Command</th>
                 <th>Direction</th>
-                <th>Sec.</th>
-                <th>UserId</th>
+                <th>Info</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var onCommand in CloudClient.OnCommands.ToArray())
             {
+                var infoData = onCommand.InfoData;
+                if (infoData?.Length > 50)
+                {
+                    infoData = "..." + infoData[^50..];
+                }
                 <tr>
+                    <td>@Math.Round(((DateTime.UtcNow - onCommand.Time).TotalSeconds))</td>
                     <td>@(onCommand.Command.ToString())</td>
                     <td>@(onCommand.IsOutput ? "Out" : "In")</td>
-                    <td>@Math.Round(((DateTime.UtcNow - onCommand.Time).TotalSeconds))</td>
-                    <td>@onCommand.UserId</td>
+                    <td>@infoData</td>
                 </tr>
             }
         </tbody>
@@ -48,13 +53,13 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var file in CloudClient.TransferredFiles.OrderBy( x => x.Completed))
+            @foreach (var file in CloudClient.TransferredFiles.OrderBy(x => x.Completed))
             {
                 <tr>
                     <td>@(file.TransferLaberl)</td>
                     <td>@file.Name</td>
                     <td>@file.Hash</td>
-                    <td>@(file.Part + "/" + file.Total + "#" ) </td>
+                    <td>@(file.Part + "/" + file.Total + "#") </td>
                     <td>@file.Length</td>
                     <td>@file.Completed</td>
                 </tr>
@@ -73,11 +78,11 @@ else
     private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
     protected override async Task OnInitializedAsync()
     {
-        if (CloudClient!= null)
+        if (CloudClient != null)
         {
             CloudClient.TransferredFiles.OnUpdated = (int idx) => { Update(); }; // Action that works like an event that is triggered when the list needs to be updated
             CloudClient.OnCommands.PreservedElement = 6;
-            CloudClient.OnCommands.OnCommandEvent = (CloudSync.Sync.Commands command, ulong? userId, bool isOutput) => { Update(); };
+            CloudClient.OnCommands.OnCommandEvent = (ulong? userId, CloudSync.Sync.Commands command, string? infoData, bool isOutput) => { Update(); };
         }
     }
 }

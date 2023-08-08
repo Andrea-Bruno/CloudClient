@@ -34,7 +34,7 @@ else
 
     <SurveyPrompt Title="Connection to the cloud server" />
 
-    <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+    <EditForm Model="@loginModel" autocomplete="off" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -43,7 +43,7 @@ else
 
         <label for="Pin">Pin or phassphrase to restore account</label>
         <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
-        <InputText type="@TxtType" class="form-control" id="Pin" @bind-Value="loginModel.Pin" />
+        <InputText id="Pin" type="@TxtType" class="form-control" @bind-Value="loginModel.Pin" />
 
 
         <button class="btn btn-primary my-3" type="submit">Submit</button>

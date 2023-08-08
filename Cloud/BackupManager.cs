@@ -4,7 +4,7 @@
     {
         public static void Initialize(string sourceDir)
         {
-            AntiGithub = new AntiGitLibrary.Context(SetAntiGitAlert, false, int.Parse(Static.Port), sourceDir);
+            AntiGithub = new AntiGitLibrary.Context(SetAntiGitAlert, false, Static.Port, sourceDir);
         }
         public static Action<Exception?>? AntiGitAlertAction { get; set; }
         public static string? AntiGitAlert { get; set; }

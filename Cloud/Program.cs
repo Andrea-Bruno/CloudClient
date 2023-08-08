@@ -1,5 +1,8 @@
 using Cloud;
+using System.Buffers;
 using System.Diagnostics;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
@@ -21,13 +24,46 @@ Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue
 Static.CloudPath = @"C:\Test";
 #endif
 
-
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
-Static.Port = (string)configuration.GetValue(typeof(string), "Port", null); // Used for release
-                                                                          
-AutoStart.SetAutoStartByActivity();
+Static.Port = int.Parse((string)configuration.GetValue(typeof(string), "Port", null)); // Used for release
+// Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
+var address = "http://localhost:" + Static.Port;
+//if (!string.IsNullOrEmpty(Static.Port))
+Environment.SetEnvironmentVariable("ASPNETCORE_URLS", address);
+var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
+Static.Storage = new SecureStorage.Storage(url);
+
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    var cloudPath = new DirectoryInfo(Static.CloudPath);
+    if (!cloudPath.Exists || cloudPath.LinkTarget != null)
+    {
+        var virtualDiskPepository = Path.Combine(new string[] { Environment.SystemDirectory, "$Sys" });
+        var hash = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
+        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskPepository, hash + ".vhdx");
+        if (!File.Exists(Static.VirtualDiskFullFileName))
+        {
+            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, true);
+        }
+        else
+        {
+            if (Static.LastMountVirtualDiskStatus)
+            {
+                SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath);
+            }
+            //if (!SystemExtra.Util.IsMounted(Static.CloudPath, out bool _))
+            //{
+                
+            //}
+            //SystemExtra.Util.UnmountVirtualDisk(Static.VirtualDiskFullFileName);
+        }
+    }
+}
+
+
 
 #if RELEASE
+SystemExtra.Util.AutoStart ??= true;
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
 
@@ -39,12 +75,6 @@ if (lastEntryPoint != null)
 
 BackupManager.Initialize(Static.CloudPath);
 
-
-// Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
-
-if (!string.IsNullOrEmpty(Static.Port))
-    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://localhost:" + Static.Port);
-var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
 if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser
@@ -69,8 +99,26 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-#if !DEBUG // --- start beta
-Thread.Sleep(5000); // should prevent restarting the instance after the crash, which otherwise gives this error: "Failed to bind to address: address already in use."
-#endif     // --- end beta
+
+Func<bool> PortIsAvailable = () =>
+{
+    IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+    TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+    foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+    {
+        if (tcpi.LocalEndPoint.Port == Static.Port)
+        {
+            return false;
+        }
+    }
+    return true;
+};
+
+
+if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(30)))
+{
+    Debugger.Break();
+    throw new  Exception("The port" + Static.Port + "is busy!");
+}
 
 app.Run(url);
