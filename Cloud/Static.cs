@@ -1,6 +1,7 @@
 ﻿using Cloud.Pages;
 using CloudSync;
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -18,12 +19,22 @@ namespace Cloud
         public static CloudBox.CloudBox? Client { get; private set; }
         public static void CreateClient(string? connectToEntryPoint = null)
         {
-            Client = new CloudBox.CloudBox(CloudPath);
+            Client = new CloudBox.CloudBox(CloudPath, isUnmounted: IsUnmounted());
             if (connectToEntryPoint != null)
             {
                 Client.CreateContext(connectToEntryPoint);
             }
         }
+        /// <summary>
+        /// This function returns true if the specified path matches a virtual disk path that has not been mounted.
+        /// </summary>
+        public static bool IsUnmounted()
+        {
+            var directoryInfo = new DirectoryInfo(CloudPath);
+            var target = directoryInfo.ResolveLinkTarget(true);
+            return target != null && !target.Exists;
+        }
+
         /// <summary>
         /// Create a new account and login to cloud server
         /// </summary>
@@ -61,7 +72,7 @@ namespace Cloud
         /// <returns></returns>
         public static CloudBox.CloudBox.LoginResult Restore(string qr, string passphrase)
         {
-            Client = new CloudBox.CloudBox(CloudPath);
+            Client = new CloudBox.CloudBox(CloudPath, isUnmounted: IsUnmounted());
             return Client.CreateContext(qr, passphrase: passphrase) ? CloudBox.CloudBox.LoginResult.Validated : CloudBox.CloudBox.LoginResult.WrongQR;
         }
 
@@ -78,7 +89,9 @@ namespace Cloud
                     Camouflage(sysFile, password);
                     Path.ChangeExtension(sysFile, ".vhdx");
                 }
+                new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
                 SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath);
+                Client?.MoutedDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
             }
         }
 
@@ -89,6 +102,8 @@ namespace Cloud
             SystemExtra.Util.UnmountVirtualDisk(VirtualDiskFullFileName);
             Camouflage(VirtualDiskFullFileName, password);
             Path.ChangeExtension(VirtualDiskFullFileName, ".sys");
+            new DirectoryInfo(CloudPath).Attributes |= FileAttributes.Hidden;
+            Client?.MoutedDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
         }
 
         private static void Camouflage(string file, string password, int len = 1048576)

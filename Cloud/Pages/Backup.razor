@@ -15,10 +15,19 @@
     <div class="input-group-prepend">
         <span class="input-group-text" id="inputGroup-sizing-default">Target</span>
     </div>
-    <input type="text" @onchange="@OnTargetChange" value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+    <input type="text" @onchange="@OnTargetChange" disabled=@DisabledTarget() BackupManager.Target value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
 </div>
 
-<button type="button" class="btn btn-primary" disabled=@BackupManager.BackupIsRunning @onclick="StartBackup">Start Backup</button>
+@if (Static.IsUnmounted())
+{
+    <div class="alert alert-warning my-3" role="alert">
+        It is not possible to use the backup functions with the cloud area locked by the password!
+    </div>
+}
+else
+{
+    <button type="button" class="btn btn-primary" disabled=@DisabledButton() @onclick="StartBackup">Start Backup</button>
+}
 
 @if (BackupManager.BackupIsRunning)
 {
@@ -42,6 +51,16 @@
     static void StartBackup()
     {
         StartOutcome = BackupManager.StartBackup();
+    }
+    static bool DisabledTarget()
+    {
+        if (!string.IsNullOrEmpty(BackupManager.Target))
+            return false;
+        return Static.IsUnmounted();
+    }
+    static bool DisabledButton()
+    {
+        return BackupManager.BackupIsRunning || string.IsNullOrEmpty(BackupManager.Target);
     }
 }
 
