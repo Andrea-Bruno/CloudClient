@@ -5,6 +5,9 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
+//var x = Static.ParallelHash(System.Text.Encoding.UTF8.GetBytes("ciao"));
+
+
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command linee
@@ -29,9 +32,10 @@ Static.Port = int.Parse((string)configuration.GetValue(typeof(string), "Port", n
 // Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
 var address = "http://localhost:" + Static.Port;
 //if (!string.IsNullOrEmpty(Static.Port))
-Environment.SetEnvironmentVariable("ASPNETCORE_URLS", address);
-var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
-Static.Storage = new SecureStorage.Storage(url);
+app.Urls.Add(address);
+//Environment.SetEnvironmentVariable("ASPNETCORE_URLS", address);
+//var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
+Static.Storage = new SecureStorage.Storage(address);
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
@@ -61,7 +65,6 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 }
 
 
-
 #if RELEASE
 SystemExtra.Util.AutoStart ??= true;
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
@@ -79,10 +82,10 @@ if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + url, true);
+        EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address, true);
     if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
     {
-        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + url + @"""></HEAD>");
+        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + address + @"""></HEAD>");
     }
 }
 
@@ -98,7 +101,6 @@ app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
-
 
 Func<bool> PortIsAvailable = () =>
 {
@@ -121,4 +123,4 @@ if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(30)))
     throw new  Exception("The port" + Static.Port + "is busy!");
 }
 
-app.Run(url);
+app.Run();

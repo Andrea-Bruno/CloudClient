@@ -1,5 +1,10 @@
 ﻿using Cloud.Pages;
 using CloudSync;
+using System.Buffers;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Runtime.InteropServices;
@@ -19,7 +24,7 @@ namespace Cloud
         public static CloudBox.CloudBox? Client { get; private set; }
         public static void CreateClient(string? connectToEntryPoint = null)
         {
-            Client = new CloudBox.CloudBox(CloudPath, isUnmounted: IsUnmounted());
+            Client = new CloudBox.CloudBox(CloudPath, isMounted: !IsUnmounted());
             if (connectToEntryPoint != null)
             {
                 Client.CreateContext(connectToEntryPoint);
@@ -72,41 +77,92 @@ namespace Cloud
         /// <returns></returns>
         public static CloudBox.CloudBox.LoginResult Restore(string qr, string passphrase)
         {
-            Client = new CloudBox.CloudBox(CloudPath, isUnmounted: IsUnmounted());
+            Client = new CloudBox.CloudBox(CloudPath, isMounted: IsUnmounted());
             return Client.CreateContext(qr, passphrase: passphrase) ? CloudBox.CloudBox.LoginResult.Validated : CloudBox.CloudBox.LoginResult.WrongQR;
         }
 
         public static bool LastMountVirtualDiskStatus { get { return Storage.Values.Get(nameof(LastMountVirtualDiskStatus), true); } set { Storage.Values.Set(nameof(LastMountVirtualDiskStatus), value); } }
 
-        public static void MountVirtualDisk(string password)
+        public static bool MountVirtualDisk(string password)
         {
+            var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
+            if (BitConverter.ToUInt64(hash) != Static.Storage.Values.Get("vhdpw", 0ul))
+                return false;
+            hash = ParallelHash(hash);
             LastMountVirtualDiskStatus = true;
             if (!SystemExtra.Util.IsMounted(CloudPath, out bool _))
             {
                 var sysFile = VirtualDiskFullFileName?.Substring(0, VirtualDiskFullFileName.Length - 4) + ".sys";
                 if (File.Exists(sysFile))
                 {
-                    Camouflage(sysFile, password);
+                    Camouflage(sysFile, hash);
                     Path.ChangeExtension(sysFile, ".vhdx");
                 }
                 new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
                 SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath);
                 Client?.MoutedDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
+                return true;
             }
+            return false;
         }
-
 
         public static void UnmountVirtualDisk(string password)
         {
+            var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
+            Static.Storage.Values.Set("vhdpw", BitConverter.ToUInt64(hash));
+            hash = ParallelHash(hash);
             LastMountVirtualDiskStatus = false;
             SystemExtra.Util.UnmountVirtualDisk(VirtualDiskFullFileName);
-            Camouflage(VirtualDiskFullFileName, password);
+            Camouflage(VirtualDiskFullFileName, hash);
             Path.ChangeExtension(VirtualDiskFullFileName, ".sys");
             new DirectoryInfo(CloudPath).Attributes |= FileAttributes.Hidden;
             Client?.MoutedDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
         }
 
-        private static void Camouflage(string file, string password, int len = 1048576)
+        /// <summary>
+        /// Anty brute force attac!
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="interactions"></param>
+        /// <param name="threads"></param>
+        /// <returns></returns>
+        private static byte[] ParallelHash(byte[] data, int interactions = 2000000, int threads = 8)
+        {
+            var seeds = new byte[threads][];
+            var sha256 = SHA256.Create();
+            for (byte i = 0; i < threads; i++)
+            {
+                seeds[i] = sha256.ComputeHash(new byte[i].Concat(data));
+            }
+            var hashes = new byte[threads][];
+            var x = new Stopwatch();
+            x.Start();
+
+            Parallel.For(0, threads, thread =>
+            {
+                hashes[thread] = RecursiceHash(seeds[thread], interactions);
+            });
+            var result = new byte[hashes[0].Length];
+            for (int i = 0; i < threads; i++)
+            {
+                result = Xor(result, hashes[i]);
+            }
+            x.Stop();
+            return result;
+        }
+
+        private static byte[] RecursiceHash(byte[] data, int interactions)
+        {
+            var sha256 = SHA256.Create();
+            byte[] hash = data;
+            for (int i = 0; i < interactions; i++)
+            {
+                hash = sha256.ComputeHash(hash);
+            }
+            return hash;
+        }
+
+        private static void Camouflage(string file, byte[] password, int len = 1048576)
         {
             using var fs = new FileStream(file, FileMode.Open);
             if (fs.Length < len)
@@ -117,10 +173,10 @@ namespace Cloud
             fs.Write(data, 0, data.Length);
             fs.Close();
         }
-        private static byte[] GetRandomByteArray(int size, string seed)
+        private static byte[] GetRandomByteArray(int size, byte[] seed)
         {
             using HashAlgorithm algorithm = SHA256.Create();
-            var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(seed));
+            var hash = seed;
             var hl = hash.Length;
             var parts = (int)Math.Ceiling((double)size / hl);
             byte[] b = new byte[parts * hl];
@@ -143,5 +199,104 @@ namespace Cloud
             }
             return result;
         }
+
+        public static string? QrDetected { get; private set; }
+        public static void DetectQrCode(Action<string> onDetected)
+        {
+            lock (Environment.OSVersion)
+            {
+                if (QrDetected != null)
+                {
+                    onDetected.Invoke(QrDetected);
+                    return;
+                }
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                var localIp = host.AddressList.ToList().Find(ip => ip.IsIntranet());
+                var my = localIp.GetAddressBytes().Last();
+                if (localIp != null)
+                {
+                    //Parallel.For(0, 255, i =>
+                    //{
+                    for (byte i = 0; i < 255; i++)
+                    {
+                        if (i != my)
+                        {
+                            var task = new Task((obj) =>
+                            {
+                                try
+                                {
+                                    var index = (byte)obj;
+                                    using var pinger = new Ping();
+                                    var address = localIp.GetAddressBytes();
+                                    address[address.Length - 1] = index;
+                                    var ipAddress = new IPAddress(address);
+                                    PingReply reply = pinger.Send(ipAddress, 1000);
+                                    if (reply.Status == IPStatus.Success)
+                                    {
+                                        string url = "http://" + ipAddress.ToString() + ":5000/qr";
+                                        using (HttpClient client = new())
+                                        {
+                                            try
+                                            {
+                                                client.Timeout = TimeSpan.FromSeconds(1);
+                                                var b64 = client.GetStringAsync(url).Result;
+                                                Convert.FromBase64String(b64);
+                                                QrDetected = b64;
+                                                onDetected.Invoke(QrDetected);
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                                catch (PingException)
+                                {
+                                }
+                            }, i);
+                            task.Start();
+                        }
+                    }
+                    //});
+                }
+            }
+        }
+
+        /// <summary>
+        /// An extension method to determine if an IP address is internal, as specified in RFC1918
+        /// </summary>
+        /// <param name="toTest">The IP address that will be tested</param>
+        /// <returns>Returns true if the IP is internal, false if it is external</returns>
+        private static bool IsIntranet(this IPAddress toTest)
+        {
+            if (IPAddress.IsLoopback(toTest)) return true;
+            if (toTest.ToString() == "::1") return false;
+            var bytes = toTest.GetAddressBytes();
+            if (bytes.Length != 4) return false;
+            uint A(byte[] bts) { Array.Reverse(bts); return BitConverter.ToUInt32(bts, 0); }
+            bool Ir(uint ipReverse, byte[] start, byte[] end) { return (ipReverse >= A(start) && ipReverse <= A(end)); } // Check if is in range
+            var ip = A(bytes);
+            // IP for special use: https://en.wikipedia.org/wiki/Reserved_IP_addresses             
+            if (Ir(ip, new byte[] { 0, 0, 0, 0 }, new byte[] { 0, 255, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 10, 0, 0, 0 }, new byte[] { 10, 255, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 100, 64, 0, 0 }, new byte[] { 100, 127, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 127, 0, 0, 0 }, new byte[] { 127, 255, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 169, 254, 0, 0 }, new byte[] { 169, 254, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 172, 16, 0, 0 }, new byte[] { 172, 31, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 192, 0, 0, 0 }, new byte[] { 192, 0, 0, 255 })) return true;
+            if (Ir(ip, new byte[] { 192, 0, 2, 0 }, new byte[] { 192, 0, 2, 255 })) return true;
+            if (Ir(ip, new byte[] { 192, 88, 99, 0 }, new byte[] { 192, 88, 99, 255 })) return true;
+            if (Ir(ip, new byte[] { 192, 168, 0, 0 }, new byte[] { 192, 168, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 198, 18, 0, 0 }, new byte[] { 198, 19, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 198, 51, 100, 0 }, new byte[] { 198, 51, 100, 255 })) return true;
+            if (Ir(ip, new byte[] { 203, 0, 113, 0 }, new byte[] { 203, 0, 113, 255 })) return true;
+            if (Ir(ip, new byte[] { 224, 0, 0, 0 }, new byte[] { 239, 255, 255, 255 })) return true;
+            if (Ir(ip, new byte[] { 233, 252, 0, 0 }, new byte[] { 233, 252, 0, 255 })) return true;
+            if (Ir(ip, new byte[] { 240, 0, 0, 0 }, new byte[] { 255, 255, 255, 254 })) return true;
+            return false;
+        }
+#if DEBUG
+       public const bool IsDebug = true;
+#else
+       public const bool IsDebug = false;
+#endif
     }
 }

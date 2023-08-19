@@ -1,14 +1,16 @@
 ﻿@page "/utility"
 
 <PageTitle>Utility</PageTitle>
-<button class="btn btn-primary my-3" @onclick=SendContact>Send my contact</button>
-<br />
+@if (Static.IsDebug)
+{
+    <button class="btn btn-primary my-3" @onclick=SendContact>Send my contact</button>
+    <br />
+    <button class="btn btn-primary my-3" @onclick=SendHoshRoot>Send hash root</button>
+    <br />
+}
 <button class="btn btn-primary my-3" @onclick=OnQuitClick>Quit</button>
 <br />
 <button class="btn btn-primary my-3" @onclick=OnExportClick>Export passphrase</button>
-
-
-
 
 @if (Passphrase != null)
 {
@@ -40,6 +42,10 @@
         {
             context.Messaging.SendContact(context.My.Contact, Static.Client.ServerCloud, false);
         }
+    }
+    void SendHoshRoot()
+    {
+        Static.Client?.Sync?.SendHashRoot();
     }
     void OnChangeAutoStart(ChangeEventArgs ea)
     {

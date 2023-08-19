@@ -71,20 +71,18 @@ else
     {
         if (Blocked)
         {
-            if (Password != Static.Storage.Values.Get("vhdpw", null))
+            if (Static.MountVirtualDisk(Password))
             {
-                vp = "is-invalid";
-                return;
+                vp = null;
+                Notification = "File access has been re-enabled";
             }
-            vp = null;
-            Static.MountVirtualDisk(Password);
-            Notification = "File access has been re-enabled";
+            else
+                vp = "is-invalid";
         }
         else
         {
             if (Password.Length < chrs)
                 return;
-            Static.Storage.Values.Set("vhdpw", Password);
             Static.UnmountVirtualDisk(Password);
             Notification = "Access blocked access to files. Use the password to access the files again.";
         }
@@ -132,7 +130,6 @@ else
         RepeatPassword = null;
         InvokeAsync(StateHasChanged);
     }
-
 }
 
 @code {

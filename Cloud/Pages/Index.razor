@@ -6,9 +6,13 @@
     if (Static.Client != null)
     {
         Static.Client.OnNotificationAction = OnNotificationAction;
-        Static.Client.OnSyncStatusChangesAction = OnSyncStatusChanges;
+        Static.Client.OnLocalSyncStatusChangesAction = OnLocalSyncStatusChanges;
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
-        OnSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
+        OnLocalSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
+    }
+    if (Static.QrDetected == null)
+    {
+        Static.DetectQrCode((qr) => { InvokeAsync(StateHasChanged); });
     }
 }
 <PageTitle>Index</PageTitle>
@@ -42,9 +46,7 @@ else
         <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
 
         <label for="Pin">Pin or phassphrase to restore account</label>
-        <span class='e-icons e-input-eye' @onclick="ShowPassword"></span>
-        <InputText id="Pin" type="@TxtType" class="form-control" @bind-Value="loginModel.Pin" />
-
+        <InputText id="Pin" style="text-security:disc; -webkit-text-security:disc;" class="form-control" @bind-Value="loginModel.Pin" />
 
         <button class="btn btn-primary my-3" type="submit">Submit</button>
         @if (LoginResult == CloudBox.CloudBox.LoginResult.WrongQR)
@@ -73,7 +75,7 @@ else
 <br />
 
 <br />
-<label id="SyncStatus" class="card" style="background-color: @SyncStatusColor">@SyncStatus</label>
+<label id="SyncStatus" class="card" style="background-color: @localSyncStatusColor">@SyncStatus</label>
 <br />
 
 
@@ -102,18 +104,6 @@ else
         Environment.Exit(0);
     }
 
-    public void ShowPassword()
-    {
-        if (this.TxtType == "password")
-        {
-            this.TxtType = "text";
-        }
-        else
-        {
-            this.TxtType = "password";
-        }
-    }
-
     bool RefreshStatus()
     {
         OldStatus = Status;
@@ -139,7 +129,7 @@ else
 
     void OnNotificationAction(ulong? fromUserId, CloudSync.Sync.Notice notice)
     {
-        Notification = "Notification: " + notice.ToString();
+        Notification = "Cloud notification: " + notice.ToString();
         if (notice == CloudSync.Sync.Notice.LoginError)
         {
             NotificationColor = nameof(System.Drawing.Color.Red);
@@ -152,16 +142,16 @@ else
         }
     }
 
-    void OnSyncStatusChanges(CloudSync.Sync.SynchronizationStatus syncStatus, int pendingFiles)
+    void OnLocalSyncStatusChanges(CloudSync.Sync.SyncStatus localSyncStatus, int pendingFiles)
     {
-        SyncStatus = "Sync status: " + syncStatus.ToString();
-        if (syncStatus == CloudSync.Sync.SynchronizationStatus.Synchronized)
+        SyncStatus = "Local sync status: " + localSyncStatus.ToString();
+        if (localSyncStatus == CloudSync.Sync.SyncStatus.Synchronized)
         {
-            SyncStatusColor = nameof(System.Drawing.Color.Green);
+            localSyncStatusColor = nameof(System.Drawing.Color.Green);
         }
         else
         {
-            SyncStatusColor = nameof(System.Drawing.Color.Aqua);
+            localSyncStatusColor = nameof(System.Drawing.Color.Aqua);
         }
     }
 
@@ -187,7 +177,7 @@ else
     static string? NotificationColor;
 
     static string? SyncStatus;
-    static string? SyncStatusColor;
+    static string? localSyncStatusColor;
 
     static string? ErrorComunication;
 

@@ -5,12 +5,9 @@
     public class LoginModel
     {
         [Required]
-#if DEBUG
-        string _qr = "AglxnU03pY3Ng27Z7epOQYfisk4kUBuhQCnAy3wtxIrldGVzdA==";
-        public string QR { get { return _qr; } set { _qr = value; } }
-#else 
-        public string QR { get; set; }
-#endif
+        string? _qr = Static.QrDetected;
+
+        public string? QR { get { return _qr; } set { _qr = value; } }
 
         [Required]
         [StringLength(10, ErrorMessage = "Name is too long.")]
