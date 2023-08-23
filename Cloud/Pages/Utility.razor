@@ -51,7 +51,7 @@
     {
         if (ea.Value is bool value)
         {
-            SystemExtra.Util.AutoStart = value;
+            SystemExtra.Util.SetAutoStart(value, Static.Port);
         }
     }
 }

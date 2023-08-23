@@ -57,16 +57,18 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             }
             //if (!SystemExtra.Util.IsMounted(Static.CloudPath, out bool _))
             //{
-                
+
             //}
             //SystemExtra.Util.UnmountVirtualDisk(Static.VirtualDiskFullFileName);
         }
     }
 }
 
+var x = Environment.GetEnvironmentVariables();
 
 #if RELEASE
-SystemExtra.Util.AutoStart ??= true;
+if (SystemExtra.Util.GetAutoStart() == null)
+    SystemExtra.Util.SetAutoStart(true, Static.Port);
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
 
@@ -120,7 +122,7 @@ Func<bool> PortIsAvailable = () =>
 if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(30)))
 {
     Debugger.Break();
-    throw new  Exception("The port" + Static.Port + "is busy!");
+    throw new Exception("The port" + Static.Port + "is busy!");
 }
 
 app.Run();
