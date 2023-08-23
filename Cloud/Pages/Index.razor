@@ -10,12 +10,12 @@
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
         OnLocalSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
     }
-    if (Static.QrDetected == null)
+    if (String.IsNullOrEmpty(Static.QrDetected))
     {
         Static.DetectQrCode((qr) => { InvokeAsync(StateHasChanged); });
     }
 }
-<PageTitle>Index</PageTitle>
+<PageTitle>Cloud client</PageTitle>
 
 <h1>Cloud</h1>
 <h3>Welcome to your Cloud Client Panel</h3>

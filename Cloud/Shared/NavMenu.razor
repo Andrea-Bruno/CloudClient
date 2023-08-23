@@ -51,6 +51,10 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="antivirus">
                 <span class="oi oi-shield" aria-hidden="true"></span> Antivirus
+                @if (CloudClient != null && CloudClient.AntivirusWarnings.Count != 0)
+                {
+                    <span class="text-danger fw-bold m-1"> @CloudClient?.AntivirusWarnings.Count</span>
+                }
             </NavLink>
         </div>
         <div class="nav-item px-3">
@@ -82,6 +86,8 @@
 </div>
 
 @code {
+    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
+    
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
