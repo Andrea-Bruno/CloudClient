@@ -24,7 +24,8 @@ var configuration = app.Configuration;
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
 #if DEBUG
-Static.CloudPath = @"C:\Test";
+//Static.CloudPath =  @"C:\Test3";
+Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
 
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
@@ -84,7 +85,10 @@ if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address, true);
+    {
+        //EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address, true);
+        EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
+    }
     if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
     {
         File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + address + @"""></HEAD>");

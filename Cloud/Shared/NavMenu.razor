@@ -15,15 +15,14 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-cloud" aria-hidden="true"></span> Connection
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="qr">
                 <span class="oi oi-phone" aria-hidden="true"></span> QR Code
             </NavLink>
         </div>
-
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="login">
+                <span class="oi oi-cloud" aria-hidden="true"></span> Connection
+            </NavLink>
+        </div>
         @if (Static.VirtualDiskFullFileName != null)
         {
             <div class="nav-item px-3">
@@ -58,8 +57,8 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="errors">
-                <span class="oi oi-warning" aria-hidden="true"></span> Errors
+            <NavLink class="nav-link" href="Diagnostics">
+                <span class="oi oi-warning" aria-hidden="true"></span> Diagnostics
             </NavLink>
         </div>
         <div class="nav-item px-3">

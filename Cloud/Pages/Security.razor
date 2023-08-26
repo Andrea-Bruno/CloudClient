@@ -81,7 +81,7 @@ else
         }
         else
         {
-            if (Password.Length < chrs)
+            if (Password == null || Password.Length < chrs)
                 return;
             Static.UnmountVirtualDisk(Password);
             Notification = "Access blocked access to files. Use the password to access the files again.";

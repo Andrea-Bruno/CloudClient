@@ -18,7 +18,7 @@
     <input type="text" @onchange="@OnTargetChange" disabled=@DisabledTarget() BackupManager.Target value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
 </div>
 
-@if (Static.IsUnmounted())
+@if (!Static.IsReachable())
 {
     <div class="alert alert-warning my-3" role="alert">
         It is not possible to use the backup functions with the cloud area locked by the password!
@@ -56,7 +56,7 @@ else
     {
         if (!string.IsNullOrEmpty(BackupManager.Target))
             return false;
-        return Static.IsUnmounted();
+        return !Static.IsReachable();
     }
     static bool DisabledButton()
     {

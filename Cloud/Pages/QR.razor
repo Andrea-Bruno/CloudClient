@@ -1,9 +1,9 @@
-﻿@page "/qr"
+﻿@page "/"
 @using QRCoder;
 <PageTitle>Connect a device</PageTitle>
 <h1>Connect a device</h1>
 @{
-    var qr = Cloud.Static.Client?.Context.SecureStorage.Values.Get("QR", null) ?? Static.QrDetected;
+    var qr = Cloud.Static.Client?.Context?.SecureStorage.Values.Get("QR", null) ?? Static.QrDetected;
     if (qr != null)
     {
         QRCodeGenerator qrGenerator = new QRCodeGenerator();

@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/login"
 @using Cloud.Data
 @using Microsoft.Extensions.Logging
 @inject ILogger<Index> Logger
@@ -12,7 +12,7 @@
     }
     if (String.IsNullOrEmpty(Static.QrDetected))
     {
-        Static.DetectQrCode((qr) => { InvokeAsync(StateHasChanged); });
+        Static.DetectQrCode((qr) => { Refresh(); });
     }
 }
 <PageTitle>Cloud client</PageTitle>
@@ -93,6 +93,10 @@ else
 
 
 @functions {
+    void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
 
     private void Logout()
     {
@@ -164,7 +168,7 @@ else
 }
 
 @code {
-    public Index()
+    public Login()
     {
         Status = Static.Client == null ? null : Static.Client.Status;
         StartRefreshStatus();

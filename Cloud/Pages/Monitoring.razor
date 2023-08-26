@@ -68,7 +68,7 @@ else
     </table>
 }
 @functions {
-    void Update()
+    void Refresh()
     {
         InvokeAsync(StateHasChanged);
     }
@@ -80,9 +80,9 @@ else
     {
         if (CloudClient != null)
         {
-            CloudClient.TransferredFiles.OnUpdated = (int idx) => { Update(); }; // Action that works like an event that is triggered when the list needs to be updated
+            CloudClient.TransferredFiles.OnUpdated = (int idx) => { Refresh(); }; // Action that works like an event that is triggered when the list needs to be updated
             CloudClient.OnCommands.PreservedElement = 6;
-            CloudClient.OnCommands.OnCommandEvent = (ulong? userId, CloudSync.Sync.Commands command, string? infoData, bool isOutput) => { Update(); };
+            CloudClient.OnCommands.OnCommandEvent = (ulong? userId, CloudSync.Sync.Commands command, string? infoData, bool isOutput) => { Refresh(); };
         }
     }
 }

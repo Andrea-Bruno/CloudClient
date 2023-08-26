@@ -1,8 +1,8 @@
-﻿@page "/errors"
+﻿@page "/Diagnostics"
 
-<PageTitle>Errors</PageTitle>
+<PageTitle>Diagnostics</PageTitle>
 
-<h1>Error logs</h1>
+<h1>System logs</h1>
 
 
 @if (CloudClient == null)
@@ -15,7 +15,7 @@ else
         <thead>
             <tr>
                 <th>Time</th>
-                <th>Error description</th>
+                <th>Event</th>
                 <th>File name</th>
             </tr>
         </thead>
