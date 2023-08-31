@@ -24,19 +24,22 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var onCommand in CloudClient.OnCommands.ToArray())
+            @lock (CloudClient.OnCommands)
             {
-                var infoData = onCommand.InfoData;
-                if (infoData?.Length > 50)
+                foreach (var onCommand in CloudClient.OnCommands.ToArray())
                 {
-                    infoData = "..." + infoData[^50..];
+                    var infoData = onCommand.InfoData;
+                    if (infoData?.Length > 50)
+                    {
+                        infoData = "..." + infoData[^50..];
+                    }
+                    <tr>
+                        <td>@Math.Round(((DateTime.UtcNow - onCommand.Time).TotalSeconds))</td>
+                        <td>@(onCommand.Command.ToString())</td>
+                        <td>@(onCommand.IsOutput ? "Out" : "In")</td>
+                        <td>@infoData</td>
+                    </tr>
                 }
-                <tr>
-                    <td>@Math.Round(((DateTime.UtcNow - onCommand.Time).TotalSeconds))</td>
-                    <td>@(onCommand.Command.ToString())</td>
-                    <td>@(onCommand.IsOutput ? "Out" : "In")</td>
-                    <td>@infoData</td>
-                </tr>
             }
         </tbody>
     </table>
@@ -53,16 +56,19 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var file in CloudClient.TransferredFiles.OrderBy(x => x.Completed))
+            @lock (CloudClient.TransferredFiles)
             {
-                <tr>
-                    <td>@(file.TransferLaberl)</td>
-                    <td>@file.Name</td>
-                    <td>@file.Hash</td>
-                    <td>@(file.Part + "/" + file.Total + "#") </td>
-                    <td>@file.Length</td>
-                    <td>@file.Completed</td>
-                </tr>
+                foreach (var file in CloudClient.TransferredFiles.OrderBy(x => x?.Completed))
+                {
+                    <tr>
+                        <td>@(file.TransferLaberl)</td>
+                        <td>@file.Name</td>
+                        <td>@file.Hash</td>
+                        <td>@(file.Part + "/" + file.Total + "#") </td>
+                        <td>@file.Length</td>
+                        <td>@file.Completed</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

@@ -3,10 +3,8 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Runtime.InteropServices;
-
-//var x = Static.ParallelHash(System.Text.Encoding.UTF8.GetBytes("ciao"));
-
 
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 

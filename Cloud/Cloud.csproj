@@ -9,25 +9,26 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Version>1.28.08.23</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="Cloud.ico" />
+		<Content Include="Cloud.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\LICENSE.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Include="..\LICENSE.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="QRCoder" Version="1.4.3" />
+		<PackageReference Include="QRCoder" Version="1.4.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -35,5 +36,4 @@
 		<ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
 		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
 	</ItemGroup>
-
 </Project>

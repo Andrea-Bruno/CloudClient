@@ -65,11 +65,12 @@ else
 
     </EditForm>
 }
-
-<br />
-<label id="ErrorComunication" class="card">@ErrorComunication</label>
-<br />
-
+@if (ErrorComunicationTime.AddMinutes(1) >= DateTime.UtcNow)
+{
+    <br />
+    <label id="ErrorComunication" class="card">@ErrorComunication</label>
+    <br />
+}
 <br />
 <label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
 <br />
@@ -149,7 +150,7 @@ else
     void OnLocalSyncStatusChanges(CloudSync.Sync.SyncStatus localSyncStatus, int pendingFiles)
     {
         SyncStatus = "Local sync status: " + localSyncStatus.ToString();
-        if (localSyncStatus == CloudSync.Sync.SyncStatus.Synchronized)
+        if (localSyncStatus == CloudSync.Sync.SyncStatus.Monitoring)
         {
             localSyncStatusColor = nameof(System.Drawing.Color.Green);
         }
@@ -161,6 +162,7 @@ else
 
     void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description)
     {
+        ErrorComunicationTime = DateTime.UtcNow;
         ErrorComunication = errorId.ToString() + " (" + description + ")";
         Static.Client?.AddFileError(ErrorComunication, null);
     }
@@ -184,6 +186,7 @@ else
     static string? localSyncStatusColor;
 
     static string? ErrorComunication;
+    static DateTime ErrorComunicationTime;
 
     string TxtType = "password";
 
