@@ -31,6 +31,13 @@
 @if (Static.Client?.IsLogged == true)
 {
     <button class="btn btn-primary my-3" @onclick="Logout">Logout</button>
+    var ETA = Static.Client?.Sync.SyncETA();
+    if (ETA != DateTime.MinValue)
+    {
+        <div class="alert alert-info" role="alert">
+            ETA = @ETA?.ToLocalTime().ToString("g");
+        </div>
+    }
 }
 else
 {
@@ -67,17 +74,26 @@ else
 }
 @if (ErrorComunicationTime.AddMinutes(1) >= DateTime.UtcNow)
 {
-    <br />
-    <label id="ErrorComunication" class="card">@ErrorComunication</label>
-    <br />
+    <div class="alert alert-danger" role="alert">
+        @ErrorComunication;
+    </div>
 }
-<br />
+
+<div class="alert @NotificationColor" role="alert">
+    @Notification
+</div>
+
+<div class="alert @localSyncStatusColor" role="alert">
+    @SyncStatus
+</div>
+
+@* <br />
 <label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
 <br />
 
 <br />
 <label id="SyncStatus" class="card" style="background-color: @localSyncStatusColor">@SyncStatus</label>
-<br />
+<br /> *@
 
 
 <pre>@Status</pre>
@@ -137,13 +153,13 @@ else
         Notification = "Cloud notification: " + notice.ToString();
         if (notice == CloudSync.Sync.Notice.LoginError)
         {
-            NotificationColor = nameof(System.Drawing.Color.Red);
+            NotificationColor = "alert-danger";
         }
         else if (notice == CloudSync.Sync.Notice.Authentication || notice == CloudSync.Sync.Notice.LoggedOut)
-            NotificationColor = nameof(System.Drawing.Color.Yellow);
+            NotificationColor = "alert-warning";
         else
         {
-            NotificationColor = nameof(System.Drawing.Color.Green);
+            NotificationColor = "alert-success";
         }
     }
 
@@ -152,11 +168,11 @@ else
         SyncStatus = "Local sync status: " + localSyncStatus.ToString();
         if (localSyncStatus == CloudSync.Sync.SyncStatus.Monitoring)
         {
-            localSyncStatusColor = nameof(System.Drawing.Color.Green);
+            localSyncStatusColor = "alert-success";
         }
         else
         {
-            localSyncStatusColor = nameof(System.Drawing.Color.Aqua);
+            localSyncStatusColor = "alert-primary";
         }
     }
 
