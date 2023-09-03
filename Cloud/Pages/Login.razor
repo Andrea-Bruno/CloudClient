@@ -10,7 +10,7 @@
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
         OnLocalSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
     }
-    if (String.IsNullOrEmpty(Static.QrDetected))
+    else if (String.IsNullOrEmpty(Static.QrDetected))
     {
         Static.DetectQrCode((qr) => { Refresh(); });
     }

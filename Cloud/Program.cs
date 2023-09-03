@@ -1,9 +1,6 @@
 using Cloud;
-using System.Buffers;
 using System.Diagnostics;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
@@ -22,7 +19,7 @@ var configuration = app.Configuration;
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
 #if DEBUG
-//Static.CloudPath =  @"C:\Test3";
+// Static.CloudPath =  @"C:\Test3";
 Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
 

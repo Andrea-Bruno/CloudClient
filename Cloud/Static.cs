@@ -303,7 +303,7 @@ namespace Cloud
                                 }
                             }
                             Task.WaitAll(tasks.ToArray());
-                        } while (Client == null && QrDetected == null);
+                        } while (Client == null && string.IsNullOrEmpty(QrDetected));
                         LockDetectQrCode = false;
                     }).Start();
                 }

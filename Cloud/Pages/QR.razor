@@ -6,18 +6,34 @@
     var qr = Cloud.Static.Client?.Context?.SecureStorage.Values.Get("QR", null) ?? Static.QrDetected;
     if (qr != null)
     {
-        QRCodeGenerator qrGenerator = new QRCodeGenerator();
-        QRCodeData qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
-        AsciiQRCode qrCode = new AsciiQRCode(qrCodeData);
-        string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
-        <pre style="font-size:small; line-height: initial">
+        if (qr == "")
+        {
+            <div class="alert alert-danger" role="alert">
+                Il tuo cloud box non è connesso a internet!<br />
+                È necessaria la connessione ad internet affinchè il Cloud sia sempre raggiungibile.
+            </div>
+        }
+        else
+        {
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
+            AsciiQRCode qrCode = new AsciiQRCode(qrCodeData);
+            string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
+            <pre style="font-size:small; line-height: initial">
                 @qrCodeAsAsciiArt
-        </pre>
-        <h3>Use the QR code to connect another device to the cloud: The PIN set on the cloud is required to connect.</h3>
+            </pre>
+            <h3>Use the QR code to connect another device to the cloud: The PIN set on the cloud is required to connect.</h3>
+        }
     }
     else
     {
         Static.DetectQrCode((qr) => { InvokeAsync(StateHasChanged); });
         <h3>Connect your device to the cloud to view the QR code here</h3>
+        if (Static.QrDetected == null)
+        {
+            <div class="alert alert-warning" role="alert">
+                Connect your computer to the same intranet as the Cloud to receive the QR code.
+            </div>
+        }
     }
 }
