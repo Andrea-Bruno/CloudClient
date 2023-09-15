@@ -9,7 +9,6 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<Version>1.28.08.23</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
