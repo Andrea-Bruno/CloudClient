@@ -17,7 +17,7 @@ namespace Cloud
                 RecordError(exception);
             }
             // Restart application after crash
-            Thread.Sleep(60000);
+            Thread.Sleep(600000); // 10 minutes
             if (Environment.ProcessPath != null)
                 System.Diagnostics.Process.Start(Environment.ProcessPath);
 # endif
