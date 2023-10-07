@@ -1,7 +1,7 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
-            Cloud 1.@(new DirectoryInfo(System.Reflection.Assembly.GetEntryAssembly()?.Location).CreationTimeUtc.ToString("yy.MM.dd", System.Globalization.CultureInfo.InvariantCulture))
+            Cloud 1.@(new DirectoryInfo(System.Reflection.Assembly.GetEntryAssembly()?.Location).LastWriteTimeUtc.ToString("yy.MM.dd", System.Globalization.CultureInfo.InvariantCulture))
         </a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>

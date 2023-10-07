@@ -32,7 +32,14 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
+		<ProjectReference Include="..\..\..\AppSync\AppSync.csproj" />
 		<ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
 		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="INSTALL.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

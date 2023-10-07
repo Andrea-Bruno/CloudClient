@@ -5,6 +5,23 @@ using System.Runtime.InteropServices;
 
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 
+var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;
+var currentPorocessId = Process.GetCurrentProcess()?.Id;
+
+Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).ToList().ForEach(process =>
+{
+    if (string.Equals(process.MainModule?.FileName, currentFileInstance, StringComparison.InvariantCultureIgnoreCase))
+    {
+        if (process.Id != currentPorocessId)
+        {
+            Debugger.Break();
+            Console.WriteLine("The application is already running");
+            Environment.Exit(1);
+            return;
+        }
+    }
+});
+
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command linee
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,18 +36,15 @@ var configuration = app.Configuration;
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
 #if DEBUG
-// Static.CloudPath =  @"C:\Test3";
-Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
+//Static.CloudPath = @"C:\Test4";
+Static.CloudPath = @"C:\Users\andre\OneDrive";
+//Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
 
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
 Static.Port = int.Parse((string)configuration.GetValue(typeof(string), "Port", null)); // Used for release
-// Functions.ExecuteCommand("cmd.exe", "/C time " + "6:10", false);
 var address = "http://localhost:" + Static.Port;
-//if (!string.IsNullOrEmpty(Static.Port))
 app.Urls.Add(address);
-//Environment.SetEnvironmentVariable("ASPNETCORE_URLS", address);
-//var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";").First();
 Static.Storage = new SecureStorage.Storage(address);
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -47,23 +61,16 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         }
         else
         {
-            if (Static.LastMountVirtualDiskStatus)
+            if (!Static.VirtualDiskIsMounted)
             {
                 SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath);
             }
-            //if (!SystemExtra.Util.IsMounted(Static.CloudPath, out bool _))
-            //{
-
-            //}
-            //SystemExtra.Util.UnmountVirtualDisk(Static.VirtualDiskFullFileName);
         }
     }
 }
 
-var x = Environment.GetEnvironmentVariables();
-
 #if RELEASE
-if (SystemExtra.Util.GetAutoStart() == null)
+if (SystemExtra.Util.GetAutoStart() == false)
     SystemExtra.Util.SetAutoStart(true, Static.Port);
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
@@ -82,7 +89,7 @@ if (lastEntryPoint == null || Debugger.IsAttached)
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
         //EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address, true);
-        EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
+        SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
     }
     if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
     {
@@ -116,7 +123,6 @@ Func<bool> PortIsAvailable = () =>
     }
     return true;
 };
-
 
 if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(30)))
 {
