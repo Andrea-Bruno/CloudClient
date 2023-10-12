@@ -99,10 +99,7 @@ namespace Cloud
             var x = new Stopwatch();
             x.Start();
 
-            Parallel.For(0, threads, thread =>
-            {
-                hashes[thread] = RecursiceHash(seeds[thread], interactions);
-            });
+            Parallel.For(0, threads, thread => hashes[thread] = RecursiceHash(seeds[thread], interactions));
             var result = new byte[hashes[0].Length];
             for (int i = 0; i < threads; i++)
             {
