@@ -20,7 +20,7 @@
 }
 
 <div class="form-check form-switch">
-    <input class="form-check-input" checked="@AutoStart" @onchange=OnChangeAutoStart type="checkbox" id="flexSwitchCheckDefault">
+    <input class="form-check-input" checked="@Static.AutoStart" @onchange=OnChangeAutoStart type="checkbox" id="flexSwitchCheckDefault">
     <label class="form-check-label" for="flexSwitchCheckDefault">Auto start</label>
 </div>
 
@@ -101,5 +101,4 @@
     private string? AlertType;
 
     private string? Passphrase = null;
-    static bool AutoStart = Static.AutoStart;
 }

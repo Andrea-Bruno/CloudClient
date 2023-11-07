@@ -26,7 +26,7 @@ namespace Cloud
 
         public static bool CanUpdate()
         {
-            return Client != null && Client.CanRestart();
+            return Client != null && Client.CanRestart() && !BackupManager.BackupIsRunning;
         }
 
         public static void CreateClient(string? connectToEntryPoint = null)
@@ -38,7 +38,6 @@ namespace Cloud
             }
         }
         /// <summary>
-
         /// Returns false if the path corresponds to an unmounted virtual disk, true in all other cases
         /// </summary>
         public static bool IsReachable()

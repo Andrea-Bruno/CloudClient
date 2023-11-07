@@ -40,7 +40,6 @@ else
             <input id="RepeatPassword" style="text-security:disc; -webkit-text-security:disc;" class="form-control @vr" @bind="RepeatPassword" @oninput=OnRepeatChange />
         </div>
     }
-
     <button class="btn btn-primary my-3" disabled="@(!ButtonEnabled)" @onclick="@ButtonClick">@buttonLabel</button>
     @if (OperationInProgress)
     {
@@ -50,56 +49,83 @@ else
     }
     @if (Notification != null)
     {
-        <style>
-            .hideAfter5Seconds {
-                animation: hideAnimation 0s ease-in 5s;
-                animation-fill-mode: forwards;
-            }
-
-            @@keyframes hideAnimation {
-                from {
-                    visibility: visible;
-                }
-
-                to {
-                    visibility: hidden;
-                }
-            }
-        </style>
-        <div class="hideAfter5Seconds 5s alert @NotificationStyle alert-dismissible" role="alert">
+        <div class=" 5s alert @NotificationStyle" role="alert">
             <strong>Notify:</strong> @Notification
         </div>
     }
 }
+
+@if (attempts >= 5)
+{
+    <div>
+        <button class="btn btn-danger my-3" @onclick="@DestroyLocalData">Destroy all local data</button>
+        <div class="alert alert-warning" role="alert">
+            <strong>warning:</strong> The destruction of all local data will be irreversible!
+        </div>
+    </div>
+}
+
 @functions {
+    void DestroyLocalData()
+    {
+        var fileinfo = new FileInfo(Static.VirtualDiskFullFileName);
+        foreach (var file in fileinfo.Directory.GetFiles(Path.GetFileNameWithoutExtension(fileinfo.Name) + ".*"))
+        {
+            try
+            {
+                file.Delete();
+            }
+            catch (Exception) { }
+        }
+        var cloudPath = new DirectoryInfo(Static.CloudPath);
+        if (cloudPath.Exists && cloudPath.LinkTarget != null)
+            cloudPath.Delete();
+
+        SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, true);
+        Static.Client?.Sync?.ResetCacheHashFileTable();    
+        Static.Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(Static.CloudPath, out bool _));
+        attempts = 0;
+    }
     void ButtonClick()
     {
+        Notification = null;
         OperationInProgress = true;
         InvokeAsync(StateHasChanged);
         System.Threading.Tasks.Task.Run(() =>
         {
             if (Blocked)
             {
-                if (Static.MountVirtualDisk(Password))
+                Static.MountVirtualDisk(Password, out string? error);
+                if (error != null)
+                {
+                    vp = "is-invalid";
+                    NotificationStyle = "alert-danger";
+                    Notification = error;
+                    attempts++;
+                }
+                else
                 {
                     vp = null;
                     NotificationStyle = "alert-success";
                     Notification = "File access has been re-enabled";
-                }
-                else
-                {
-                    vp = "is-invalid";
-                    NotificationStyle = "alert-danger";
-                    Notification = "Password errata!";
+                    attempts = 0;
                 }
             }
             else
             {
                 if (Password == null || Password.Length < chrs)
                     return;
-                Static.UnmountVirtualDisk(Password);
-                NotificationStyle = "alert-success";
-                Notification = "File area locked! Use the password to access the files again.";
+                Static.UnmountVirtualDisk(Password, out string? error);
+                if (error != null)
+                {
+                    NotificationStyle = "alert-danger";
+                    Notification = error;
+                }
+                else
+                {
+                    NotificationStyle = "alert-success";
+                    Notification = "File area locked! Use the password to access the files again.";
+                }
             }
             OperationInProgress = false;
             Reload();
@@ -150,6 +176,7 @@ else
 }
 
 @code {
+    private int attempts = 0;
     const int chrs = 8;
     private bool OperationInProgress;
     private int per;

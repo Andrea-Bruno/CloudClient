@@ -25,6 +25,22 @@
                 <span class="oi oi-cloud" aria-hidden="true"></span> Connection
             </NavLink>
         </div>
+
+        @if (Directory.Exists(Static.CloudPath))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="OpenPath">
+                    <span class="oi oi-folder" aria-hidden="true"></span> Explorer
+                </NavLink>
+            </div>
+        }
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="search">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search
+            </NavLink>
+        </div>
+
         @if (Static.VirtualDiskFullFileName != null)
         {
             <div class="nav-item px-3">
@@ -96,5 +112,20 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void OpenPath(){
+        if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+        {
+            System.Diagnostics.Process.Start("explorer", Static.CloudPath);
+        }
+        else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+        {
+            System.Diagnostics.Process.Start("xdg-open", Static.CloudPath);
+        }
+        else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+        {
+            System.Diagnostics.Process.Start("open", Static.CloudPath);
+        }
     }
 }

@@ -1,0 +1,125 @@
+﻿@page "/library"
+@using System.Text;
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@using Newtonsoft.Json;
+
+<PageTitle>Library</PageTitle>
+
+
+<h1>The largest library in the world!</h1>
+
+
+
+<div class="main-search-input-wrap">
+
+
+    <div class="main-search-input fl-wrap">
+        <div class="main-search-input-item">
+            <input type="text" value="" placeholder="Search Products...">
+        </div>
+
+        <button class="main-search-button">Search</button>
+    </div>
+
+
+</div>
+
+<div class="input-group">
+    <div class="form-outline">
+        <input type="search" id="form1" class="form-control" />
+        <label class="form-label" for="form1">Search</label>
+    </div>
+    <button type="button" class="btn btn-primary">
+        <i class="fas fa-search"></i>
+    </button>
+</div>
+
+
+<div class="input-group">
+    <div class="form-outline">
+        <input type="search" id="form1" class="form-control" @bind=Query />
+        <label class="form-label" for="form1">Search</label>
+    </div>
+    <button type="button" class="btn btn-primary" @onclick=Search>
+        <i class="fas fa-search"></i>
+    </button>
+</div>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Operation</th>
+            <th>Name</th>
+            <th>Hash</th>
+            <th>Part</th>
+            <th>Length</th>
+            <th>Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        @*         foreach (var file in CloudClient.TransferredFiles.OrderBy(x => x?.Completed))
+        {
+        <tr>
+        <td>@(file.TransferLaberl)</td>
+        <td>@file.Name</td>
+        <td>@file.Hash</td>
+        <td>@(file.Part + "/" + file.Total + "#") </td>
+        <td>@file.Length</td>
+        <td>@file.Completed</td>
+        </tr>
+        } *@
+    </tbody>
+</table>
+
+@functions {
+    void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public async void Search()
+    {
+        var url = @"http://api.duckduckgo.com/?format=json&q=" + System.Web.HttpUtility.UrlEncode(Query);
+        await PostCallAPI(url);
+    }
+
+    public static async Task<object?> PostCallAPI(string url)
+    {
+        try
+        {
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                dynamic json = JsonConvert.DeserializeObject(responseBody);
+                // JObject json = JObject.Parse(str);
+                return json;
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+        return null;
+    }
+
+}
+@code {
+    public object? SearchResult;
+    public string? Query;
+    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
+    protected override async Task OnInitializedAsync()
+    {
+        if (CloudClient != null)
+        {
+            CloudClient.TransferredFiles.OnUpdated = (int idx) => { Refresh(); }; // Action that works like an event that is triggered when the list needs to be updated
+            CloudClient.OnCommands.PreservedElement = 6;
+            CloudClient.OnCommands.OnCommandEvent = (ulong? userId, CloudSync.Sync.Commands command, string? infoData, bool isOutput) => { Refresh(); };
+        }
+    }
+}

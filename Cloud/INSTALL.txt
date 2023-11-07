@@ -1,8 +1,6 @@
-﻿Installat
-ion is very simple
+﻿Installation is very simple
+
 Unzip this package 
-
-
 
 (if it is a zip file)
 Copy all the files in the path where you want to run the application, for example on Windows you can create the directory "C:\Program Files\Cloud", and copy all the files in there.

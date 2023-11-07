@@ -6,13 +6,13 @@ using System.Runtime.InteropServices;
 AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 
 var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;
-var currentPorocessId = Process.GetCurrentProcess()?.Id;
+var currentProcessId = Process.GetCurrentProcess()?.Id;
 
 Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).ToList().ForEach(process =>
 {
     if (string.Equals(process.MainModule?.FileName, currentFileInstance, StringComparison.InvariantCultureIgnoreCase))
     {
-        if (process.Id != currentPorocessId)
+        if (process.Id != currentProcessId)
         {
             Debugger.Break();
             Console.WriteLine("The application is already running");
@@ -36,8 +36,8 @@ var configuration = app.Configuration;
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
 #if DEBUG
-//Static.CloudPath = @"C:\Test4";
-Static.CloudPath = @"C:\Users\andre\OneDrive";
+Static.CloudPath = @"C:\Test4";
+//Static.CloudPath = @"C:\Users\andre\OneDrive";
 //Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
 
@@ -55,7 +55,10 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         var virtualDiskPepository = Path.Combine(new string[] { Environment.SystemDirectory, "$Sys" });
         var hash = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
         Static.VirtualDiskFullFileName = Path.Combine(virtualDiskPepository, hash + ".vhdx");
-        if (!File.Exists(Static.VirtualDiskFullFileName))
+        //    if (!Directory.Exists(virtualDiskPepository) || Directory.GetFiles(virtualDiskPepository, hash + ".*").Length == 0)
+        // Path.ChangeExtension(VirtualDiskFullFileName, ".sys")
+
+        if (!Directory.Exists(virtualDiskPepository) || !File.Exists(Static.VirtualDiskFullFileName) && !File.Exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
         {
             SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, true);
         }
@@ -88,7 +91,6 @@ if (lastEntryPoint == null || Debugger.IsAttached)
     // Open the browser
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-        //EncryptedMessaging.Functions.ExecuteCommand("cmd.exe", "/C " + "start /max " + address, true);
         SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
     }
     if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
@@ -124,7 +126,7 @@ Func<bool> PortIsAvailable = () =>
     return true;
 };
 
-if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(30)))
+if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(180)))
 {
     Debugger.Break();
     throw new Exception("The port" + Static.Port + "is busy!");

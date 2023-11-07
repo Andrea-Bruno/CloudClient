@@ -30,40 +30,48 @@ namespace Cloud
         // public static bool MountVirtualDiskStatus { get { return Storage.Values.Get(nameof(MountVirtualDiskStatus), true); } set { Storage.Values.Set(nameof(MountVirtualDiskStatus), value); } }
 
         private static int MountRunning;
-        public static bool MountVirtualDisk(string password)
+        public static void MountVirtualDisk(string password, out string? error)
         {
-            if (MountRunning == 0 && password != null)
+            if (MountRunning == 0)
             {
                 MountRunning++;
-                var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
-                if (BitConverter.ToUInt64(hash) != Storage.Values.Get("vhdpw", 0ul))
+                if (password != null)
                 {
-                    MountRunning--;
-                    return false;
-                }
-                hash = ParallelHash(hash);
-                if (!SystemExtra.Util.IsMounted(CloudPath, out bool _))
-                {
-                    var sysFile = Path.ChangeExtension(VirtualDiskFullFileName, ".sys");
-                    if (File.Exists(sysFile))
+                    var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
+                    if (BitConverter.ToUInt64(hash) != Storage.Values.Get("vhdpw", 0ul))
                     {
-                        Thread.CurrentThread.Priority = ThreadPriority.Highest;
-                        Camouflage(sysFile, hash);
-                        File.Move(sysFile, VirtualDiskFullFileName);
-                        Thread.CurrentThread.Priority = ThreadPriority.Normal;
+                        MountRunning--;
+                        error = "wrong password";
+                        return;
                     }
-                    new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
-                    SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath);
-                    Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
-                    MountRunning--;
-                    return true;
+                    hash = ParallelHash(hash);
+                    if (!SystemExtra.Util.IsMounted(CloudPath, out bool _))
+                    {
+                        var sysFile = Path.ChangeExtension(VirtualDiskFullFileName, ".sys");
+                        if (File.Exists(sysFile))
+                        {
+                            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+                            Camouflage(sysFile, hash);
+                            if (File.Exists(VirtualDiskFullFileName))
+                                File.Delete(VirtualDiskFullFileName);
+                            File.Move(sysFile, VirtualDiskFullFileName);
+                            Thread.CurrentThread.Priority = ThreadPriority.Normal;
+                        }
+                        new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
+                        SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath);
+                        Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
+                        MountRunning--;
+                        error = null;
+                        return;
+                    }
                 }
                 MountRunning--;
             }
-            return false;
+            error = "Operation already in progress, please wait!";
+            return;
         }
 
-        public static void UnmountVirtualDisk(string password)
+        public static void UnmountVirtualDisk(string password, out string? error)
         {
             if (MountRunning == 0)
             {
@@ -77,7 +85,11 @@ namespace Cloud
                 new DirectoryInfo(CloudPath).Attributes |= FileAttributes.Hidden;
                 Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
                 MountRunning--;
+                error = null;
+                return;
             }
+            error = "Operation already in progress, please wait!";
+            return;
         }
 
         /// <summary>

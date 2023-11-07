@@ -35,6 +35,14 @@ else
         The backup is in progress, it will be completed soon!
     </div>
 }
+else if (BackupManager.LastDailyBackupResult != null)
+{
+    var alert = BackupManager.LastDailyBackupResult.Item2 == BackupLibrary.Backup.Outcome.Successful ? "alert-info" : "alert-danger";
+    <div class="alert @alert my-3" role="alert">
+        The last backup was performed at: @BackupManager.LastDailyBackupResult.Item1<br>
+        The outcome was: @BackupManager.LastDailyBackupResult.Item2
+    </div>
+}
 
 <div class="alert alert-primary my-3" role="alert">
     If the application is running, daily backups will still be performed automatically.

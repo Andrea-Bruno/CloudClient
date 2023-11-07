@@ -1,4 +1,8 @@
-﻿namespace Cloud
+﻿
+
+using static BackupLibrary.Backup;
+
+namespace Cloud
 {
     public static class BackupManager
     {
@@ -34,6 +38,8 @@
         }
         public static bool BackupIsRunning => AntiGithub.DailyBckupIsRunning;
         public static void StopSyncGit() => AntiGithub.StopSyncGit();
+        public static Tuple<DateTime, Outcome> LastDailyBackupResult => AntiGithub.LastDailyBackupResult;
+
 
     }
 }

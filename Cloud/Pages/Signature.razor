@@ -3,6 +3,7 @@
 <PageTitle>Digital signature of documents</PageTitle>
 
 @using Cloud.Data
+@using System.Diagnostics
 
 <h1>Digital signature of documents</h1>
 
@@ -39,14 +40,13 @@ else
     CloudBox.DigitalSignature.Scope Scope;
     private async Task LoadFiles(InputFileChangeEventArgs e)
     {
-
         if (Static.Client != null)
             using (var fr = e.File.OpenReadStream(e.File.Size))
             {
                 var data = new byte[e.File.Size];
                 await fr.ReadAsync(data, 0, (int)e.File.Size);
                 var json = Static.Client.SignDocument(Scope, out SignatureFileName, e.File.Name, data);
-                JsonBase64 = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(json));
+                JsonBase64 = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(json));                
             }
     }
     private void ChangeSelectScope(ChangeEventArgs args)
