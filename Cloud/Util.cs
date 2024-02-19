@@ -8,7 +8,7 @@ namespace Cloud
         /// <summary>
         /// The address of the server that acts as a repository for new versions of applications (new versions are published to this address and apps that need to be updated get the new version from here)
         /// </summary>
-        private const string DefaultUpdateUrl = "http://update.cloudservices.agency:5050";
+        private const string DefaultUpdateUrl = "http://update.tc0.it:5050";
 
         /// <summary>
         /// The local location of the application package ready to be published.

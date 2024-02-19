@@ -1,9 +1,10 @@
 ﻿@page "/login"
 @using Cloud.Data
 @using Microsoft.Extensions.Logging
+@using System.Runtime.InteropServices
 @inject ILogger<Index> Logger
 @{
-    if (Static.Client != null)
+if (Static.Client != null)
     {
         Static.Client.OnNotificationAction = OnNotificationAction;
         Static.Client.OnLocalSyncStatusChangesAction = OnLocalSyncStatusChanges;
@@ -20,7 +21,7 @@
 <h1>Cloud</h1>
 <h3>Welcome to your Cloud Client Panel</h3>
 
-@if (!Static.IsAdmin)
+@if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Static.IsAdmin)
 {
     <div class="alert alert-danger" role="alert">
         For correct operation, the application must be run as an administrator.<br />
@@ -95,12 +96,12 @@ else if (!HideForm)
     }
 }
 @* <br />
-<label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
-<br />
+    <label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
+    <br />
 
-<br />
-<label id="SyncStatus" class="card" style="background-color: @localSyncStatusColor">@SyncStatus</label>
-<br /> *@
+    <br />
+    <label id="SyncStatus" class="card" style="background-color: @localSyncStatusColor">@SyncStatus</label>
+    <br /> *@
 
 
 <pre>@Status</pre>

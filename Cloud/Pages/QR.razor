@@ -16,33 +16,39 @@
                 An internet connection is required so that the Cloud is always reachable.
             </div>
         }
-    else
-    {
-        QRCodeGenerator qrGenerator = new QRCodeGenerator();
-        QRCodeData qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
-        AsciiQRCode qrCode = new AsciiQRCode(qrCodeData);
-        string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
-        <pre style="font-size:small; line-height: initial">
-            @qrCodeAsAsciiArt
-        </pre>
-        <h3>Use the QR code to connect another device to the cloud: The PIN set on the cloud is required to connect.</h3>
-        if (loggedQr == null)
+        else
         {
-            <div class="alert alert-info" role="alert">
-                This device is not connected to the cloud: <a href="login">Connect using the cloud pin</a>
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
+            AsciiQRCode qrCode = new AsciiQRCode(qrCodeData);
+            string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
+            <div style="display:inline-flex">
+                <pre style="font-size:x-small; cursor:none; font-family: monospace, monospace; line-height: initial">@qrCodeAsAsciiArt</pre>
+                <span>
+                    <button class="btn btn-primary my-3" onclick="navigator.clipboard.writeText('@qr')">Copy</button>
+                </span>
             </div>
+            <h3>Use the QR code to connect another device to the cloud: The PIN set on the cloud is required to connect.</h3>
+            if (loggedQr == null)
+            {
+                <div class="alert alert-info" role="alert">
+                    This device is not connected to the cloud: <a href="login">Connect using the cloud pin</a>
+                </div>
+            }
         }
     }
-}
     else
     {
         StartDetect();
-<h3>Connect your device to the cloud to view the QR code here</h3>
+        <h3>Connect your device to the cloud to view the QR code here</h3>
         if (Static.QrDetected == null)
         {
-<div class="alert alert-warning" role="alert">
-    Connect your computer to the same intranet as the Cloud to receive the QR code.
-</div>
+            <div class="alert alert-warning" role="alert">
+                Connect your computer to the same intranet as the Cloud to receive the QR code.
+            </div>
+            <progress Class="mb-3 w-100">
+                <progressBar a />
+            </progress>
         }
     }
 }

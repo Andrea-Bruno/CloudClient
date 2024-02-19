@@ -8,21 +8,26 @@ AppDomain.CurrentDomain.UnhandledException += Util.UnhandledException; //it catc
 var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;
 var currentProcessId = Process.GetCurrentProcess()?.Id;
 
-Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).ToList().ForEach(process =>
+// It doesn't work with Macintosh, it hasn't been tested with Linux
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    if (string.Equals(process.MainModule?.FileName, currentFileInstance, StringComparison.InvariantCultureIgnoreCase))
+    Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).ToList().ForEach(process =>
     {
-        if (process.Id != currentProcessId)
+        if (string.Equals(process.MainModule?.FileName, currentFileInstance, StringComparison.InvariantCultureIgnoreCase))
         {
-            Debugger.Break();
-            Console.WriteLine("The application is already running");
-            Environment.Exit(1);
-            return;
+            if (process.Id != currentProcessId)
+            {
+                Debugger.Break();
+                Console.WriteLine("The application is already running");
+                    Environment.Exit(1);
+                return;
+            }
         }
-    }
-});
+    });
+}
 
-Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command linee
+
+Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -36,7 +41,10 @@ var configuration = app.Configuration;
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
 #if DEBUG
-Static.CloudPath = @"C:\Test4";
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    Static.CloudPath = @"C:\Test4";
+//else
+//    Static.CloudPath = @"/home/user/test";
 //Static.CloudPath = @"C:\Users\andre\OneDrive";
 //Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
@@ -47,18 +55,15 @@ var address = "http://localhost:" + Static.Port;
 app.Urls.Add(address);
 Static.Storage = new SecureStorage.Storage(address);
 
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) 
 {
     var cloudPath = new DirectoryInfo(Static.CloudPath);
     if (!cloudPath.Exists || cloudPath.LinkTarget != null)
     {
-        var virtualDiskPepository = Path.Combine(new string[] { Environment.SystemDirectory, "$Sys" });
+        var virtualDiskRepository = Path.Combine(new string[] { Environment.SystemDirectory, "$Sys" });
         var hash = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
-        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskPepository, hash + ".vhdx");
-        //    if (!Directory.Exists(virtualDiskPepository) || Directory.GetFiles(virtualDiskPepository, hash + ".*").Length == 0)
-        // Path.ChangeExtension(VirtualDiskFullFileName, ".sys")
-
-        if (!Directory.Exists(virtualDiskPepository) || !File.Exists(Static.VirtualDiskFullFileName) && !File.Exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
+        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hash + ".vhdx");
+        if (!Directory.Exists(virtualDiskRepository) || !File.Exists(Static.VirtualDiskFullFileName) && !File.Exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
         {
             SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, true);
         }
@@ -86,16 +91,52 @@ if (lastEntryPoint != null)
 
 BackupManager.Initialize(Static.CloudPath);
 
+Func<bool> PortIsAvailable = () =>
+{
+    IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+    TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+    foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+    {
+        if (tcpi.LocalEndPoint.Port == Static.Port)
+        {
+            return false;
+        }
+    }
+    return true;
+};
+
+Func<bool> NotPortIsAvailable = () =>
+{
+    return !PortIsAvailable();
+};
+
+
 if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser
-    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+    Task.Run(() =>
     {
-        SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
-    }
-    if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (!SpinWait.SpinUntil(NotPortIsAvailable, TimeSpan.FromSeconds(180)))
+            {
+                Debugger.Break();
+                throw new Exception("The web interface is not working!");
+            }
+            SystemExtra.Util.ExecuteCommand("open", address);
+        }
+    });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+
+    if (Directory.Exists(CloudSync.Util.DesktopPath()))
     {
-        File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + address + @"""></HEAD>");
+        File.WriteAllText(Path.Combine(CloudSync.Util.DesktopPath(), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + address + @"""></HEAD>");
     }
 }
 
@@ -112,19 +153,7 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-Func<bool> PortIsAvailable = () =>
-{
-    IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-    TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
-    foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
-    {
-        if (tcpi.LocalEndPoint.Port == Static.Port)
-        {
-            return false;
-        }
-    }
-    return true;
-};
+
 
 if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(180)))
 {

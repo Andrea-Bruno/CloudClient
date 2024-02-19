@@ -1,4 +1,10 @@
-﻿Installation is very simple
+﻿Installation is very simple!
+
+========= LINUX:
+
+From terminal run the command ./install.sh
+
+========= WINDOWS:
 
 Unzip this package 
 

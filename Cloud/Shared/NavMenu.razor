@@ -1,4 +1,5 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using System.Runtime.InteropServices;
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
             Cloud 1.@(new DirectoryInfo(System.Reflection.Assembly.GetEntryAssembly()?.Location).LastWriteTimeUtc.ToString("yy.MM.dd", System.Globalization.CultureInfo.InvariantCulture))
@@ -9,7 +10,7 @@
     </div>
 </div>
 
-@*         The unicode icon set used by bootstrap blazor
+@*         The Unicode icon set used by bootstrap Blazor
          https://kordamp.org/ikonli/cheat-sheet-openiconic.html
 *@
 
@@ -64,16 +65,18 @@
                 <span class="oi oi-loop" aria-hidden="true"></span> Redundancy
             </NavLink>
         </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="antivirus">
-                <span class="oi oi-shield" aria-hidden="true"></span> Antivirus
-                @if (CloudClient != null && CloudClient.AntivirusWarnings.Count != 0)
-                {
-                    <span class="text-danger fw-bold m-1"> @CloudClient?.AntivirusWarnings.Count</span>
-                }
-            </NavLink>
+        @if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="antivirus">
+                    <span class="oi oi-shield" aria-hidden="true"></span> Antivirus
+                    @if (CloudClient != null && CloudClient.AntivirusWarnings.Count != 0)
+                    {
+                        <span class="text-danger fw-bold m-1"> @CloudClient?.AntivirusWarnings.Count</span>
+                    }
+                </NavLink>
         </div>
+        }
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Diagnostics">
                 <span class="oi oi-warning" aria-hidden="true"></span> Diagnostics
@@ -90,7 +93,7 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="signaturevalidation">
+            <NavLink class="nav-link" href="signatureValidation">
                 <span class="oi oi-check" aria-hidden="true"></span> Sign validator
             </NavLink>
         </div>
