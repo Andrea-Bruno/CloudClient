@@ -75,7 +75,7 @@
                         <span class="text-danger fw-bold m-1"> @CloudClient?.AntivirusWarnings.Count</span>
                     }
                 </NavLink>
-        </div>
+            </div>
         }
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Diagnostics">
@@ -103,6 +103,11 @@
             </NavLink>
         </div>
     </nav>
+    @* Component to add for dynamic rendering of AI-generated content *@
+    @{
+        var Features = UISupportGeneric.Util.GetAllClassInfoInNamespace("Cloud.Features", System.Reflection.Assembly.GetExecutingAssembly());
+    }
+    <UISupportRazor.Menu ClassesInfo="@Features"></UISupportRazor.Menu>
 </div>
 
 @code {
@@ -117,7 +122,8 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private void OpenPath(){
+    private void OpenPath()
+    {
         if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
         {
             System.Diagnostics.Process.Start("explorer", Static.CloudPath);

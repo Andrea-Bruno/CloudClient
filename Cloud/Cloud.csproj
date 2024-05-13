@@ -9,6 +9,7 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -34,6 +35,7 @@
 		<ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
 		<ProjectReference Include="..\..\..\AppSync\AppSync.csproj" />
 		<ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
+		<ProjectReference Include="..\..\..\UISupportRazor\UISupportRazor.csproj" />
 		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
 	</ItemGroup>
 

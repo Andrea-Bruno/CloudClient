@@ -110,7 +110,6 @@ Func<bool> NotPortIsAvailable = () =>
     return !PortIsAvailable();
 };
 
-
 if (lastEntryPoint == null || Debugger.IsAttached)
 {
     // Open the browser

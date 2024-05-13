@@ -53,17 +53,17 @@ else if (!HideForm)
         <label for="QR">QR code</label>
         <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
 
-        <label for="Pin">Pin or phassphrase to restore account</label>
+        <label for="Pin">Pin or passphrase to restore account</label>
         <InputText id="Pin" style="text-security:disc; -webkit-text-security:disc;" class="form-control" @bind-Value="loginModel.Pin" />
 
         <button class="btn btn-primary my-3" type="submit">Submit</button>
 
     </EditForm>
 }
-@if (ErrorComunicationTime.AddMinutes(1) >= DateTime.UtcNow)
+@if (ErrorCommunicationTime.AddMinutes(1) >= DateTime.UtcNow)
 {
     <div class="alert alert-danger" role="alert">
-        @ErrorComunication;
+        @ErrorCommunication;
     </div>
 }
 @{
@@ -186,9 +186,9 @@ else if (!HideForm)
 
     void OnCommunicationErrorEvent(CommunicationChannel.Channel.ErrorType errorId, string description)
     {
-        ErrorComunicationTime = DateTime.UtcNow;
-        ErrorComunication = errorId.ToString() + " (" + description + ")";
-        Static.Client?.AddFileError(ErrorComunication, null);
+        ErrorCommunicationTime = DateTime.UtcNow;
+        ErrorCommunication = errorId.ToString() + " (" + description + ")";
+        Static.Client?.AddFileError(ErrorCommunication, null);
     }
 
 }
@@ -209,14 +209,14 @@ else if (!HideForm)
     static string? SyncStatus;
     static string? localSyncStatusColor;
 
-    static string? ErrorComunication;
-    static DateTime ErrorComunicationTime;
+    static string? ErrorCommunication;
+    static DateTime ErrorCommunicationTime;
 
     string TxtType = "password";
 
     private void HandleValidSubmit(EditContext editContext)
     {
-        LoginResult = CloudBox.CloudBox.LoginResult.Successful; // reset previus login message
+        LoginResult = CloudBox.CloudBox.LoginResult.Successful; // reset previous login message
         InvokeAsync(StateHasChanged);
         System.Threading.Tasks.Task.Run(() =>
         {

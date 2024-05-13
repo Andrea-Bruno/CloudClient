@@ -6,7 +6,7 @@
 
 Cross-platform desktop cloud client, for compatible clouds (works in conjunction with cloud server to sync files).
 This project has dependencies with other libraries which you can find open source in the same account as separate projects as the underlying libraries are in common with other projects:
-Therefore, the projects not included can be added by searching for them on the github repository, some are also available as nughet packages (you can add them to the solution instead of the missing projects).
+Therefore, the projects not included can be added by searching for them on the Github repository, some are also available as Nuget packages (you can add them to the solution instead of the missing projects).
 If you don't have the Cloud Server, alternatively you can use this software with a network address as a remote repository (the path must be set in the "git" parameter under the backup settings), for example you can set a pen drive connected to your router (in this case, the samba network path of the pen drive must be entered in "git").
 
 # Description
@@ -30,6 +30,11 @@ As a bonus we have added some extra features:
 The software needs to run in administrator mode for the following reasons:
 * Automatic date and time adjustment in your computer (if the date is wrong the files will be recorded with wrong dates and could be mistakenly mistaken as older than versions contained on the cloud).
 * Create hard links for backups (this saves a lot of space during backups).
+
+# Installation
+
+If you use Windows we recommend unpacking the files in the "C:\Program Files\Cloud" folder. Launch the executable (Cloud.exe) to start the cloud and complete the installation. If not already installed, ask to install the 2 runtimes necessary to start the application, then proceed with the installation of the necessary components.
+It is possible to connect your PC with multiple clouds, in which case it is necessary to reinstall the application in a different path, modifying the appsettings.json file, so that the port for the web interface is different from those already used, and also setting a CloudPath that is different from the paths already used for other cloud client instances. These rules to follow also apply to those who use Mac and Linux.
 
 # Privacy Policy
 
