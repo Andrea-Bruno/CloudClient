@@ -68,13 +68,13 @@ else if (!HideForm)
 }
 @{
     string? alert = null;
-    if (LoginResult == CloudBox.CloudBox.LoginResult.WrongQR)
+    if (LoginResult == CloudClient.Client.LoginResult.WrongQR)
         alert = "Wrong QR code: This is not a valid code for this application!";
-    else if (LoginResult == CloudBox.CloudBox.LoginResult.WrongPassword)
+    else if (LoginResult == CloudClient.Client.LoginResult.WrongPassword)
         alert = "Wrong pin!";
-    else if (LoginResult == CloudBox.CloudBox.LoginResult.RemoteHostNotReachable)
+    else if (LoginResult == CloudClient.Client.LoginResult.RemoteHostNotReachable)
         alert = "The cloud is unreachable: Check the internet connection of the cloud and your computer";
-    else if (LoginResult == CloudBox.CloudBox.LoginResult.LicenseExpired)
+    else if (LoginResult == CloudClient.Client.LoginResult.LicenseExpired)
         alert = "Connection refused: Check if the license has expired!";
     if (alert != null)
     {
@@ -201,7 +201,7 @@ else if (!HideForm)
     }
     string? Status;
     string? OldStatus;
-    static CloudBox.CloudBox.LoginResult LoginResult;
+    static CloudClient.Client.LoginResult LoginResult;
     bool HideForm;
     static string? Notification;
     static string? NotificationColor;
@@ -216,7 +216,7 @@ else if (!HideForm)
 
     private void HandleValidSubmit(EditContext editContext)
     {
-        LoginResult = CloudBox.CloudBox.LoginResult.Successful; // reset previous login message
+        LoginResult = CloudClient.Client.LoginResult.Successful; // reset previous login message
         InvokeAsync(StateHasChanged);
         System.Threading.Tasks.Task.Run(() =>
         {
@@ -234,7 +234,7 @@ else if (!HideForm)
             {
                 LoginResult = Static.Login(qr, pin);
             }
-            if (LoginResult != CloudBox.CloudBox.LoginResult.Successful)
+            if (LoginResult != CloudClient.Client.LoginResult.Successful)
                 Static.Logout();
             HideForm = false;
             InvokeAsync(StateHasChanged);

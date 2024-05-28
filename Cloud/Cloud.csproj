@@ -10,11 +10,12 @@
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	</PropertyGroup>
+    <DisableScopedCssBundling>False</DisableScopedCssBundling>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<Content Include="Cloud.ico" />
-	</ItemGroup>
+  </ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\LICENSE.md">
@@ -36,10 +37,13 @@
 		<ProjectReference Include="..\..\..\AppSync\AppSync.csproj" />
 		<ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
 		<ProjectReference Include="..\..\..\UISupportRazor\UISupportRazor.csproj" />
-		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
+		<ProjectReference Include="..\CloudClient\CloudClient.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Extra\putty.exe">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="INSTALL.txt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

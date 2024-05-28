@@ -11,10 +11,10 @@ namespace Cloud
         public static int Port;
         public static SecureStorage.Storage Storage;
         public static readonly bool IsAdmin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator) : Environment.UserName == "root";
-        private static CloudBox.CloudBox? _client;
+        private static CloudClient.Client? _client;
 
 
-        public static CloudBox.CloudBox? Client
+        public static CloudClient.Client? Client
         {
             get { return _client; }
             private set
@@ -31,7 +31,7 @@ namespace Cloud
 
         public static void CreateClient(string? connectToEntryPoint = null)
         {
-            Client = new CloudBox.CloudBox(CloudPath, isReachable: IsReachable());
+            Client = new CloudClient.Client(CloudPath, isReachable: IsReachable());
             if (connectToEntryPoint != null)
             {
                 Client.CreateContext(connectToEntryPoint);
@@ -55,12 +55,12 @@ namespace Cloud
         /// <param name="qr"></param>
         /// <param name="pin"></param>
         /// <returns>True for Successful, or false if QR code is not valid (this routine don't check the pin)</returns>
-        public static CloudBox.CloudBox.LoginResult Login(string qr, string pin)
+        public static CloudClient.Client.LoginResult Login(string qr, string pin)
         {
             if (Client == null)
                 CreateClient();
-            var result = Client == null ? CloudBox.CloudBox.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
-            if (result == CloudBox.CloudBox.LoginResult.Successful)
+            var result = Client == null ? CloudClient.Client.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
+            if (result == CloudClient.Client.LoginResult.Successful)
             {
                 AutoStart = true;
                 Client?.Context.SecureStorage.Values.Set("QR", qr);
@@ -94,10 +94,10 @@ namespace Cloud
         /// <param name="qr"></param>
         /// <param name="passphrase"></param>
         /// <returns></returns>
-        public static CloudBox.CloudBox.LoginResult Restore(string qr, string passphrase)
+        public static CloudClient.Client.LoginResult Restore(string qr, string passphrase)
         {
-            Client = new CloudBox.CloudBox(CloudPath, isReachable: IsReachable());
-            return Client.CreateContext(qr, passphrase: passphrase) != null ? CloudBox.CloudBox.LoginResult.Successful : CloudBox.CloudBox.LoginResult.WrongQR;
+            Client = new CloudClient.Client(CloudPath, isReachable: IsReachable());
+            return Client.CreateContext(qr, passphrase: passphrase) != null ? CloudClient.Client.LoginResult.Successful : CloudClient.Client.LoginResult.WrongQR;
         }
 
         public static string? QrDetected { get; private set; }

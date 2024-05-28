@@ -19,7 +19,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Debugger.Break();
                 Console.WriteLine("The application is already running");
-                    Environment.Exit(1);
+                Environment.Exit(1);
                 return;
             }
         }
@@ -55,7 +55,7 @@ var address = "http://localhost:" + Static.Port;
 app.Urls.Add(address);
 Static.Storage = new SecureStorage.Storage(address);
 
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) 
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     var cloudPath = new DirectoryInfo(Static.CloudPath);
     if (!cloudPath.Exists || cloudPath.LinkTarget != null)

@@ -5,7 +5,7 @@
 {
     <button class="btn btn-primary my-3" @onclick=SendContact>Send my contact</button>
     <br />
-    <button class="btn btn-primary my-3" @onclick=SendHoshRoot>Send hash root</button>
+    <button class="btn btn-primary my-3" @onclick=SendHashRoot>Send hash root</button>
     <br />
 }
 <button class="btn btn-primary my-3" @onclick=OnQuitClick>Quit</button>
@@ -43,7 +43,7 @@
             context.Messaging.SendContact(context.My.Contact, Static.Client.ServerCloud, false);
         }
     }
-    void SendHoshRoot()
+    void SendHashRoot()
     {
         Static.Client?.Sync?.SendHashRoot();
     }

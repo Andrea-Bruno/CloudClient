@@ -127,7 +127,7 @@ namespace Cloud.Features
         /// <returns></returns>
         public static string? GenerateSharingLink()
         {
-            return CloudBox.Share.GenerateSharingLink(Static.Client);
+            return CloudBox.Share.GenerateSharingLink(SharingGroup, Static.Client);
         }
     }
 }
