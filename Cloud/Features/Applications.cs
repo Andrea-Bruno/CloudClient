@@ -15,14 +15,14 @@ namespace Cloud.Features
         /// <summary>
         /// Select a cloud application to run in a local virtual environment
         /// </summary>
-        public static string[]? TheApplicationToRun => Static.Client?.SupportedApps;
+        public static string[]? ApplicationToRun => Static.Client?.SupportedApps;
 
         /// <summary>
         /// Run the selected application
         /// </summary>
         private static void OnSelectApplicationToRun(int id)
         {
-                SelectedApplication = TheApplicationToRun?[id];                
+                SelectedApplication = ApplicationToRun?[id];                
         }
 
         /// <summary>

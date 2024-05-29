@@ -41,9 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Extra\putty.exe">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
 	  <None Update="INSTALL.txt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

@@ -52,7 +52,7 @@ namespace CloudClient
                                 bool isLocalhost = false;
                                 try
                                 {
-                                    if (publicIP.ToString() == Util.GetPublicIpAddress()?.ToString())
+                                    if (new IPAddress(publicIP).ToString() == Util.GetPublicIpAddress()?.ToString())
                                     {
                                         var myLocalIp = Util.GetLocalIpAddress().GetAddressBytes();
                                         if (localIP[0] == myLocalIp[0] && localIP[1] == myLocalIp[1] && localIP[2] == myLocalIp[2] && localIP[3] == myLocalIp[3])
@@ -70,18 +70,24 @@ namespace CloudClient
                                     {
                                         var puttyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "extra");
                                         var putty = Path.Combine(puttyPath, "putty.exe");
-                                        File.WriteAllText(Path.Combine(puttyPath, "run.txt"), programToExecute);
-                                        if (File.Exists(putty))
+                                        var xming = Path.Combine(puttyPath, "Xming.exe");
+                                        var run = Path.Combine(puttyPath, "run.txt");
+                                        File.WriteAllText(run, programToExecute);
+                                        if (File.Exists(putty) && File.Exists(xming))
                                         {
+                                            if (Process.GetProcessesByName("Xming").Length == 0)
+                                            {
+                                                Process.Start(xming, ":0 -clipboard -multiwindow -dpi 108");
+                                            }
                                             var process = new Process();
-                                            process.StartInfo.FileName = putty;
-                                            process.StartInfo.Arguments = "-ssh " + ipToConnect + " -X -pw " + password + " -l " + userId.ToString() + " -m run.txt";
+                                            process.StartInfo.FileName = putty;                                       
+                                            process.StartInfo.Arguments = "-ssh " + ipToConnect + " -X -pw " + password + " -l " + userId.ToString() + " -m " + "\"" + run + "\"";
 #if RELEASE
-                                        process.StartInfo.RedirectStandardOutput = true;
-                                        process.StartInfo.RedirectStandardError = true;
-                                        process.StartInfo.UseShellExecute = false;
-                                        process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                                        process.StartInfo.CreateNoWindow = true;
+                                            process.StartInfo.RedirectStandardOutput = true;
+                                            process.StartInfo.RedirectStandardError = true;
+                                            process.StartInfo.UseShellExecute = false;
+                                            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                            process.StartInfo.CreateNoWindow = true;
 #endif
                                             process.Start();
                                         }
