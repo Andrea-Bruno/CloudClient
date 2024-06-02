@@ -12,6 +12,16 @@ namespace Cloud.Features
 
         }
 
+        const string notConnected = "The client is not connected to the cloud!";
+
+        /// <summary>
+        /// Current status of the connection with the cloud
+        /// </summary>
+        public static string Status { get {
+                return Static.Client == null || !Static.Client.IsConnected ? throw new Exception(notConnected) : "Connected";
+            }
+        }
+
         /// <summary>
         /// Select a cloud application to run in a local virtual environment
         /// </summary>
@@ -30,8 +40,10 @@ namespace Cloud.Features
         /// </summary>
         public static void ExecuteApplication()
         {
+            if (SelectedApplication == null)
+                throw new Exception("No applications selected!");
             if (Static.Client == null || !Static.Client.IsConnected)
-                throw new Exception("The client is not connected to the cloud!");
+                throw new Exception(notConnected);
             Static.Client.StartApplication(SelectedApplication);
         }
         private static string? SelectedApplication;    

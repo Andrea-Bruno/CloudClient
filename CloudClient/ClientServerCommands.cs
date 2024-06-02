@@ -42,7 +42,11 @@ namespace CloudClient
                             break;
                         case Command.GetSSHAccess:
                             var ToExecute = parameters[0];
-                            var password = BitConverter.ToString(parameters[1]).Replace("-", "");
+                            // var password = BitConverter.ToString(parameters[1]).Replace("-", "");
+                            var password = parameters[1].ToHex();
+
+                            password = "testpassword";
+
                             var localIP = parameters[2];
                             var publicIP = parameters[3];
                             if (ToExecute.Length > 1) // if is 1 byte, then is a error message
@@ -69,7 +73,11 @@ namespace CloudClient
                                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                     {
                                         var puttyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "extra");
-                                        var putty = Path.Combine(puttyPath, "putty.exe");
+                                        // var putty = Path.Combine(puttyPath, "putty.exe");
+                                        // var fileName = "putty.exe";
+
+                                        var fileName = "plink.exe";
+                                        var putty = Path.Combine(puttyPath, fileName);
                                         var xming = Path.Combine(puttyPath, "Xming.exe");
                                         var run = Path.Combine(puttyPath, "run.txt");
                                         File.WriteAllText(run, programToExecute);
@@ -80,15 +88,18 @@ namespace CloudClient
                                                 Process.Start(xming, ":0 -clipboard -multiwindow -dpi 108");
                                             }
                                             var process = new Process();
-                                            process.StartInfo.FileName = putty;                                       
-                                            process.StartInfo.Arguments = "-ssh " + ipToConnect + " -X -pw " + password + " -l " + userId.ToString() + " -m " + "\"" + run + "\"";
-#if RELEASE
-                                            process.StartInfo.RedirectStandardOutput = true;
-                                            process.StartInfo.RedirectStandardError = true;
+                                            process.StartInfo.EnvironmentVariables["PATH"] = puttyPath;
+                                            process.StartInfo.FileName = fileName;                                           
+                                            process.StartInfo.Arguments = "-batch -ssh " + " -X -pw " + password + " " + Context.My.Id + "@" + ipToConnect + " \"" + programToExecute + "\"";
+                                            //process.StartInfo.Arguments = "-ssh " + Context.My.Id + "@" + ipToConnect + " -X -pw " + password + " -m " + "\"" + run + "\"";
+                                            //process.StartInfo.Arguments = "-ssh " + ipToConnect + " -X -pw " + password + " -l " + Context.My.Id.ToString() + " -m " + "\"" + run + "\"";
+                                            // #if RELEASE
+                                            //process.StartInfo.RedirectStandardOutput = true;
+                                            //process.StartInfo.RedirectStandardError = true;
                                             process.StartInfo.UseShellExecute = false;
-                                            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                                             process.StartInfo.CreateNoWindow = true;
-#endif
+                                            //process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                            // #endif
                                             process.Start();
                                         }
                                     }
@@ -129,7 +140,7 @@ namespace CloudClient
             if (SendCommand(ServerCloud, Command.GetSSHAccess, new[] { Encoding.UTF8.GetBytes(programToExecute) }))
             {
                 GetSSHAccessSemaphore = new AutoResetEvent(false);
-                if (!GetSSHAccessSemaphore.WaitOne(5000))
+                if (!GetSSHAccessSemaphore.WaitOne(10000))
                     throw new Exception("Timeout error: The cloud is probably unreachable!");
             }
             else
