@@ -5,6 +5,7 @@ using NBitcoin;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace CloudClient
@@ -14,10 +15,18 @@ namespace CloudClient
     /// </summary>
     public partial class Client : CloudBox.CloudBox
     {
-        public Client(string cloudPath = null, bool isReachable = true) : base( cloudPath, isReachable: isReachable)
+        public Client(string cloudPath = null, bool isReachable = true) : base(cloudPath, isReachable: isReachable)
         {
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
             OnCommandEvent = OnServerCommand;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Extra")))
+            {
+                string zipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Extra.zip");
+                if (File.Exists(zipPath))
+                    System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, AppDomain.CurrentDomain.BaseDirectory);
+            }
+
         }
         /// <summary>
         /// Connect to server and start sync
