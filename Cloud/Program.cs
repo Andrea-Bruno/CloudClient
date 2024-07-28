@@ -99,16 +99,14 @@ Func<bool> PortIsAvailable = () =>
     {
         if (tcpi.LocalEndPoint.Port == Static.Port)
         {
+            Thread.Sleep(1000);
             return false;
         }
     }
     return true;
 };
 
-Func<bool> NotPortIsAvailable = () =>
-{
-    return !PortIsAvailable();
-};
+Func<bool> NotPortIsAvailable = () => !PortIsAvailable();
 
 if (lastEntryPoint == null || Debugger.IsAttached)
 {

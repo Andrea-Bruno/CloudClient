@@ -5,7 +5,7 @@
     public class LoginModel
     {
         [Required]
-        string? _qr = Static.QrDetected;
+        string? _qr = CloudClient.QrCodeDetector.QrDetected;
 
         public string? QR { get { return _qr; } set { _qr = value; } }
 

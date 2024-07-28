@@ -11,9 +11,9 @@ if (Static.Client != null)
         Static.Client.OnCommunicationErrorEvent = OnCommunicationErrorEvent;
         OnLocalSyncStatusChanges(Static.Client.SyncStatus, Static.Client.PendingFiles);
     }
-    else if (String.IsNullOrEmpty(Static.QrDetected))
+    else if (String.IsNullOrEmpty(CloudClient.QrCodeDetector.QrDetected))
     {
-        Static.DetectQrCode((qr) => { Refresh(); });
+        CloudClient.QrCodeDetector.DetectQrCode((qr) => { Refresh(); });
     }
 }
 <PageTitle>Cloud client</PageTitle>
@@ -126,6 +126,7 @@ else if (!HideForm)
     private void Logout()
     {
         Static.Logout();
+        HideForm = false;
     }
 
     private void Exit()
@@ -139,7 +140,7 @@ else if (!HideForm)
         Status = Static.Client?.Status;
         if (Status != OldStatus)
         {
-            InvokeAsync(StateHasChanged);
+            Refresh();
         }
         return true;
     }
@@ -216,6 +217,9 @@ else if (!HideForm)
 
     private void HandleValidSubmit(EditContext editContext)
     {
+        Status = null;
+        Notification = null;
+        SyncStatus = null;
         LoginResult = CloudClient.Client.LoginResult.Successful; // reset previous login message
         InvokeAsync(StateHasChanged);
         System.Threading.Tasks.Task.Run(() =>
@@ -235,8 +239,8 @@ else if (!HideForm)
                 LoginResult = Static.Login(qr, pin);
             }
             if (LoginResult != CloudClient.Client.LoginResult.Successful)
-                Static.Logout();
-            HideForm = false;
+                Logout();
+            // HideForm = false;
             InvokeAsync(StateHasChanged);
         });
     }

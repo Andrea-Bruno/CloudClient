@@ -17,6 +17,7 @@ namespace CloudClient
     {
         public Client(string cloudPath = null, bool isReachable = true) : base(cloudPath, isReachable: isReachable)
         {
+            QrCodeDetector.DisallowDetectQrCode = true;
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
             OnCommandEvent = OnServerCommand;
 
@@ -26,7 +27,6 @@ namespace CloudClient
                 if (File.Exists(zipPath))
                     System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, AppDomain.CurrentDomain.BaseDirectory);
             }
-
         }
         /// <summary>
         /// Connect to server and start sync
@@ -77,6 +77,7 @@ namespace CloudClient
         /// <returns>Validated for Successful, or other result if QR code or PIN is not valid</returns>        
         public LoginResult Login(string qrCode, string pin, string entryPoint = null)
         {
+            QrCodeDetector.DisallowDetectQrCode = true;
             var result = TryLogin(qrCode, pin, entryPoint);
             if (result != LoginResult.Successful)
                 Logout();
@@ -99,15 +100,29 @@ namespace CloudClient
             // =================
             context.SecureStorage.Values.Set("pin", pin);
             context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
-            if (SpinWait.SpinUntil(() => Sync != null && (Sync.IsLogged || Sync.LoginError), 60000))
-                return Sync.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
-            else if (context.LicenseExpired)
-                return LoginResult.LicenseExpired;
-            else if (Sync == null)
-                return LoginResult.RemoteHostNotReachable;
-            else if (Sync.RemoteHostReachable)
-                return LoginResult.CloudNotResponding;
-            return LoginResult.RemoteHostNotReachable;
+            try
+            {
+                OnSyncStart = new AutoResetEvent(false);
+                if (OnSyncStart.WaitOne(60000))
+                {
+                    Sync.OnLoginCompleted = new AutoResetEvent(false);
+                    if (Sync.OnLoginCompleted.WaitOne(60000))
+                        // if (SpinWait.SpinUntil(() => Sync != null && (Sync.IsLogged || Sync.LoginError), 60000))
+                        return Sync.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
+                    else if (context.LicenseExpired)
+                        return LoginResult.LicenseExpired;
+                    else if (Sync == null)
+                        return LoginResult.RemoteHostNotReachable;
+                    else if (Sync.RemoteHostReachable)
+                        return LoginResult.CloudNotResponding;
+                    return LoginResult.RemoteHostNotReachable;
+                }
+                return LoginResult.TimeoutError;
+            }
+            catch (Exception)
+            {
+                return LoginResult.ErrorOccurred;
+            }
         }
 
 #pragma warning disable CS1591
@@ -122,6 +137,8 @@ namespace CloudClient
             CloudNotResponding,
             WrongQR,
             RemoteHostNotReachable,
+            ErrorOccurred,
+            TimeoutError
         }
 #pragma warning restore CS1591
 
@@ -131,6 +148,7 @@ namespace CloudClient
         /// <returns>False if already logged out, true otherwise</returns>
         public bool Logout()
         {
+            QrCodeDetector.DisallowDetectQrCode = false;
             if (File.Exists(FileLastEntryPoint))
                 File.Delete(FileLastEntryPoint);
             StopSync();

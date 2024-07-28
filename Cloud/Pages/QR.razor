@@ -5,7 +5,7 @@
 <h1>Connect a device</h1>
 @{
     var loggedQr = Static.LoggedQr;
-    var qr = loggedQr ?? Static.QrDetected;
+    var qr = loggedQr ?? CloudClient.QrCodeDetector.QrDetected;
     if (qr != null)
     {
         if (qr == "")
@@ -41,7 +41,7 @@
     {
         StartDetect();
         <h3>Connect your device to the cloud to view the QR code here</h3>
-        if (Static.QrDetected == null)
+        if (CloudClient.QrCodeDetector.QrDetected == null)
         {
             <div class="alert alert-warning" role="alert">
                 Connect your computer to the same intranet as the Cloud to receive the QR code.
@@ -55,7 +55,7 @@
 @functions {
     void StartDetect()
     {
-        Static.DetectQrCode((qr) =>
+        CloudClient.QrCodeDetector.DetectQrCode((qr) =>
         {
             InvokeAsync(StateHasChanged);
         });

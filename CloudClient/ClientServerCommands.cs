@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using CloudSync;
+using SecureStorage;
 
 namespace CloudClient
 {
@@ -49,32 +51,56 @@ namespace CloudClient
                             else
                             {
                                 var password = parameters[1].ToHex();
-
-                                // password = "testpassword";
-
                                 var localIP = parameters[2];
                                 var publicIP = parameters[3];
+                                var myLocalIp = Util.GetLocalIpAddress().GetAddressBytes();
+                                string key = null;
+                                string keyHex = null;
+                                bool keyIsStored = false;
+                                if (parameters.Count > 4)
+                                {
+                                    key = Encoding.ASCII.GetString(parameters[4]);
+                                    keyHex = parameters[4].ToHex();
+                                    keyIsStored = Context.SecureStorage.Values.Get(keyHex, false);
+                                }
+                                connectedTo = default;
+
                                 if (ToExecute.Length > 1) // if is 1 byte, then is a error message
                                 {
                                     var programToExecute = Encoding.UTF8.GetString(ToExecute);
-                                    bool isLocal = false;
-                                    bool isLocalhost = false;
                                     try
                                     {
                                         if (new IPAddress(publicIP).ToString() == Util.GetPublicIpAddress()?.ToString())
                                         {
-                                            var myLocalIp = Util.GetLocalIpAddress().GetAddressBytes();
-                                            if (localIP[0] == myLocalIp[0] && localIP[1] == myLocalIp[1] && localIP[2] == myLocalIp[2] && localIP[3] == myLocalIp[3])
-                                                isLocal = true;
+                                            //if (!Debugger.IsAttached)
+                                            //    isLocal = true;
+                                            //else
+                                            //{
+                                            if (localIP[0] == myLocalIp[0] && localIP[1] == myLocalIp[1] && localIP[2] == myLocalIp[2])
+                                                connectedTo = Connection.localIP;
                                             else
-                                                isLocalhost = true;
+                                            {
+                                                var virtualMachine = false;
+                                                if (virtualMachine)
+                                                    connectedTo = Connection.localhost; // The cloud run in Virtual Machine in localhost (for testing in debug mode)
+                                                else
+                                                    connectedTo = Connection.router;
+                                            }
+                                            //}
                                         }
                                     }
                                     catch (Exception) { }
                                     try
                                     {
-                                        var connectTo = isLocalhost ? IPAddress.Loopback.GetAddressBytes() : isLocal ? localIP : publicIP;
-                                        var ipToConnect = new IPAddress(connectTo).ToString();
+                                        if (connectedTo == Connection.publicIP)
+                                            SshIP = publicIP;
+                                        else if (connectedTo == Connection.localIP)
+                                            SshIP = localIP;
+                                        else if (connectedTo == Connection.localhost)
+                                            SshIP = IPAddress.Loopback.GetAddressBytes();
+                                        else if (connectedTo == Connection.router)
+                                            SshIP = localIP;                                        
+                                        var ipToConnect = new IPAddress(SshIP).ToString();
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                         {
                                             var puttyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "extra");
@@ -84,28 +110,38 @@ namespace CloudClient
                                             var fileName = "plink.exe";
                                             var putty = Path.Combine(puttyPath, fileName);
                                             var xming = Path.Combine(puttyPath, "Xming.exe");
-                                            var run = Path.Combine(puttyPath, "run.txt");
-                                            File.WriteAllText(run, programToExecute);
+                                            // var run = Path.Combine(puttyPath, "run.txt");
+                                            // File.WriteAllText(run, programToExecute);
                                             if (File.Exists(putty) && File.Exists(xming))
                                             {
                                                 if (Process.GetProcessesByName("Xming").Length == 0)
                                                 {
                                                     Process.Start(xming, ":0 -clipboard -multiwindow -dpi 108");
                                                 }
-                                                var process = new Process();
-                                                process.StartInfo.EnvironmentVariables["PATH"] = puttyPath;
-                                                process.StartInfo.FileName = fileName;
-                                                process.StartInfo.Arguments = "-batch -ssh " + " -X -pw " + password + " " + Context.My.Id + "@" + ipToConnect + " \"" + programToExecute + "\"";
-                                                //process.StartInfo.Arguments = "-ssh " + Context.My.Id + "@" + ipToConnect + " -X -pw " + password + " -m " + "\"" + run + "\"";
-                                                //process.StartInfo.Arguments = "-ssh " + ipToConnect + " -X -pw " + password + " -l " + Context.My.Id.ToString() + " -m " + "\"" + run + "\"";
-                                                // #if RELEASE
-                                                //process.StartInfo.RedirectStandardOutput = true;
-                                                //process.StartInfo.RedirectStandardError = true;
-                                                process.StartInfo.UseShellExecute = false;
-                                                process.StartInfo.CreateNoWindow = true;
-                                                //process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                                                // #endif
-                                                process.Start();
+                                                SSHClientProcess = new Process();
+                                                SSHClientProcess.StartInfo.RedirectStandardInput = true;
+                                                SSHClientProcess.StartInfo.RedirectStandardOutput = true;
+                                                SSHClientProcess.StartInfo.EnvironmentVariables["PATH"] = puttyPath;
+                                                SSHClientProcess.StartInfo.FileName = fileName;
+                                                if (!keyIsStored)
+                                                    SSHClientProcess.StartInfo.Arguments = "-ssh " + " -X -pw " + password + " " + Context.My.Id + "@" + ipToConnect + " \"" + programToExecute + "\"";
+                                                else
+                                                    SSHClientProcess.StartInfo.Arguments = "-batch -ssh " + " -X -pw " + password + " " + Context.My.Id + "@" + ipToConnect + " \"" + programToExecute + "\"";
+
+                                                SSHClientProcess.StartInfo.UseShellExecute = false;
+#if RELEASE
+                                                SSHClientProcess.StartInfo.CreateNoWindow = true;
+#endif
+                                                SSHClientProcess.Start();
+                                                if (!keyIsStored)
+                                                {
+                                                    StreamWriter myStreamWriter = SSHClientProcess.StandardInput;
+                                                    myStreamWriter.WriteLine("y");
+                                                    myStreamWriter.WriteLine("");
+                                                    myStreamWriter.Close();
+                                                    Context?.SecureStorage?.Values.Set(keyHex, true);
+                                                }
+                                                //SSHClientProcess.BeginOutputReadLine();
                                             }
                                         }
 
@@ -141,6 +177,13 @@ namespace CloudClient
         public Action<Command, string> OnCommandFeedback { get; set; }
 
         // ============== StartProgram ===========================
+        private Process SSHClientProcess;
+        byte[] SshIP;
+        enum Connection { publicIP, localIP, router, localhost }
+        Connection connectedTo;
+        //bool isLocal = false;
+        //bool isLocalhost = false;
+
 
         /// <summary>
         /// Requires SSH access to the cloud to run a specific program locally
@@ -150,12 +193,28 @@ namespace CloudClient
         {
             lock (Feedbacks)
             {
+                connectedTo = default;
+                //isLocal = default;
+                //isLocalhost = default;
+                SSHClientProcess = default;
                 Feedbacks.Remove(Command.GetSSHAccess);
                 if (SendCommand(ServerCloud, Command.GetSSHAccess, new[] { Encoding.UTF8.GetBytes(programToExecute) }))
                 {
                     GetSSHAccessSemaphore = new AutoResetEvent(false);
-                    if (!GetSSHAccessSemaphore.WaitOne(10000))
+                    if (!GetSSHAccessSemaphore.WaitOne(20000))
                         throw new Exception("Timeout error: The cloud is probably unreachable!");
+                    else if (SSHClientProcess != null)
+                    {
+                        if (!SSHClientProcess.HasExited)
+                            SSHClientProcess.WaitForExit(10000);
+                        if (SSHClientProcess.HasExited)
+                        {
+                            if (connectedTo == Connection.publicIP)
+                                throw new Exception("The cloud is not reachable at IP address " + new IPAddress(SshIP).ToString() + ", if it is connected to a router try redirecting port 22");
+                            else
+                                throw new Exception("The cloud is not reachable in the local network at IP address: " + new IPAddress(SshIP).ToString());
+                        }
+                    }
                 }
                 else
                     throw new Exception("The client is not connected to the cloud!");
@@ -168,27 +227,30 @@ namespace CloudClient
 
         // ============== GetSupportedApps ===========================
 
-        private bool GetSupportedApps() => SendCommand(ServerCloud, Command.GetSupportedApps, null);
+        // private bool GetSupportedApps() => SendCommand(ServerCloud, Command.GetSupportedApps, null);
 
         private AutoResetEvent GetSupportedAppsSemaphore;
         private string[] _SupportedApps;
-        public string[] SupportedApps
+        private bool GetSupportedAppsRunning;
+        public string[] GetSupportedApps(out bool timeout)
         {
-            get
+            timeout = false;
+            if (_SupportedApps != null)
+                return _SupportedApps;
+            else
             {
-                if (_SupportedApps != null)
-                    return _SupportedApps;
-                else
+                if (!GetSupportedAppsRunning)
                 {
-
-                    if (GetSupportedApps())
+                    GetSupportedAppsRunning = true;
+                    if (SendCommand(ServerCloud, Command.GetSupportedApps, null))
                     {
                         GetSupportedAppsSemaphore = new AutoResetEvent(false);
-                        GetSupportedAppsSemaphore.WaitOne(10000);
+                        timeout = GetSupportedAppsSemaphore.WaitOne(10000);
                     }
+                    GetSupportedAppsRunning = false;
                 }
-                return _SupportedApps;
             }
+            return _SupportedApps;
         }
 
     }
