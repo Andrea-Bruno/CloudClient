@@ -2,7 +2,7 @@ using Cloud;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-
+using CommunicationChannel;
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 
 var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;

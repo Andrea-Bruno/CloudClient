@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using CloudSync;
 using SecureStorage;
-
+using CommunicationChannel;
 namespace CloudClient
 {
     /// <summary>

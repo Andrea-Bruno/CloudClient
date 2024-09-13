@@ -69,7 +69,7 @@
         {
             var data = new byte[e.File.Size];
             await fr.ReadAsync(data, 0, (int)e.File.Size);
-            var json = data.ToASCII();
+            var json = CommunicationChannel.Bytes.ToASCII(data);
             Sign = CloudBox.DigitalSignature.Load(json);
             IsValid = Sign.Validate(file);
             var SignatureFileName = e.File.Name;
