@@ -1,26 +1,13 @@
 ﻿#!/bin/bash
 
-# Determine the operating system
-OS=$(uname)
-
-# Set the installation path based on the operating system
-if [ "$OS" == "Linux" ]; then
-  INSTALL_PATH="/usr/share/cloud"
-elif [ "$OS" == "Darwin" ]; then
-  INSTALL_PATH="/usr/local/share/cloud"
-else
-  echo "Unsupported operating system"
-  exit 1
-fi
-
-# Create the installation directory and copy files
-if [ "$PWD" != "$INSTALL_PATH" ]; then
-  sudo mkdir -p "$INSTALL_PATH"
-  sudo chmod 777 "$INSTALL_PATH"
-  cp -R . "$INSTALL_PATH"
-  sudo chmod 777 "$INSTALL_PATH/install.sh"
-  cd "$INSTALL_PATH"
-  ./install.sh
+# copy files to working directory
+if [ "$PWD" != /usr/share/cloud ]; then
+  sudo mkdir /usr/share/cloud
+  sudo chmod 777 /usr/share/cloud
+  cp -R . /usr/share/cloud
+  sudo chmod 777 /usr/share/cloud/install.sh
+  cd /usr/share/cloud
+  ./install-linux.sh
   exit
 fi
 

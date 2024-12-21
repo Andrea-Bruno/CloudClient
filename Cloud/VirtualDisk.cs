@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using CloudSync;
@@ -27,22 +28,52 @@ namespace Cloud
             }
         }
 
+        /// <summary>
+        /// Get or generate a virtual disk password
+        /// </summary>
+        /// <returns></returns>
+        public static string? VirtualDiskPassword()
+        {
+            string? vdPassword = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                vdPassword = Static.Storage.Values.Get(nameof(vdPassword), null);
+                if (vdPassword == null)
+                {
+                    vdPassword = Guid.NewGuid().ToByteArray().ToHex();
+                    Static.Storage.Values.Set(nameof(vdPassword), vdPassword);
+                }
+            }
+            return vdPassword;
+        }
+
+
         // public static bool MountVirtualDiskStatus { get { return Storage.Values.Get(nameof(MountVirtualDiskStatus), true); } set { Storage.Values.Set(nameof(MountVirtualDiskStatus), value); } }
 
         private static int MountRunning;
-        public static void MountVirtualDisk(string password, out string? error)
+
+        /// <summary>
+        /// Mount a password-locked disk
+        /// </summary>
+        /// <param name="password">Disk password</param>
+        /// <returns>Description of the error if it occurs, or nothing</returns>
+        public static string? MountVirtualDisk(string? password)
         {
             if (MountRunning == 0)
             {
                 MountRunning++;
-                if (password != null)
+                if (string.IsNullOrEmpty( password))
+                {
+                    MountRunning--;
+                    return "null password";
+                }
+                else
                 {
                     var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
                     if (BitConverter.ToUInt64(hash) != Storage.Values.Get("vhdpw", 0ul))
                     {
                         MountRunning--;
-                        error = "wrong password";
-                        return;
+                        return "wrong password";
                     }
                     hash = ParallelHash(hash);
                     if (!SystemExtra.Util.IsMounted(CloudPath, out bool _))
@@ -58,17 +89,15 @@ namespace Cloud
                             Thread.CurrentThread.Priority = ThreadPriority.Normal;
                         }
                         new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
-                        SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath);
+                        SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath, password);
                         Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
                         MountRunning--;
-                        error = null;
-                        return;
+                        return null;
                     }
                 }
                 MountRunning--;
             }
-            error = "Operation already in progress, please wait!";
-            return;
+            return "Operation already in progress, please wait!";
         }
 
         public static void UnmountVirtualDisk(string password, out string? error)
@@ -80,8 +109,24 @@ namespace Cloud
                 Storage.Values.Set("vhdpw", BitConverter.ToUInt64(hash));
                 hash = ParallelHash(hash);
                 SystemExtra.Util.UnmountVirtualDisk(VirtualDiskFullFileName);
-                Camouflage(VirtualDiskFullFileName, hash);
-                File.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    string vdPassword = Storage.Values.Get(nameof(vdPassword), null);
+                    if (vdPassword == null)
+                    {
+                        Debugger.Break();
+                    }
+                    string newPassword = hash.ToHex();
+                    // Comando per cambiare la password
+                    string command = $"hdiutil chpass {VirtualDiskFullFileName}";
+                    SystemExtra.Util.ExecuteSystemCommand(command, vdPassword + Environment.NewLine + newPassword + Environment.NewLine + newPassword);
+                    Static.Storage.Values.Set(nameof(vdPassword), newPassword);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Camouflage(VirtualDiskFullFileName, hash);
+                    File.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
+                }
                 new DirectoryInfo(CloudPath).Attributes |= FileAttributes.Hidden;
                 Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(CloudPath, out bool _));
                 MountRunning--;
@@ -93,7 +138,7 @@ namespace Cloud
         }
 
         /// <summary>
-        /// Anty brute force attac!
+        /// Anti brute force attach!
         /// </summary>
         /// <param name="data"></param>
         /// <param name="interactions"></param>
@@ -111,7 +156,7 @@ namespace Cloud
             var x = new Stopwatch();
             x.Start();
 
-            Parallel.For(0, threads, thread => hashes[thread] = RecursiceHash(seeds[thread], interactions));
+            Parallel.For(0, threads, thread => hashes[thread] = RecursiveHash(seeds[thread], interactions));
             var result = new byte[hashes[0].Length];
             for (int i = 0; i < threads; i++)
             {
@@ -121,7 +166,7 @@ namespace Cloud
             return result;
         }
 
-        private static byte[] RecursiceHash(byte[] data, int interactions)
+        private static byte[] RecursiveHash(byte[] data, int interactions)
         {
             var sha256 = SHA256.Create();
             byte[] hash = data;

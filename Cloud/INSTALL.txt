@@ -1,8 +1,12 @@
 ﻿Installation is very simple!
 
-========= LINUX:
+========= OSX:
 
 From terminal run the command ./install.sh
+
+========= LINUX:
+
+From terminal run the command ./install-linux.sh
 
 ========= WINDOWS:
 

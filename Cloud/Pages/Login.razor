@@ -73,7 +73,7 @@ else if (!HideForm)
     else if (LoginResult == CloudClient.Client.LoginResult.WrongPassword)
         alert = "Wrong pin!";
     else if (LoginResult == CloudClient.Client.LoginResult.RemoteHostNotReachable)
-        alert = "The cloud is unreachable: Check the internet connection of the cloud and your computer";
+        alert = "The cloud is unreachable: Is the cloud active and connected to a stable internet line?";
     else if (LoginResult == CloudClient.Client.LoginResult.LicenseExpired)
         alert = "Connection refused: Check if the license has expired!";
     if (alert != null)

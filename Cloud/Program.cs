@@ -1,9 +1,17 @@
-using Cloud;
+﻿using Cloud;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using CommunicationChannel;
+
+
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
+
+if (!SystemExtra.Util.IsAdmin())
+{
+    // From MacOS run VS by the follow command line:
+    // sudo /Applications/Visual\ Studio.app/Contents/MacOS/VisualStudio
+    throw new Exception("The application requires administrator role to work!");
+}
 
 var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;
 var currentProcessId = Process.GetCurrentProcess()?.Id;
@@ -25,7 +33,6 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         }
     });
 }
-
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 var builder = WebApplication.CreateBuilder(args);
@@ -51,27 +58,30 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
 Static.Port = int.Parse((string)configuration.GetValue(typeof(string), "Port", null)); // Used for release
-var address = "http://localhost:" + Static.Port;
-app.Urls.Add(address);
-Static.Storage = new SecureStorage.Storage(address);
+Static.UIAddress = "http://localhost:" + Static.Port;
+app.Urls.Add(Static.UIAddress);
+Static.Storage = new SecureStorage.Storage(Static.UIAddress);
 
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+var VirtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
+if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
 {
     var cloudPath = new DirectoryInfo(Static.CloudPath);
     if (!cloudPath.Exists || cloudPath.LinkTarget != null)
     {
-        var virtualDiskRepository = Path.Combine(new string[] { Environment.SystemDirectory, "$Sys" });
+        var virtualDiskRepository = Path.Combine(new string[] { RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/Volumes" : Environment.SystemDirectory, ".$Sys" });
         var hash = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
-        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hash + ".vhdx");
+        var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : ".sparsebundle";
+        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hash + extension);
+        string? vdPassword = Static.VirtualDiskPassword();
         if (!Directory.Exists(virtualDiskRepository) || !File.Exists(Static.VirtualDiskFullFileName) && !File.Exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
         {
-            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, true);
+            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, true);
         }
         else
         {
             if (!Static.VirtualDiskIsMounted)
             {
-                SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath);
+                SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword);
             }
         }
     }
@@ -83,7 +93,7 @@ if (SystemExtra.Util.GetAutoStart() == false)
 if (Static.EntryPoint != null && Static.EntryPoint.Contains("test")) { Console.WriteLine("WARNING: Test entry point in use: Change entry point in application settings before deployment!"); };
 #endif
 
-var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
+string? lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
 if (lastEntryPoint != null)
 {
     Static.CreateClient(lastEntryPoint);
@@ -93,69 +103,77 @@ BackupManager.Initialize(Static.CloudPath);
 
 Func<bool> PortIsAvailable = () =>
 {
-    IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-    TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
-    foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+    try
     {
-        if (tcpi.LocalEndPoint.Port == Static.Port)
-        {
-            Thread.Sleep(1000);
-            return false;
-        }
+        using TcpClient client = new TcpClient("localhost", Static.Port);
+        Thread.Sleep(500);
+        return false;
     }
-    return true;
+    catch (SocketException)
+    {
+        return true;
+    }
 };
 
-Func<bool> NotPortIsAvailable = () => !PortIsAvailable();
-
-if (lastEntryPoint == null || Debugger.IsAttached)
-{
-    // Open the browser
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-    Task.Run(() =>
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + address);
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            if (!SpinWait.SpinUntil(NotPortIsAvailable, TimeSpan.FromSeconds(180)))
-            {
-                Debugger.Break();
-                throw new Exception("The web interface is not working!");
-            }
-            SystemExtra.Util.ExecuteCommand("open", address);
-        }
-    });
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-
-
-    if (Directory.Exists(CloudSync.Util.DesktopPath()))
-    {
-        File.WriteAllText(Path.Combine(CloudSync.Util.DesktopPath(), "Cloud Settings " + Static.Port + ".htm"), @"<HEAD><META http-equiv=""refresh"" content=""1;" + address + @"""></HEAD>");
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
-
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
-
 
 
 if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(180)))
 {
     Debugger.Break();
-    throw new Exception("The port" + Static.Port + "is busy!");
+    throw new Exception("The port " + Static.Port + " is busy!");
+}
+else
+{
+    if (lastEntryPoint == null || Debugger.IsAttached)
+    {
+        // Open the browser
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        Task.Run(() =>
+        {
+            if (!SpinWait.SpinUntil(() => !PortIsAvailable(), TimeSpan.FromSeconds(180)))
+            {
+                Debugger.Break();
+                throw new Exception("Web interface not found on port " + Static.Port);
+            }
+            else
+            {
+                Static.OpenUI.Invoke();
+            }
+        });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+
+        if (Directory.Exists(CloudSync.Util.DesktopPath()))
+        {
+            try
+            {
+                var html = File.ReadAllText("redirect.html").Replace("{address}", Static.UIAddress);
+                File.WriteAllText(Path.Combine(CloudSync.Util.DesktopPath(), "Cloud Settings " + Static.Port + ".htm"), html);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+    }
 }
 
-app.Run();
+
+new Thread(() =>
+{
+    app.Run();
+}).Start();
+
+if (Static.Client == null)
+    Static.SemaphoreCreateClient.WaitOne();
+Static.Client?.EnableOSFeatures(Static.OpenUI);
+

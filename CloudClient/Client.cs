@@ -1,9 +1,7 @@
-﻿using CloudBox;
-using CloudSync;
+﻿using CloudSync;
 using EncryptedMessaging;
 using NBitcoin;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,7 +18,9 @@ namespace CloudClient
             QrCodeDetector.DisallowDetectQrCode = true;
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
             OnCommandEvent = OnServerCommand;
+            OnLocalSyncStatusChangesActionList.Add(OnLocalSyncStatusChanges);
 
+            // EnableOSFeatures(null);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Extra")))
             {
                 string zipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Extra.zip");
@@ -28,34 +28,62 @@ namespace CloudClient
                     System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, AppDomain.CurrentDomain.BaseDirectory);
             }
         }
+
+
+
+        public void EnableOSFeatures(Action openUI)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                MacOSSupport.SetOSXStatusIcon(CloudPath, openUI);
+            }
+        }
+
+        private void OnLocalSyncStatusChanges(Sync.SyncStatus syncStatus, int pendingFiles)
+        {
+            IconStatus currentStatus;
+            if (syncStatus == Sync.SyncStatus.Undefined)
+                currentStatus = IconStatus.Default;
+            else if (syncStatus == Sync.SyncStatus.Pending)
+                currentStatus = IconStatus.Synchronize;
+            else if (syncStatus == Sync.SyncStatus.Monitoring)
+                currentStatus = IconStatus.Synchronized;
+            else
+                currentStatus = IconStatus.Warning;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                MacOSSupport.UpdateStatusIcon(currentStatus);
+            };
+        }
+        internal enum IconStatus
+        {
+            Default,
+            Synchronize,
+            Synchronized,
+            Warning
+        }
+
         /// <summary>
         /// Connect to server and start sync
         /// </summary>
         /// <param name="serverPublicKey">It is the server to which this client must connect (the public key of the server)</param>
-        /// <param name="pin">If the client is running, this is the Pin on the server that is required to log in and then connect the client to the server</param>       
         /// <returns>Successful</returns>        
-        public void ConnectToServer(string serverPublicKey = null, string pin = null)
+        public void ConnectToServer(string serverPublicKey = null)
         {
-            if (!IsServer)
+            if (EncryptedQR != null)
             {
-                if (EncryptedQR != null)
-                {
-                    // If the login was partially done with an encrypted QR code, once the connection with the router has been established, it asks the cloud for the QR code in order to log in definitively
-                    SendCommand(EncryptedQR.Item1, Command.GetEncryptedQR, null);
-                    return;
-                }
-                if (pin == null)
-                    pin = Context.SecureStorage.Values.Get("pin", null);
-                if (!string.IsNullOrEmpty(pin))
-                    Context.SecureStorage.Values.Set("pin", pin);
-                if (serverPublicKey == null)
-                    serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
-                SetServerCloudContact(serverPublicKey);
+                // If the login was partially done with an encrypted QR code, once the connection with the router has been established, it asks the cloud for the QR code in order to log in definitively
+                SendCommand(EncryptedQR.Item1, Command.GetEncryptedQR, null);
+                return;
             }
-            var credential = IsServer ? null : new LoginCredential { Pin = pin, PublicKey = Context.My.GetPublicKeyBinary() };
+            serverPublicKey ??= ServerPublicKey; // serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
+            SetServerCloudContact(serverPublicKey);
+            LoginCredential credential = Pin == null ? null : new LoginCredential { Pin = Pin, PublicKey = Context.My.GetPublicKeyBinary() };
             StartSync(credential);
             return;
         }
+        private string ServerPublicKey { get { return Context.SecureStorage.Values.Get(nameof(ServerPublicKey), null); } set { Context.SecureStorage.Values.Set(nameof(ServerPublicKey), value); } }
+        private string Pin;
 
         /// <summary>
         /// Placeholder for a method that will be called when the connection changes  
@@ -86,8 +114,6 @@ namespace CloudClient
 
         private LoginResult TryLogin(string qrCode, string pin, string entryPoint = null)
         {
-            if (IsServer)
-                Debugger.Break(); // non sense for server                     
             Logout();
             if (string.IsNullOrEmpty(pin))
                 return LoginResult.WrongPassword;
@@ -98,16 +124,16 @@ namespace CloudClient
             // =================
             // NOTE: Login is performed when the context has established the connection with the router
             // =================
-            context.SecureStorage.Values.Set("pin", pin);
-            context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
+            Pin = pin; // context.SecureStorage.Values.Set("pin", pin);
+            ServerPublicKey = serverPublicKey; // context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
             try
             {
                 OnSyncStart = new AutoResetEvent(false);
                 if (OnSyncStart.WaitOne(60000))
                 {
+                    Pin = null;
                     Sync.OnLoginCompleted = new AutoResetEvent(false);
                     if (Sync.OnLoginCompleted.WaitOne(60000))
-                        // if (SpinWait.SpinUntil(() => Sync != null && (Sync.IsLogged || Sync.LoginError), 60000))
                         return Sync.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
                     else if (context.LicenseExpired)
                         return LoginResult.LicenseExpired;
@@ -117,10 +143,12 @@ namespace CloudClient
                         return LoginResult.CloudNotResponding;
                     return LoginResult.RemoteHostNotReachable;
                 }
+                Pin = null;
                 return LoginResult.TimeoutError;
             }
             catch (Exception)
             {
+                Pin = null;
                 return LoginResult.ErrorOccurred;
             }
         }
@@ -154,14 +182,20 @@ namespace CloudClient
             StopSync();
             if (Context != null)
             {
-                Context.SecureStorage.Values.Set("pin", null);
-                Context.SecureStorage.Values.Set("ServerPublicKey", null);
+                Pin = null; // Context.SecureStorage.Values.Set("pin", null);
+                ServerPublicKey = null; // Context.SecureStorage.Values.Set("ServerPublicKey", null);
                 Context.Dispose();
                 Context = null;
                 return true;
             }
             return false;
         }
+
+        /// <summary>
+        /// Returns true if the cloud is logged in to the server. The returned value is persistent, that is, if the client is logged in it will remain logged in even after a reboot, and this value will return true (after a reboot it is not necessary to log in again)
+        /// </summary>
+        /// <returns>True if the client is logged in to the server</returns>
+        public bool LoginStatus() => File.Exists(FileLastEntryPoint);
 
         private void SetServerCloudContact(string serverPublicKey)
         {
@@ -178,9 +212,9 @@ namespace CloudClient
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (serverPublicKey == null)
                 // ReSharper disable once HeuristicUnreachableCode
-                serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
+                serverPublicKey = ServerPublicKey; // serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
             else
-                Context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
+                ServerPublicKey = serverPublicKey; // Context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (serverPublicKey != null)
             {
@@ -188,5 +222,13 @@ namespace CloudClient
             }
 #pragma warning restore            
         }
+
+        /// <summary>
+        /// Execute when Garbage Collector remove it
+        /// </summary>
+        ~Client()
+        {
+        }
     }
+
 }

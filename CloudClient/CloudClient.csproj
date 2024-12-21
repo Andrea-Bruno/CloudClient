@@ -10,9 +10,28 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\" />
+    <None Remove="Resources\CloudIcon.png" />
+    <None Remove="Resources\CloudIconSynchronize.png" />
+    <None Remove="Resources\CloudIconSynchronized.png" />
+    <None Remove="Resources\CloudIconWarning.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Extra.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\CloudIconDefault.png" />
+    <EmbeddedResource Include="Resources\CloudIconSynchronize.png" />
+    <EmbeddedResource Include="Resources\CloudIconSynchronized.png" />
+    <EmbeddedResource Include="Resources\CloudIconWarning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoMac.NetStandard" Version="0.0.4" />
+  </ItemGroup>
 </Project>

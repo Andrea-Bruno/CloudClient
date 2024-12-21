@@ -91,14 +91,27 @@ else
             {
                 client.DownloadFile(url, fullname);
             }
-
+            string? command = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                command = "explorer";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                command = "open";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                command = "xdg-open";
+            }
+            if (command != null)
+            {
                 using Process fileopener = new Process();
-                fileopener.StartInfo.FileName = "explorer";
+                fileopener.StartInfo.FileName = command;
                 fileopener.StartInfo.Arguments = "\"" + fullname + "\"";
                 fileopener.Start();
-            }
+
+            }            
             DownloadRunning = false;
             return true;
         }
