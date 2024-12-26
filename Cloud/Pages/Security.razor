@@ -81,10 +81,10 @@ else
         if (cloudPath.Exists && cloudPath.LinkTarget != null)
             cloudPath.Delete();
 
-        string? vdPassword = Static.VirtualDiskPassword();
-        SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, true);
+        string? vdPassword = Static.VirtualDiskPassword;
+        SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, new FileInfo(Static.CloudPath).Name, true);
         Static.Client?.Sync?.ResetCacheHashFileTable();
-        Static.Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(Static.CloudPath, out bool _));
+        Static.Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(Static.CloudPath));
         attempts = 0;
     }
     void ButtonClick()
@@ -96,7 +96,7 @@ else
         {
             if (Blocked)
             {
-                string? error = Static.MountVirtualDisk(Password);
+                string? error = Static.UnlockVirtualDisk(Password);
                 if (error != null)
                 {
                     vp = "is-invalid";
@@ -116,7 +116,7 @@ else
             {
                 if (Password == null || Password.Length < chrs)
                     return;
-                Static.UnmountVirtualDisk(Password, out string? error);
+                Static.LockVirtualDisk(Password, out string? error);
                 if (error != null)
                 {
                     NotificationStyle = "alert-danger";

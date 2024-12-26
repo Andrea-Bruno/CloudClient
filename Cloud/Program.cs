@@ -5,14 +5,22 @@ using System.Runtime.InteropServices;
 
 
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
+Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
 if (!SystemExtra.Util.IsAdmin())
 {
-    // From MacOS run VS by the follow command line:
-    // sudo /Applications/Visual\ Studio.app/Contents/MacOS/VisualStudio
-    throw new Exception("The application requires administrator role to work!");
+#if DEBUG
+    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
+        // From MacOS run VS by the follow command line:
+        // sudo /Applications/Visual\ Studio.app/Contents/MacOS/VisualStudio
+        Debugger.Break();
+    }
+#endif
+    Console.WriteLine("The application requires the administrator role");
+    Environment.Exit(1);
+    return;
 }
-
 var currentFileInstance = Process.GetCurrentProcess()?.MainModule?.FileName;
 var currentProcessId = Process.GetCurrentProcess()?.Id;
 
@@ -34,7 +42,6 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     });
 }
 
-Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -56,6 +63,11 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 //Static.CloudPath = @"C:\Users\andre\OneDrive - Copy";
 #endif
 
+if (!new FileInfo(Static.CloudPath).Directory.Exists)
+{
+    throw new Exception("ERROR: Invalid cloud path!");
+}
+
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null); // Used for release
 Static.Port = int.Parse((string)configuration.GetValue(typeof(string), "Port", null)); // Used for release
 Static.UIAddress = "http://localhost:" + Static.Port;
@@ -65,17 +77,23 @@ Static.Storage = new SecureStorage.Storage(Static.UIAddress);
 var VirtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
 if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
 {
-    var cloudPath = new DirectoryInfo(Static.CloudPath);
-    if (!cloudPath.Exists || cloudPath.LinkTarget != null)
+    FileSystemInfo cloudPath = new DirectoryInfo(Static.CloudPath);
+    if (!cloudPath.Exists || cloudPath.LinkTarget != null || cloudPath.Attributes.HasFlag(FileAttributes.ReadOnly) || Static.VirtualDiskIsMounted) // Offline is for non windows OS
     {
         var virtualDiskRepository = Path.Combine(new string[] { RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/Volumes" : Environment.SystemDirectory, ".$Sys" });
-        var hash = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
+        // var virtualDiskRepository =  RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/Volumes" : Environment.SystemDirectory;
+        var hashPath = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
         var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : ".sparsebundle";
-        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hash + extension);
-        string? vdPassword = Static.VirtualDiskPassword();
-        if (!Directory.Exists(virtualDiskRepository) || !File.Exists(Static.VirtualDiskFullFileName) && !File.Exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
+        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hashPath + extension);
+        static bool exists(string fullName) => File.Exists(fullName) || Directory.Exists(fullName);
+        var VirtualDiskFileInfo = new FileInfo(Static.VirtualDiskFullFileName);
+        string? vdPassword = Static.VirtualDiskPassword;
+        if (!Directory.Exists(virtualDiskRepository) || !exists(Static.VirtualDiskFullFileName) && !exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
         {
-            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, true);
+            Directory.CreateDirectory(Static.CloudPath);
+            cloudPath.Refresh();
+            cloudPath.Attributes |= FileAttributes.Hidden | FileAttributes.ReadOnly;
+            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, cloudPath.Name, true);
         }
         else
         {
