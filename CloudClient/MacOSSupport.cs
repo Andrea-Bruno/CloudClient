@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using MonoMac.AppKit;
 using MonoMac.Foundation;
@@ -30,10 +31,14 @@ namespace CloudClient
                     var menu = new NSMenu();
                     if (openUI != null)
                         menu.AddItem(new NSMenuItem("Settings", (sender, e) => openUI.Invoke()));
-                    menu.AddItem(new NSMenuItem("Open folder", (sender, e) => NSWorkspace.SharedWorkspace.OpenFile(cloudPath)));
+                    menu.AddItem(new NSMenuItem("Open folder", (sender, e) =>
+                    {
+                        if (!System.IO.Directory.Exists(cloudPath) || System.IO.File.GetAttributes(cloudPath).HasFlag(System.IO.FileAttributes.ReadOnly))
+                            ShowPopup("Cloud", "Cloud area has been blocked!");
+                        else
+                            NSWorkspace.SharedWorkspace.OpenFile(cloudPath);
+                    }));
                     statusItem.Menu = menu;
-
-
 
                     try
                     {
@@ -44,20 +49,48 @@ namespace CloudClient
                     {
 
                     }
-
-                    // NSApplication.SharedApplication.InvokeOnMainThread(() => NSApplication.SharedApplication.Run());
-
                 });
-
-
-
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Errore: {ex.Message}");
             }
         }
+
+
+
+
+
+
+
+
+
+        static void ShowPopup(string title, string message)
+        {
+            // Crea un comando AppleScript per mostrare una finestra di dialogo
+            string appleScript = $"display dialog \"{message}\" with title \"{title}\" buttons {{\"OK\"}} default button \"OK\"";
+
+            // Esegui il comando AppleScript utilizzando `osascript`
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = "osascript",
+                Arguments = $"-e \"{appleScript}\"",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = Process.Start(processInfo))
+            {
+                process.WaitForExit();
+            }
+        }
+
+
+
+
+
+
 
 
         static public void UpdateStatusIcon(Client.IconStatus newStatus)

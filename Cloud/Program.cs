@@ -97,7 +97,7 @@ if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Runti
         }
         else
         {
-            if (!Static.VirtualDiskIsMounted)
+            if (!Static.VirtualDiskIsMounted && !Static.VirtualDiskIsLocked)
             {
                 SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword);
             }

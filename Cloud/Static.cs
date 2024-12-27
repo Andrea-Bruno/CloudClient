@@ -73,17 +73,6 @@ namespace Cloud
 
         public static ManualResetEvent SemaphoreCreateClient = new ManualResetEvent(false);
 
-        /// <summary>
-        /// Returns false if the path corresponds to an unmounted virtual disk, true in all other cases
-        /// </summary>
-        public static bool IsReachable()
-        {
-            var directoryInfo = new DirectoryInfo(CloudPath);
-            if (!directoryInfo.Exists)
-                return true;
-            var target = directoryInfo.ResolveLinkTarget(true);
-            return target == null ? directoryInfo.Exists : target.Exists;
-        }
 
         /// <summary>
         /// Create a new account and login to cloud server

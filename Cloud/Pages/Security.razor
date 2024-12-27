@@ -84,7 +84,7 @@ else
         string? vdPassword = Static.VirtualDiskPassword;
         SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, new FileInfo(Static.CloudPath).Name, true);
         Static.Client?.Sync?.ResetCacheHashFileTable();
-        Static.Client?.IsReachableDiskStateIsChanged(SystemExtra.Util.IsMounted(Static.CloudPath));
+        Static.Client?.SetSyncState(SystemExtra.Util.IsMounted(Static.CloudPath));
         attempts = 0;
     }
     void ButtonClick()

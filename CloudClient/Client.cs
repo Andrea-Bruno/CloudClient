@@ -13,8 +13,10 @@ namespace CloudClient
     /// </summary>
     public partial class Client : CloudBox.CloudBox
     {
-        public Client(string cloudPath = null, bool isReachable = true) : base(cloudPath, isReachable: isReachable)
+        public Client(string cloudPath = null, bool isReachable = true) : base(cloudPath, syncIsEnabled: isReachable)
         {
+            
+
             QrCodeDetector.DisallowDetectQrCode = true;
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
             OnCommandEvent = OnServerCommand;
@@ -28,7 +30,6 @@ namespace CloudClient
                     System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, AppDomain.CurrentDomain.BaseDirectory);
             }
         }
-
 
 
         public void EnableOSFeatures(Action openUI)
