@@ -7,13 +7,22 @@ using System.Runtime.InteropServices;
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
+var user = Environment.UserName;
+
 if (!SystemExtra.Util.IsAdmin())
 {
 #if DEBUG
-    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
     {
         // From MacOS run VS by the follow command line:
         // sudo /Applications/Visual\ Studio.app/Contents/MacOS/VisualStudio
+        Debugger.Break();
+    }
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        // From Linux in wsl edit the file /etc/wsl.conf: (nano /etc/wsl.conf) and add:
+        // [user]
+        // default = root
         Debugger.Break();
     }
 #endif
@@ -75,15 +84,21 @@ app.Urls.Add(Static.UIAddress);
 Static.Storage = new SecureStorage.Storage(Static.UIAddress);
 
 var VirtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
-if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
+if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux)))
 {
     FileSystemInfo cloudPath = new DirectoryInfo(Static.CloudPath);
     if (!cloudPath.Exists || cloudPath.LinkTarget != null || cloudPath.Attributes.HasFlag(FileAttributes.ReadOnly) || Static.VirtualDiskIsMounted) // Offline is for non windows OS
     {
-        var virtualDiskRepository = Path.Combine(new string[] { RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/Volumes" : Environment.SystemDirectory, ".$Sys" });
-        // var virtualDiskRepository =  RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "/Volumes" : Environment.SystemDirectory;
+        string virtualDiskRepository = "";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            virtualDiskRepository = "/Volumes";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            virtualDiskRepository = Environment.SystemDirectory;
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            virtualDiskRepository = "/var/lib";
+        virtualDiskRepository = Path.Combine([virtualDiskRepository, ".$Sys"]);
         var hashPath = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
-        var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : ".sparsebundle";
+        var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".sparsebundle" : "encrypted";
         Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hashPath + extension);
         static bool exists(string fullName) => File.Exists(fullName) || Directory.Exists(fullName);
         var VirtualDiskFileInfo = new FileInfo(Static.VirtualDiskFullFileName);
@@ -165,7 +180,7 @@ else
             }
             else
             {
-                Static.OpenUI.Invoke();
+                Static.OpenUI?.Invoke();
             }
         });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed

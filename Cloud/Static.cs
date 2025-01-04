@@ -19,11 +19,17 @@ namespace Cloud
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                OpenUI = () => SystemExtra.Util.ExecuteCommand("xdg-open", UIAddress);
+                string? desktopEnvironment = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP");
+                if (!string.IsNullOrEmpty(desktopEnvironment))
+                {
+                    OpenUI = () => SystemExtra.Util.ExecuteCommand("xdg-open", UIAddress);
+                }
             }
         }
-
-        public static Action OpenUI;
+        /// <summary>
+        /// Calling this function starts the application's graphical interface (basically the browser with the app's settings page)
+        /// </summary>
+        public readonly static Action? OpenUI;
 
         /// <summary>
         /// Router entry point

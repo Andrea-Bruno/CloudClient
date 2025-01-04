@@ -44,7 +44,7 @@ namespace Cloud
             get
             {
                 string? vdPassword = null;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     vdPassword = Storage.Values.Get(nameof(vdPassword), null);
                     if (vdPassword == null)
@@ -57,7 +57,7 @@ namespace Cloud
             }
             set
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     string? vdPassword = value;
 

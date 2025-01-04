@@ -3,7 +3,10 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../AntiGit" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ClientMobile/cloud-storage-main" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../CloudBox/CloudLibraries" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudClientMobile" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ProxyCloud" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../EncryptedMessaging" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../SecureStorage" vcs="Git" />
   </component>

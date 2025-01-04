@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>WinExe</OutputType>
@@ -17,7 +17,7 @@
 	</PropertyGroup>
 
   <PropertyGroup>
-    <BaseOutputPath>/tmp/OutputBin/</BaseOutputPath>
+<!--    <BaseOutputPath>/tmp/OutputBin/</BaseOutputPath>-->
   </PropertyGroup>
 
 
@@ -61,7 +61,7 @@
 		<None Update="install.sh">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="install-linux.sh">
+		<None Update="install.old.sh">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="INSTALL.txt">
