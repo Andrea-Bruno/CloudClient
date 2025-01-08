@@ -13,9 +13,11 @@ namespace CloudClient
     /// </summary>
     public partial class Client : CloudBox.CloudBox
     {
-        public Client(string cloudPath = null, bool isReachable = true) : base(cloudPath, syncIsEnabled: isReachable)
+        /// <param name="cloudPath">Directory position of the cloud (a null value will be considered the default path)</param>
+        /// <param name="syncIsEnabled"> False to suspend sync, or true. It is important to suspend synchronization if the path is not available (for example when using virtual disks)! Indicate true if the path to the cloud space is reachable (true), or unmounted virtual disk (false). Use IsReachableDiskStateIsChanged to notify that access to the cloud path has changed.</param>
+        public Client(string cloudPath = null, bool syncIsEnabled = true) : base(cloudPath, syncIsEnabled: syncIsEnabled)
         {
-            
+
 
             QrCodeDetector.DisallowDetectQrCode = true;
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
@@ -34,7 +36,11 @@ namespace CloudClient
 
         public void EnableOSFeatures(Action openUI)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                WindowsSupport.SetWindowsStatusIcon(CloudPath, openUI);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 MacOSSupport.SetOSXStatusIcon(CloudPath, openUI);
             }
@@ -51,7 +57,11 @@ namespace CloudClient
                 currentStatus = IconStatus.Synchronized;
             else
                 currentStatus = IconStatus.Warning;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                WindowsSupport.UpdateStatusIcon(currentStatus);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 MacOSSupport.UpdateStatusIcon(currentStatus);
             };

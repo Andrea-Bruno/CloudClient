@@ -7,22 +7,29 @@ namespace Cloud
 {
     static public partial class Static
     {
-        public static string? VirtualDiskFullFileName;
+        /// <summary>
+        /// If used, the virtual disk path that underlies the cloud path
+        /// </summary>
+        public static string? VirtualDiskFullFileName { get; set; }
 
         /// <summary>
         /// Returns false if the path corresponds to an unmounted virtual disk, true in all other cases
         /// </summary>
-        public static bool IsReachable()
+        public static bool CloudPathIsReachable()
         {
-            var directoryInfo = new DirectoryInfo(CloudPath);
-            if (!directoryInfo.Exists)
-                return true;
-            else if (directoryInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
-                return false;
-            var target = directoryInfo.ResolveLinkTarget(true);
-            return target == null ? directoryInfo.Exists : target.Exists;
+            return VirtualDiskFullFileName == null ? Directory.Exists(CloudPath) : VirtualDiskIsMounted;
+            //var directoryInfo = new DirectoryInfo(CloudPath);
+            //if (!directoryInfo.Exists)
+            //    return true;
+            //else if (directoryInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
+            //    return false;
+            //var target = directoryInfo.ResolveLinkTarget(true);
+            //return target == null ? directoryInfo.Exists : target.Exists;
         }
 
+        /// <summary>
+        /// Returns true if the virtual disk is mounted
+        /// </summary>
         public static bool VirtualDiskIsMounted
         {
             get
@@ -30,9 +37,13 @@ namespace Cloud
                 return SystemExtra.Util.IsMounted(CloudPath);
             }
         }
+
+        /// <summary>
+        /// True if the virtual disk has been locked with a password
+        /// </summary>
         public static bool VirtualDiskIsLocked
         {
-            get { return !System.IO.File.Exists(VirtualDiskFullFileName); }
+            get { return !File.Exists(VirtualDiskFullFileName); }
         }
 
         /// <summary>
@@ -108,7 +119,7 @@ namespace Cloud
                         var sysFile = Path.ChangeExtension(VirtualDiskFullFileName, ".sys");
 
                         string vdPassword = null;
-                        if (Directory.Exists(sysFile) || Directory.Exists(sysFile))
+                        if (Directory.Exists(sysFile) || File.Exists(sysFile))
                         {
                             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             {
@@ -118,7 +129,7 @@ namespace Cloud
                                     File.Delete(VirtualDiskFullFileName);
                                 Thread.CurrentThread.Priority = ThreadPriority.Normal;
                             }
-                            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                             {
                                 byte[] xorVDPass;
                                 xorVDPass = Storage.Values.Get(nameof(xorVDPass), null).HexToBytes();
@@ -158,6 +169,11 @@ namespace Cloud
             return "Operation already in progress, please wait!";
         }
 
+        /// <summary>
+        /// Unmount the virtual disk and assign a password for mounting
+        /// </summary>
+        /// <param name="password">Password assigned</param>
+        /// <param name="error">Out error if any</param>
         public static void LockVirtualDisk(string password, out string? error)
         {
             if (LockVirtualDiskRunning == 0)
@@ -167,9 +183,9 @@ namespace Cloud
                 Storage.Values.Set("vhdpw", BitConverter.ToUInt64(hash));
                 hash = ParallelHash(hash);
                 Client?.SetSyncState(false);
-                if (SystemExtra.Util.UnmountVirtualDisk(CloudPath))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SystemExtra.Util.UnmountVirtualDiskWindow(VirtualDiskFullFileName) : SystemExtra.Util.UnmountVirtualDisk(CloudPath))
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
                         string vdPassword;
                         vdPassword = Storage.Values.Get(nameof(vdPassword), null);

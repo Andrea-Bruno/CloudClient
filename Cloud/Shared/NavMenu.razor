@@ -27,7 +27,7 @@
             </NavLink>
         </div>
 
-        @if (CanExplorer())
+        @if (Static.CloudPathIsReachable())
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" @onclick="OpenPath">
@@ -37,8 +37,8 @@
         }
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="search">
-                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search
+            <NavLink class="nav-link" href="library">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Library
             </NavLink>
         </div>
 
@@ -122,14 +122,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private bool CanExplorer()
-    {
-        return Directory.Exists(Static.CloudPath) && Static.IsReachable();
-    }
-
     private void OpenPath()
     {
-        if (CanExplorer())
+        if (Static.CloudPathIsReachable())
         {
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {

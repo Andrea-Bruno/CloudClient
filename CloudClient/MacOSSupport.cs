@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 using MonoMac.AppKit;
 using MonoMac.Foundation;
 namespace CloudClient
@@ -8,14 +8,14 @@ namespace CloudClient
     class MacOSSupport
     {
         private static NSStatusItem statusItem;
-        static public void SetOSXStatusIcon(string cloudPath, Action openUI)
+        static internal void SetOSXStatusIcon(string cloudPath, Action openUI)
         {
             try
             {
+
                 if (statusItem != null)
                     return;
                 NSApplication.Init();
-
                 NSApplication.SharedApplication.InvokeOnMainThread(() =>
                 {
 
@@ -50,20 +50,13 @@ namespace CloudClient
 
                     }
                 });
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Errore: {ex.Message}");
             }
         }
-
-
-
-
-
-
-
-
 
         static void ShowPopup(string title, string message)
         {
@@ -85,13 +78,6 @@ namespace CloudClient
                 process.WaitForExit();
             }
         }
-
-
-
-
-
-
-
 
         static public void UpdateStatusIcon(Client.IconStatus newStatus)
         {

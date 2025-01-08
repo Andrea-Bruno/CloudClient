@@ -32,11 +32,16 @@ The software needs to run in administrator mode for the following reasons:
 * Create hard links for backups (this saves a lot of space during backups).
 
 # Installation
-
+If you want to customize the cloud folder path, enable or disable virtual disk and other settings, you need to edit the **appsettings.json** file and read the notes inside for more clarifications. The default configuration is fine for most users.
+If you are a Linux and MacOS user, you can simply run install.sh to install the application:
+```sh
+chmod +x install.sh
+./install.sh
+```
 If you use Windows we recommend unpacking the files in the "C:\Program Files\Cloud" folder. Launch the executable (Cloud.exe) to start the cloud and complete the installation (at the first start you may be asked to install runtime components, these are open source components that are required, if you do not want these components you need to compile the application without these dependencies)
 It is possible to connect your PC with multiple clouds, in which case it is necessary to reinstall the application in a different path, modifying the appsettings.json file, so that the port for the web interface is different from those already used, and also setting a CloudPath that is different from the paths already used for other cloud client instances. These rules to follow also apply to those who use Mac and Linux.
 
-NOTE: Administrator privileges are required to allow the application to synchronize the system clock, give full access to the files, and to allow the application to create hard links for backup functions. It is important to work with the synchronized clock, so that you have the correct date and time on the files and allow the cloud to accurately recognize new versions of the files.
+NOTE: Administrator/root privileges are required to allow the application to synchronize the system clock, give full access to the files, and to allow the application to create hard links for backup functions. It is important to work with the synchronized clock, so that you have the correct date and time on the files and allow the cloud to accurately recognize new versions of the files.
 
 # Privacy Policy
 

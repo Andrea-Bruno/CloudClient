@@ -18,7 +18,7 @@
     <input type="text" @onchange="@OnTargetChange" disabled=@DisabledTarget() BackupManager.Target value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
 </div>
 
-@if (!Static.IsReachable())
+@if (!Static.CloudPathIsReachable())
 {
     <div class="alert alert-warning my-3" role="alert">
         It is not possible to use the backup functions with the cloud area locked by the password!
@@ -64,7 +64,7 @@ else if (BackupManager.LastDailyBackupResult != null)
     {
         if (!string.IsNullOrEmpty(BackupManager.Target))
             return false;
-        return !Static.IsReachable();
+        return !Static.CloudPathIsReachable();
     }
     static bool DisabledButton()
     {

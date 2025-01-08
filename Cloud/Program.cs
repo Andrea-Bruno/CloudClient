@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
@@ -84,9 +83,9 @@ app.Urls.Add(Static.UIAddress);
 Static.Storage = new SecureStorage.Storage(Static.UIAddress);
 
 var VirtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
+var cloudPath = new DirectoryInfo(Static.CloudPath);
 if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux)))
 {
-    FileSystemInfo cloudPath = new DirectoryInfo(Static.CloudPath);
     if (!cloudPath.Exists || cloudPath.LinkTarget != null || cloudPath.Attributes.HasFlag(FileAttributes.ReadOnly) || Static.VirtualDiskIsMounted) // Offline is for non windows OS
     {
         string virtualDiskRepository = "";
@@ -105,7 +104,7 @@ if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Runti
         string? vdPassword = Static.VirtualDiskPassword;
         if (!Directory.Exists(virtualDiskRepository) || !exists(Static.VirtualDiskFullFileName) && !exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
         {
-            Directory.CreateDirectory(Static.CloudPath);
+            cloudPath.Create();
             cloudPath.Refresh();
             cloudPath.Attributes |= FileAttributes.Hidden | FileAttributes.ReadOnly;
             SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, cloudPath.Name, true);
@@ -117,6 +116,15 @@ if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Runti
                 SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword);
             }
         }
+    }
+}
+else
+{
+    cloudPath.Create();
+    cloudPath.Refresh();
+    if (!cloudPath.Exists)
+    {
+        throw new Exception("Invalid cloud path: '" + cloudPath.FullName + "'");
     }
 }
 

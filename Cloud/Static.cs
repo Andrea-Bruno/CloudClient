@@ -62,14 +62,22 @@ namespace Cloud
             }
         }
 
+        /// <summary>
+        /// Returns true if queried when is a suitable time to perform an update
+        /// </summary>
+        /// <returns></returns>
         public static bool CanUpdate()
         {
             return Client != null && Client.CanRestart() && !BackupManager.BackupIsRunning;
         }
 
+        /// <summary>
+        /// Create the client instance 
+        /// </summary>
+        /// <param name="connectToEntryPoint"></param>
         public static void CreateClient(string? connectToEntryPoint = null)
         {
-            Client = new CloudClient.Client(CloudPath, IsReachable());
+            Client = new CloudClient.Client(CloudPath, CloudPathIsReachable());
             if (connectToEntryPoint != null)
             {
                 Client.CreateContext(connectToEntryPoint);

@@ -1,125 +1,235 @@
 ﻿@page "/library"
 @using System.Text;
-@using System.Text.Json;
-@using System.Text.Json.Serialization;
-@using Newtonsoft.Json;
+@using System.Xml;
+@using Microsoft.AspNetCore.Html;
+@using System.Net;
+@using System.Diagnostics;
+@using System.Runtime.InteropServices;
 
 <PageTitle>Library</PageTitle>
 
+<style>
+    .pointer {
+        cursor: pointer;
+    }
+
+</style>
 
 <h1>The largest library in the world!</h1>
 
 
+<div class="input-group mb-3">
+@*     <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">
+            Search
+        </span>
+    </div> *@
+    <input type="search" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Search" autofocus @bind=Query @onkeyup=Enter>
+    <input type="submit" class="btn btn-primary m-2" @onclick=StartSearch />
+</div>
 
-<div class="main-search-input-wrap">
+@* <div class="input-group">
+    <input type="search" class="form-control" autofocus @bind=Query @onkeydown=Enter />
+    <button type="button" class="m-2 btn btn-primary" @onclick=StartSearch>
+        <i class="oi oi-magnifying-glass"></i>
+    </button>
+</div> *@
 
-
-    <div class="main-search-input fl-wrap">
-        <div class="main-search-input-item">
-            <input type="text" value="" placeholder="Search Products...">
+@if (SearchResult != null)
+{
+    if (SearchResult.Count == 0)
+    {
+        <div class="alert alert-info" role="alert">
+            The search did not return any results!
         </div>
+    }
 
-        <button class="main-search-button">Search</button>
-    </div>
-
-
-</div>
-
-<div class="input-group">
-    <div class="form-outline">
-        <input type="search" id="form1" class="form-control" />
-        <label class="form-label" for="form1">Search</label>
-    </div>
-    <button type="button" class="btn btn-primary">
-        <i class="fas fa-search"></i>
-    </button>
-</div>
-
-
-<div class="input-group">
-    <div class="form-outline">
-        <input type="search" id="form1" class="form-control" @bind=Query />
-        <label class="form-label" for="form1">Search</label>
-    </div>
-    <button type="button" class="btn btn-primary" @onclick=Search>
-        <i class="fas fa-search"></i>
-    </button>
-</div>
-
-
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Operation</th>
-            <th>Name</th>
-            <th>Hash</th>
-            <th>Part</th>
-            <th>Length</th>
-            <th>Completed</th>
-        </tr>
-    </thead>
-    <tbody>
-        @*         foreach (var file in CloudClient.TransferredFiles.OrderBy(x => x?.Completed))
-        {
-        <tr>
-        <td>@(file.TransferLaberl)</td>
-        <td>@file.Name</td>
-        <td>@file.Hash</td>
-        <td>@(file.Part + "/" + file.Total + "#") </td>
-        <td>@file.Length</td>
-        <td>@file.Completed</td>
-        </tr>
-        } *@
-    </tbody>
-</table>
+    foreach (var item in SearchResult)
+    {
+        <div class="pointer mt-3" onclick="@(()=> { Download( item.Url, item.Filetype); })">
+            <p><span class="oi oi-document" aria-hidden="true"></span> <u class="text-primary lead">@item.Title</u></p>
+            <p>
+                @item.Preview
+            </p>
+        </div>
+    }
+}
+else
+{
+    if (ServiceCurrentlyUnavailable)
+    {
+        <div class="alert alert-warning" role="alert">
+            Service currently unavailable!
+        </div>
+    }
+}
 
 @functions {
+
+
+    bool Download(string url, string filetype)
+    {
+        if (DownloadRunning)
+            return true;
+        DownloadRunning = true;
+        try
+        {
+            DirectoryInfo download = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "downloads"));
+            download.Create();
+            string fullname;
+            int n = 0;
+            do
+            {
+                string filename = (n == 0 ? "" : n) + Path.GetFileName(new Uri(url).AbsolutePath);
+                if (!filename.ToLower().EndsWith("." + filetype.ToLower()))
+                    filename += "." + filetype.ToLower();
+                n++;
+                fullname = Path.Combine(download.FullName, filename);
+            }
+            while (File.Exists(fullname));
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(url, fullname);
+            }
+            string? command = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                command = "explorer";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                command = "open";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                command = "xdg-open";
+            }
+            if (command != null)
+            {
+                using Process fileopener = new Process();
+                fileopener.StartInfo.FileName = command;
+                fileopener.StartInfo.Arguments = "\"" + fullname + "\"";
+                fileopener.Start();
+
+            }            
+            DownloadRunning = false;
+            return true;
+        }
+        catch (Exception)
+        {
+        }
+        DownloadRunning = false;
+        return false;
+    }
+
     void Refresh()
     {
         InvokeAsync(StateHasChanged);
     }
 
-    public async void Search()
+    public void Enter( KeyboardEventArgs e)
     {
-        var url = @"http://api.duckduckgo.com/?format=json&q=" + System.Web.HttpUtility.UrlEncode(Query);
-        await PostCallAPI(url);
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            StartSearch();
+        }
     }
 
-    public static async Task<object?> PostCallAPI(string url)
+    public void StartSearch()
+    {
+        if (!SearchRunning && Query != null)
+        {
+            SearchRunning = true;
+            SearchResult = null;
+            var types = new string[] { "doc", "pdf" };
+            Parallel.ForEach(types, type =>
+            {
+                var result = SearchFiletype(type, Query);
+                if (result != null)
+                {
+                    if (SearchResult != null)
+                    {
+                        result.AddRange(SearchResult);
+                    }
+                    SearchResult = result;
+                }
+
+            });
+            ServiceCurrentlyUnavailable = SearchResult == null;
+            Refresh();
+            SearchRunning = false;
+        }
+    }
+
+    public List<link>? SearchFiletype(string filetype, string query)
+    {
+        // var kl = System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        // kl = kl + "-" + kl;
+        var url = @"https://html.duckduckgo.com/html/?q=" + System.Web.HttpUtility.UrlEncode(query) + "+filetype:" + filetype; // + "&kl=" + kl;
+        return PostCallAPI(url, filetype);
+    }
+
+
+    public static List<link>? PostCallAPI(string? url, string filetype)
     {
         try
         {
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            using (HttpClient client = new HttpClient())
             {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                dynamic json = JsonConvert.DeserializeObject(responseBody);
-                // JObject json = JObject.Parse(str);
-                return json;
+                client.DefaultRequestHeaders.Add("User-Agent", @"Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+                string responseBody = client.GetStringAsync(url).Result;
+                var html = responseBody.Substring(responseBody.IndexOf(@"<!-- Web results are present -->"));
+                html = html.Substring(0, html.IndexOf(@"<!-- links wrapper //-->"));
+                html += @"</div>";
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(html);
+                var links = xmlDoc.ChildNodes[1].ChildNodes[0].ChildNodes[0].ChildNodes;
+                var result = new List<link>();
+                for (int i = 0; i < links.Count; i++)
+                {
+                    XmlNode item = links[i];
+                    XmlNode a = null;
+                    try
+                    {
+                        a = item?.ChildNodes[0]?.ChildNodes[1]?.ChildNodes[0];
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    if (a != null)
+                    {
+                        var link = new link();
+                        link.Title = a.InnerText;
+                        link.Url = a.Attributes["href"].Value;
+                        link.Preview = item.ChildNodes[0].ChildNodes[3].InnerText;
+                        link.Filetype = filetype;
+                        result.Add(link);
+                    }
+                }
+                return result;
             }
+
+
         }
         catch (Exception ex)
         {
-
         }
         return null;
     }
 
 }
 @code {
-    public object? SearchResult;
-    public string? Query;
-    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
-    protected override async Task OnInitializedAsync()
+    public class link
     {
-        if (CloudClient != null)
-        {
-            CloudClient.TransferredFiles.OnUpdated = (int idx) => { Refresh(); }; // Action that works like an event that is triggered when the list needs to be updated
-            CloudClient.OnCommands.PreservedElement = 6;
-            CloudClient.OnCommands.OnCommandEvent = (ulong? userId, CloudSync.Sync.Commands command, string? infoData, bool isOutput) => { Refresh(); };
-        }
+        public string Title;
+        public string Preview;
+        public string Url;
+        public string Filetype;
     }
+    private bool SearchRunning;
+    private bool DownloadRunning;
+    public bool ServiceCurrentlyUnavailable = false;
+    public List<link>? SearchResult;
+    public string? Query { get; set; }
+
 }
