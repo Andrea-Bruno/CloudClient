@@ -8,6 +8,7 @@
     <mapping directory="$PROJECT_DIR$/../CloudClientMobile" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../ProxyCloud" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../EncryptedMessaging" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../FullDuplexStreamSupport" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../SecureStorage" vcs="Git" />
   </component>
 </project>

@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Net;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+
 namespace Cloud
 {
     static public partial class Static
@@ -15,17 +14,38 @@ namespace Cloud
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                OpenUI = () => SystemExtra.Util.ExecuteCommand("open", UIAddress);
+                OpenUI = () =>
+                {
+                    var browserOpenResult = SystemExtra.Util.ExecuteSystemCommand($"open {UIAddress}");
+                    if (!browserOpenResult.Successful || browserOpenResult.Output.Contains("error", StringComparison.OrdinalIgnoreCase))
+                        NotifyUIAddress();
+                };
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 string? desktopEnvironment = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP");
                 if (!string.IsNullOrEmpty(desktopEnvironment))
                 {
-                    OpenUI = () => SystemExtra.Util.ExecuteCommand("xdg-open", UIAddress);
+                    OpenUI = () =>
+                    {
+                        var userName = SystemExtra.Util.CurrentUIUser();
+                        var openBrowserCommand = $"runuser -l {userName} -c \"xdg-open {UIAddress}\"";
+                        var browserOpenResult = SystemExtra.Util.ExecuteSystemCommand(openBrowserCommand);
+                        if (!browserOpenResult.Successful || browserOpenResult.Output.Contains("error", StringComparison.OrdinalIgnoreCase))
+                            NotifyUIAddress();
+                    };
                 }
             }
         }
+
+        static private void NotifyUIAddress()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            string appName = currentProcess.ProcessName;
+            var message = $"The cloud control panel is online at {UIAddress}";
+            SystemExtra.Util.Notify(appName, message);
+        }
+
         /// <summary>
         /// Calling this function starts the application's graphical interface (basically the browser with the app's settings page)
         /// </summary>
@@ -35,20 +55,28 @@ namespace Cloud
         /// Router entry point
         /// </summary>
         public static string? EntryPoint;
+
         /// <summary>
         /// Local cloud directory position (Path)
         /// </summary>
         public static string? CloudPath;
+
         /// <summary>
         /// Address of User Interface
         /// </summary>
         public static string? UIAddress;
+
         /// <summary>
         /// Port of Iser Interface
         /// </summary>
         public static int Port;
+
         public static SecureStorage.Storage Storage;
-        public static readonly bool IsAdmin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator) : Environment.UserName == "root";
+
+        public static readonly bool IsAdmin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator)
+            : Environment.UserName == "root";
+
         private static CloudClient.Client? _client;
 
 
@@ -82,6 +110,7 @@ namespace Cloud
             {
                 Client.CreateContext(connectToEntryPoint);
             }
+
             SemaphoreCreateClient.Set();
         }
 
@@ -104,6 +133,7 @@ namespace Cloud
                 AutoStart = true;
                 Client?.Context.SecureStorage.Values.Set("QR", qr);
             }
+
             return result;
         }
 
@@ -115,7 +145,11 @@ namespace Cloud
         /// <summary>
         /// Set to true, starts automatically when the operating system starts
         /// </summary>
-        public static bool AutoStart { get { return SystemExtra.Util.AutoStart; } set { SystemExtra.Util.SetAutoStart(value, Static.Port); } }
+        public static bool AutoStart
+        {
+            get { return SystemExtra.Util.AutoStart; }
+            set { SystemExtra.Util.SetAutoStart(value, Static.Port); }
+        }
 
         /// <summary>
         /// Disconnect from the cloud
@@ -124,7 +158,7 @@ namespace Cloud
         {
             Client?.Context?.SecureStorage.Values.Set("QR", null);
             Client?.Logout();
-            Client = null;            
+            Client = null;
         }
 
         /// <summary>
@@ -138,7 +172,9 @@ namespace Cloud
             if (Client != null)
                 CreateClient();
             Client?.Logout();
-            return Client?.CreateContext(qr, passphrase: passphrase) != null ? CloudClient.Client.LoginResult.Successful : CloudClient.Client.LoginResult.WrongQR;
+            return Client?.CreateContext(qr, passphrase: passphrase) != null
+                ? CloudClient.Client.LoginResult.Successful
+                : CloudClient.Client.LoginResult.WrongQR;
         }
 #if DEBUG
         public const bool IsDebug = true;

@@ -1,5 +1,4 @@
 ﻿using AppSync;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Cloud
 {

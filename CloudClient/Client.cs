@@ -188,8 +188,7 @@ namespace CloudClient
         public bool Logout()
         {
             QrCodeDetector.DisallowDetectQrCode = false;
-            if (File.Exists(FileLastEntryPoint))
-                File.Delete(FileLastEntryPoint);
+            SetStaticValue(nameof(LastEntryPoint), null);
             StopSync();
             if (Context != null)
             {
@@ -206,7 +205,7 @@ namespace CloudClient
         /// Returns true if the cloud is logged in to the server. The returned value is persistent, that is, if the client is logged in it will remain logged in even after a reboot, and this value will return true (after a reboot it is not necessary to log in again)
         /// </summary>
         /// <returns>True if the client is logged in to the server</returns>
-        public bool LoginStatus() => File.Exists(FileLastEntryPoint);
+        public bool LoginStatus() => StaticValueExists(nameof(LastEntryPoint));
 
         private void SetServerCloudContact(string serverPublicKey)
         {

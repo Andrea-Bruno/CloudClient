@@ -1,5 +1,4 @@
-﻿using NBitcoin;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;

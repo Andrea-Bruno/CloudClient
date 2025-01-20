@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using MonoMac.AppKit;
 using MonoMac.Foundation;
 namespace CloudClient
@@ -60,10 +59,7 @@ namespace CloudClient
 
         static void ShowPopup(string title, string message)
         {
-            // Crea un comando AppleScript per mostrare una finestra di dialogo
             string appleScript = $"display dialog \"{message}\" with title \"{title}\" buttons {{\"OK\"}} default button \"OK\"";
-
-            // Esegui il comando AppleScript utilizzando `osascript`
             var processInfo = new ProcessStartInfo
             {
                 FileName = "osascript",

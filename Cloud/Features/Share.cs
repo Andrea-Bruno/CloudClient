@@ -1,7 +1,4 @@
-﻿using CloudSync;
-using System;
-
-namespace Cloud.Features
+﻿namespace Cloud.Features
 {
     /// <summary>
     /// File sharing
