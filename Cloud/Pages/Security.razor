@@ -79,7 +79,10 @@ else
         }
         var cloudPath = new DirectoryInfo(Static.CloudPath);
         if (cloudPath.Exists && cloudPath.LinkTarget != null)
-            cloudPath.Delete();
+        {
+            cloudPath.Attributes &= ~FileAttributes.ReadOnly;
+            cloudPath.Delete(true);
+        }
 
         string? vdPassword = Static.VirtualDiskPassword;
         SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, new FileInfo(Static.CloudPath).Name, true);
