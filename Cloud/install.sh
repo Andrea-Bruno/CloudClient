@@ -6,8 +6,11 @@ OS=$(uname)
 # Set the installation path based on the operating system
 if [ "$OS" == "Linux" ]; then
   INSTALL_PATH="/usr/share/cloud"
+  DOTNET_PATH="/usr/share/dotnet"
 elif [ "$OS" == "Darwin" ]; then
   INSTALL_PATH="/usr/local/share/cloud"
+  DOTNET_PATH="/usr/local/share/dotnet"
+
 else
   echo "Unsupported operating system"
   exit 1
@@ -24,14 +27,17 @@ if [ "$PWD" != "$INSTALL_PATH" ]; then
   exit
 fi
 
+sudo chmod 755 "$INSTALL_PATH"
+
+
 if (( $EUID == 0 )); then
     echo "WARNING: Don't run as root!"
     exit
 fi
 
 # DOTNET runtime
-# NOTE: You can download the runtime from here: https://dotnet.microsoft.com/en-us/download/dotnet/6.0
-#       and unzip the *.tga.gz file in home/$YourUser/.dotnet
+# NOTE: You can download the runtime from here: https://dotnet.microsoft.com/en-us/download/dotnet/9.0
+#       and unzip the *.tga.gz file in home/$YourUser/.dotnet (or in a different position)
 
 # Download the installer:
 if which wget >/dev/null ; then
@@ -43,9 +49,12 @@ else
     exit
 fi
 
+sudo mkdir -p $DOTNET_PATH
+sudo chmod 755 $DOTNET_PATH
+
 sudo chmod +x ./dotnet-install.sh
 # info https://learn.microsoft.com/it-it/dotnet/core/tools/dotnet-install-script
-./dotnet-install.sh --channel 9.0 --runtime aspnetcore
+sudo ./dotnet-install.sh --channel 9.0 --runtime aspnetcore --install-dir $DOTNET_PATH
 
 #start the application
-sudo ~/.dotnet/dotnet Cloud.dll
+sudo $DOTNET_PATH/dotnet Cloud.dll

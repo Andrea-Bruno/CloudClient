@@ -33,6 +33,7 @@
     }
     void OnQuitClick()
     {
+        CloudSync.Util.DisallowRestartApplicationOnEnd = false;
         System.Environment.Exit(0);
     }
     void SendContact()

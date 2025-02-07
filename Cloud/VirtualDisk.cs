@@ -18,13 +18,6 @@ namespace Cloud
         public static bool CloudPathIsReachable()
         {
             return VirtualDiskFullFileName == null ? Directory.Exists(CloudPath) : VirtualDiskIsMounted;
-            //var directoryInfo = new DirectoryInfo(CloudPath);
-            //if (!directoryInfo.Exists)
-            //    return true;
-            //else if (directoryInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
-            //    return false;
-            //var target = directoryInfo.ResolveLinkTarget(true);
-            //return target == null ? directoryInfo.Exists : target.Exists;
         }
 
         /// <summary>

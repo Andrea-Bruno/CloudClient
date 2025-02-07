@@ -4,7 +4,7 @@
 @using System.Runtime.InteropServices
 @inject ILogger<Index> Logger
 @{
-if (Static.Client != null)
+    if (Static.Client != null)
     {
         Static.Client.OnNotificationAction = OnNotificationAction;
         Static.Client.OnLocalSyncStatusChangesAction = OnLocalSyncStatusChanges;
@@ -29,7 +29,7 @@ if (Static.Client != null)
     </div>
 }
 
-@if (Static.Client != null)
+@if (Static.Client != null && !LoginIsRunning)
 {
     <button class="btn btn-primary my-3" @onclick="Logout">Logout</button>
     var ETA = Static.Client?.Sync?.SyncETA();
@@ -40,7 +40,7 @@ if (Static.Client != null)
         </div>
     }
 }
-else if (!HideForm)
+else if (!LoginIsRunning)
 {
     <button class="btn btn-primary my-3" @onclick="Exit">Exit</button>
 
@@ -126,11 +126,11 @@ else if (!HideForm)
     private void Logout()
     {
         Static.Logout();
-        HideForm = false;
     }
 
     private void Exit()
     {
+        CloudSync.Util.DisallowRestartApplicationOnEnd = false;
         Environment.Exit(0);
     }
 
@@ -149,10 +149,7 @@ else if (!HideForm)
 
     void StartRefreshStatus()
     {
-        timer = new System.Threading.Timer((object? state) =>
-        {
-            RefreshStatus();
-        }, null, 1000, 1000);
+        timer = new System.Threading.Timer((object? state) => { RefreshStatus(); }, null, 1000, 1000);
     }
 
     private LoginModel loginModel = new();
@@ -203,7 +200,7 @@ else if (!HideForm)
     string? Status;
     string? OldStatus;
     static CloudClient.Client.LoginResult LoginResult;
-    bool HideForm;
+    static bool LoginIsRunning;
     static string? Notification;
     static string? NotificationColor;
 
@@ -227,7 +224,7 @@ else if (!HideForm)
             var form = editContext.Model as Cloud.Data.LoginModel;
             var qr = form.QR;
             var pin = form.Pin.Trim();
-            HideForm = true;
+            LoginIsRunning = true;
             InvokeAsync(StateHasChanged);
             if (pin.Contains(' '))
             {
@@ -240,7 +237,7 @@ else if (!HideForm)
             }
             if (LoginResult != CloudClient.Client.LoginResult.Successful)
                 Logout();
-            // HideForm = false;
+            LoginIsRunning = false;
             InvokeAsync(StateHasChanged);
         });
     }

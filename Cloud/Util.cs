@@ -1,4 +1,5 @@
 ﻿using AppSync;
+using System.Runtime.InteropServices;
 
 namespace Cloud
 {
@@ -13,7 +14,16 @@ namespace Cloud
         /// The local location of the application package ready to be published.
         /// Explanation: The developer can publish updates of this app to a public repository in order to distribute them. This is the location of the application ready for distribution.
         /// </summary>
-        public static readonly string CurrentPublicationPath = Path.Combine(new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName, "Release", "net6.0", "publish");
+        public static readonly string CurrentPublicationPath = Path.Combine(new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName, "Release", "net" + GetFrameworkVersion(), "publish");
+
+
+        static string GetFrameworkVersion()
+        {
+            string frameworkDescription = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+            string version = frameworkDescription.Split(' ')[1]; 
+            string majorMinorVersion = string.Join('.', version.Split('.').Take(2));
+            return majorMinorVersion;
+        }
 
         /// <summary>
         /// Returns true if a new package was recently created.
@@ -51,6 +61,5 @@ namespace Cloud
         /// Publish the current application package in the private store in order to distribute an update
         /// </summary>
         public static void PublishCurrentApplication() => Prepare.PublishCurrentApplication(DefaultUpdateUrl, publicationPath: CurrentPublicationPath);
-
     }
 }

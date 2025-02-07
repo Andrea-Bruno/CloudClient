@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
@@ -8,6 +9,7 @@ namespace Cloud
     {
         static Static()
         {
+            // Initialize OpenUI action based on the operating system
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 OpenUI = () => SystemExtra.Util.ExecuteCommand("cmd.exe", "/C " + "start /max " + UIAddress);
@@ -24,27 +26,71 @@ namespace Cloud
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 string? desktopEnvironment = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP");
-                if (!string.IsNullOrEmpty(desktopEnvironment))
+                if (CloudSync.Util.DesktopEnvironmentIsStarted || Debugger.IsAttached)
                 {
                     OpenUI = () =>
                     {
                         var userName = SystemExtra.Util.CurrentUIUser();
-                        var openBrowserCommand = $"runuser -l {userName} -c \"xdg-open {UIAddress}\"";
+                        string? openBrowserCommand;
+                        if (IsWSL)
+                        {
+                            Environment.SetEnvironmentVariable("DISPLAY", ":0");
+                            openBrowserCommand = $"firefox {UIAddress}";
+                        }
+                        else
+                        {
+                            openBrowserCommand = $"runuser -l {userName} -c \"xdg-open {UIAddress}\"";
+                        }
+
                         var browserOpenResult = SystemExtra.Util.ExecuteSystemCommand(openBrowserCommand);
                         if (!browserOpenResult.Successful || browserOpenResult.Output.Contains("error", StringComparison.OrdinalIgnoreCase))
                             NotifyUIAddress();
+                        else if (Debugger.IsAttached)
+                            Debugger.Break(); // Install the browser in WSL: sudo apt install firefox-esr
                     };
                 }
             }
         }
 
-        static private void NotifyUIAddress()
+        public static void OpenFileExplorer()
         {
-            Process currentProcess = Process.GetCurrentProcess();
-            string appName = currentProcess.ProcessName;
-            var message = $"The cloud control panel is online at {UIAddress}";
-            SystemExtra.Util.Notify(appName, message);
+            // Open file explorer based on the operating system
+            if (CloudSync.Util.DesktopEnvironmentIsStarted && CloudPathIsReachable())
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    Process.Start("explorer", Static.CloudPath);
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // Process.Start("xdg-open", Static.CloudPath);
+                    var userName = SystemExtra.Util.CurrentUIUser();
+                    string? open;
+                    open = $"runuser -l {userName} -c \"xdg-open {Static.CloudPath}\"";
+                    var openResult = SystemExtra.Util.ExecuteSystemCommand(open);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    Process.Start("open", Static.CloudPath);
+            }
         }
+
+        /// <summary>
+        /// Check if the environment is WSL
+        /// </summary>
+        public static bool IsWSL => (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Debugger.IsAttached && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP")));
+
+        /// <summary>
+        /// Create a notification indicating the browser page to access the cloud client control panel
+        /// </summary>
+        static public void NotifyUIAddress()
+        {
+            var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "Notify!";
+            var message = $"The cloud control panel is online at {UIAddress}";
+            SystemExtra.Util.Notify(appName, NotifyUIAddressMessage);
+        }
+
+        /// <summary>
+        /// Message indicating browser pages with GUI
+        /// </summary>
+        static public string NotifyUIAddressMessage => $"The cloud control panel is online at {UIAddress}";
 
         /// <summary>
         /// Calling this function starts the application's graphical interface (basically the browser with the app's settings page)
@@ -67,18 +113,18 @@ namespace Cloud
         public static string? UIAddress;
 
         /// <summary>
-        /// Port of Iser Interface
+        /// Port of User Interface
         /// </summary>
         public static int Port;
 
         public static SecureStorage.Storage Storage;
 
+        // Check if the current user is an administrator
         public static readonly bool IsAdmin = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator)
             : Environment.UserName == "root";
 
         private static CloudClient.Client? _client;
-
 
         public static CloudClient.Client? Client
         {
@@ -110,12 +156,10 @@ namespace Cloud
             {
                 Client.CreateContext(connectToEntryPoint);
             }
-
             SemaphoreCreateClient.Set();
         }
 
         public static ManualResetEvent SemaphoreCreateClient = new ManualResetEvent(false);
-
 
         /// <summary>
         /// Create a new account and login to cloud server

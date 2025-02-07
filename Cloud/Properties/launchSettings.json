@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:47582",
+      "applicationUrl": "http://localhost:5778",
       "sslPort": 0
     }
   },
@@ -11,7 +11,7 @@
     "Cloud": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:5216",
+      "applicationUrl": "http://localhost:5778",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -27,10 +27,10 @@
     "WSL": {
       "commandName": "WSL2",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5216",
+      "launchUrl": "http://localhost:5778",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5216"
+        "ASPNETCORE_URLS": "http://localhost:5778"
       },
       "distributionName": ""
     }

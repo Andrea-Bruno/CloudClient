@@ -1,4 +1,5 @@
-﻿@using System.Runtime.InteropServices;
+﻿@namespace Cloud.Shared
+@using System.Runtime.InteropServices;
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
@@ -27,10 +28,10 @@
             </NavLink>
         </div>
 
-        @if (Static.CloudPathIsReachable())
+        @if (Static.CloudPathIsReachable() && CloudSync.Util.DesktopEnvironmentIsStarted)
         {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="OpenPath">
+                <NavLink class="nav-link" @onclick="@OpenPath">
                     <span class="oi oi-folder" aria-hidden="true"></span> Explorer
                 </NavLink>
             </div>
@@ -109,7 +110,6 @@
     }
     <UISupportRazor.Menu ClassesInfo="@Features"></UISupportRazor.Menu>
 </div>
-
 @code {
     private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
 
@@ -124,20 +124,6 @@
 
     private void OpenPath()
     {
-        if (Static.CloudPathIsReachable())
-        {
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-            {
-                System.Diagnostics.Process.Start("explorer", Static.CloudPath);
-            }
-            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
-            {
-                System.Diagnostics.Process.Start("xdg-open", Static.CloudPath);
-            }
-            else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
-            {
-                System.Diagnostics.Process.Start("open", Static.CloudPath);
-            }
-        }
+        Static.OpenFileExplorer();
     }
 }
