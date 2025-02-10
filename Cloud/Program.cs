@@ -1,4 +1,5 @@
 ﻿using Cloud;
+using NBitcoin;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -6,6 +7,8 @@ using System.Runtime.InteropServices;
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Set(); // Unlock semaphore in exit request
 //AppDomain.CurrentDomain.ProcessExit += new EventHandler(CloudSync.Util.RestartApplication); //restart application on end;
+
+
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
@@ -65,7 +68,8 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 
 if (!new FileInfo(Static.CloudPath).Directory.Exists)
 {
-    throw new Exception("ERROR: Invalid cloud path!");
+    CloudBox.CloudBox.ResetAppData();
+    throw new Exception("ERROR: Invalid cloud path!"); // Restart!
 }
 
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null);

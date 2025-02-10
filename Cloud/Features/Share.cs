@@ -70,7 +70,7 @@
         {
             get
             {
-                return CloudSync.Share.GetGroups(Static.CloudPath);
+                return Static.Client == null ? throw MissingLogin : (Static.Client?.Sync.Share.GetGroups());
             }
         }
 
@@ -97,7 +97,9 @@
             {
                 FileSelected = SearchResult.First();
             }
-            CloudSync.Share.AddShareFile(Static.CloudPath, SharingGroup, FileSelected);
+            if (Static.Client == null)
+                throw MissingLogin;
+            Static.Client?.Sync.Share.AddShareFile(SharingGroup, FileSelected);
         }
 
         /// <summary>
@@ -107,14 +109,16 @@
         {
             get
             {
-                return CloudSync.Share.GetSharedFiles(Static.CloudPath, SharingGroup).ToArray();
+                return Static.Client == null ? throw MissingLogin : (Static.Client?.Sync.Share.GetSharedFiles(SharingGroup).ToArray());
             }
         }
 
         internal static void OnSelectSharedFiles(int recordIndex)
         {
             var toRemove = SharedFiles?[recordIndex];
-            CloudSync.Share.RemoveSharedFile(Static.CloudPath, SharingGroup, toRemove);
+            if (Static.Client == null)
+                throw MissingLogin;
+            Static.Client?.Sync.Share.RemoveSharedFile(SharingGroup, toRemove);
         }
 
         /// <summary>
@@ -124,7 +128,9 @@
         /// <returns></returns>
         public static string? GenerateSharingLink()
         {
-            return CloudBox.Share.GenerateSharingLink(SharingGroup, Static.Client);
+            return Static.Client == null ? throw MissingLogin : (Static.Client?.Sync.Share.GenerateSharingLink(SharingGroup, Static.Client.Context.EntryPoint, Static.LoggedQr));
         }
+
+        private static readonly Exception MissingLogin = new("Client not logged into cloud");
     }
 }

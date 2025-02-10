@@ -1,5 +1,4 @@
 ﻿@page "/login"
-@using Cloud.Data
 @using Microsoft.Extensions.Logging
 @using System.Runtime.InteropServices
 @inject ILogger<Index> Logger
@@ -14,6 +13,18 @@
     else if (String.IsNullOrEmpty(CloudClient.QrCodeDetector.QrDetected))
     {
         CloudClient.QrCodeDetector.DetectQrCode((qr) => { Refresh(); });
+    }
+    if (string.IsNullOrEmpty(QR))
+    {
+        QR = CloudClient.QrCodeDetector.QrDetected;
+    }
+    if (string.IsNullOrEmpty(Pin)){
+        Pin = System.Diagnostics.Debugger.IsAttached ? "777777" : "";
+    }
+    if (!UseMyPassphrase && string.IsNullOrEmpty(Passphrase))
+    {
+        var mnemonic = new NBitcoin.Mnemonic(NBitcoin.Wordlist.English, NBitcoin.WordCount.TwentyFour);
+        Passphrase = mnemonic.ToString();
     }
 }
 <PageTitle>Cloud client</PageTitle>
@@ -44,21 +55,41 @@ else if (!LoginIsRunning)
 {
     <button class="btn btn-primary my-3" @onclick="Exit">Exit</button>
 
-    <SurveyPrompt Title="Connection to the cloud server" />
+    <h2>Connect to the cloud server</h2>
 
-    <EditForm Model="@loginModel" autocomplete="off" OnValidSubmit="@HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <label for="QR">QR code</label>
+    <input type="text" id="QR" class="form-control" @bind="QR" />
 
-        <label for="QR">QR code</label>
-        <InputText id="QR" class="form-control" @bind-Value="loginModel.QR" />
+    <label for="Pin">Pin/2FA or passphrase to restore account</label>
+    <input type="text" id="Pin" style="text-security:disc; -webkit-text-security:disc;" class="form-control" @bind="Pin" />
 
-        <label for="Pin">Pin/2FA or passphrase to restore account</label>
-        <InputText id="Pin" style="text-security:disc; -webkit-text-security:disc;" class="form-control" @bind-Value="loginModel.Pin" />
 
-        <button class="btn btn-primary my-3" type="submit">Submit</button>
 
-    </EditForm>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="ZeroKnowledge" @bind="passphraseShow">
+        <label class="form-check-label" for="ZeroKnowledge">
+            By enabling zero knowledge encryption, your cloud-side data will be encrypted with a passphrase that only you have.
+        </label>
+    </div>
+
+
+    @if (passphraseShow)
+    {
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="UseMyPassphrase" @bind="UseMyPassphrase">
+            <label class="form-check-label" for="UseMyPassphrase">
+                I already have a passphrase.
+            </label>
+        </div>
+
+
+        <div contenteditable="true" aria-multiline="true">
+            <label for="Passphrase">Passphrase (important: If you have already used zero knowledge, you must use the same passphrase)</label>
+            <textarea id="Passphrase" rows="3" class="form-control" @bind="Passphrase" />
+        </div>
+    }
+    <button class="btn btn-primary my-3" type="submit" @onclick="HandleValidSubmit">Submit</button>
 }
 @if (ErrorCommunicationTime.AddMinutes(1) >= DateTime.UtcNow)
 {
@@ -76,6 +107,10 @@ else if (!LoginIsRunning)
         alert = "The cloud is unreachable: Is the cloud active and connected to a stable internet line?";
     else if (LoginResult == CloudClient.Client.LoginResult.LicenseExpired)
         alert = "Connection refused: Check if the license has expired!";
+    else if (customAlert != null){
+        alert = customAlert;
+        customAlert = null;
+    }
     if (alert != null)
     {
         <div class="alert alert-danger" role="alert">
@@ -110,9 +145,9 @@ else if (!LoginIsRunning)
 
 <style>
     .e-input-eye:before {
-        content: '\01F441';
-        /*        font-family: e-icons; */
-        font-size: 32px;
+    content: '\01F441';
+    /*        font-family: e-icons; */
+    font-size: 32px;
     }
 </style>
 
@@ -151,8 +186,6 @@ else if (!LoginIsRunning)
     {
         timer = new System.Threading.Timer((object? state) => { RefreshStatus(); }, null, 1000, 1000);
     }
-
-    private LoginModel loginModel = new();
 
     void OnNotificationAction(ulong? fromUserId, CloudSync.Sync.Notice notice)
     {
@@ -203,7 +236,6 @@ else if (!LoginIsRunning)
     static bool LoginIsRunning;
     static string? Notification;
     static string? NotificationColor;
-
     static string? SyncStatus;
     static string? localSyncStatusColor;
 
@@ -212,8 +244,28 @@ else if (!LoginIsRunning)
 
     string TxtType = "password";
 
-    private void HandleValidSubmit(EditContext editContext)
+    public bool passphraseShow { get; set; }
+    public bool UseMyPassphrase { get; set; } = true;
+
+    public string QR { get; set; } //   CloudClient.QrCodeDetector.QrDetected;
+    public string Pin { get; set; } // System.Diagnostics.Debugger.IsAttached ? "777777" : "";
+    public string Passphrase { get; set; }
+    string? customAlert { get; set; }
+
+    private void HandleValidSubmit()
     {
+        if (passphraseShow && !string.IsNullOrEmpty(Passphrase)){
+            try
+            {
+                var key = Static.GenerateKeyFromPassphrase(Passphrase);
+            }
+            catch (Exception)
+            {
+                customAlert = "Invalid passphrase!";
+                // InvokeAsync(StateHasChanged);
+                return;
+            }
+        }
         Status = null;
         Notification = null;
         SyncStatus = null;
@@ -221,19 +273,17 @@ else if (!LoginIsRunning)
         InvokeAsync(StateHasChanged);
         System.Threading.Tasks.Task.Run(() =>
         {
-            var form = editContext.Model as Cloud.Data.LoginModel;
-            var qr = form.QR;
-            var pin = form.Pin.Trim();
+            var pin = Pin.Trim();
             LoginIsRunning = true;
             InvokeAsync(StateHasChanged);
             if (pin.Contains(' '))
             {
                 var passphrase = pin;
-                LoginResult = Static.Restore(qr, passphrase);
+                LoginResult = Static.Restore(QR, passphrase);
             }
             else
             {
-                LoginResult = Static.Login(qr, pin);
+                LoginResult = Static.Login(QR, pin);
             }
             if (LoginResult != CloudClient.Client.LoginResult.Successful)
                 Logout();

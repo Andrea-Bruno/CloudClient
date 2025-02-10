@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using NBitcoin;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -220,6 +221,30 @@ namespace Cloud
                 ? CloudClient.Client.LoginResult.Successful
                 : CloudClient.Client.LoginResult.WrongQR;
         }
+
+
+
+        public static ExtKey GenerateKeyFromPassphrase(string passphrase)
+        {
+            string cleanedPassphrase = CleanPassphrase(passphrase);
+            Mnemonic mnemonic = new Mnemonic(cleanedPassphrase);
+            return mnemonic.DeriveExtKey();
+        }
+
+        private static string CleanPassphrase(string passphrase)
+        {
+            string cleaned = passphrase.Replace("\n", " ")
+                                       .Replace("\r", " ")
+                                       .Replace(",", "")
+                                       .Replace("!", "")
+                                       .Replace(".", "")
+                                       .Trim();
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+", " ");
+            return cleaned;
+        }
+
+
+
 #if DEBUG
         public const bool IsDebug = true;
 #else

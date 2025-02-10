@@ -47,7 +47,7 @@ namespace Cloud
         }
 
         /// <summary>
-        /// Check for updates & update the current application with the latest version published in the current store if is necessary
+        /// Check for updates and update the current application with the latest version published in the current store if is necessary
         /// </summary>
         /// <returns></returns>
         static public string UpdateApplication() => Update.CheckAndUpdate(DefaultUpdateUrl, Static.CanUpdate);

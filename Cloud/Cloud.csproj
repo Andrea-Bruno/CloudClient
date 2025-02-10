@@ -49,7 +49,7 @@
 
 
   <!--=========== START: ONLY IN VS CODE ON LINUX ================-->
-  <ItemGroup>    
+  <!--<ItemGroup>    
     <PackageReference Include="BytesExtension" Version="1.24.9.13" />
 		<ProjectReference Include="..\..\..\AntiGit\Backup\BackupLibrary.csproj" />
 		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
@@ -58,7 +58,7 @@
 		<ProjectReference Include="..\..\..\EncryptedMessaging\CommunicationChannel\CommunicationChannel.csproj" />
 		<ProjectReference Include="..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj" />
 		<ProjectReference Include="..\..\..\UISupportGeneric\UISupportGeneric.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
   <!--=========== END: ONLY IN VS CODE ON LINUX ================-->
 
 
@@ -88,5 +88,8 @@
 		<None Update="uninstall.sh">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Data\" />
 	</ItemGroup>
 </Project>
