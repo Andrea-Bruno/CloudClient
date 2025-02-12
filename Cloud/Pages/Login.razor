@@ -254,10 +254,12 @@ else if (!LoginIsRunning)
 
     private void HandleValidSubmit()
     {
+        byte[] zeroKnowledgeEncryptionMasterKey = null;
         if (passphraseShow && !string.IsNullOrEmpty(Passphrase)){
             try
             {
                 var key = Static.GenerateKeyFromPassphrase(Passphrase);
+                zeroKnowledgeEncryptionMasterKey = key.ToBytes();
             }
             catch (Exception)
             {
@@ -283,7 +285,7 @@ else if (!LoginIsRunning)
             }
             else
             {
-                LoginResult = Static.Login(QR, pin);
+                LoginResult = Static.Login(QR, pin, zeroKnowledgeEncryptionMasterKey);
             }
             if (LoginResult != CloudClient.Client.LoginResult.Successful)
                 Logout();

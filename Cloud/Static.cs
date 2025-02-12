@@ -167,12 +167,13 @@ namespace Cloud
         /// </summary>
         /// <param name="qr"></param>
         /// <param name="pin"></param>
+        /// <param name="zeroKnowledgeEncryptionMasterKey">If set, zero knowledge proof is enabled, meaning files will be sent encrypted with keys derived from this, and once received, if encrypted, they will be decrypted.</param>
         /// <returns>True for Successful, or false if QR code is not valid (this routine don't check the pin)</returns>
-        public static CloudClient.Client.LoginResult Login(string qr, string pin)
+        public static CloudClient.Client.LoginResult Login(string qr, string pin, byte[]? zeroKnowledgeEncryptionMasterKey = null)
         {
             if (Client == null)
                 CreateClient();
-            var result = Client == null ? CloudClient.Client.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint);
+            var result = Client == null ? CloudClient.Client.LoginResult.WrongQR : Client.Login(qr, pin, EntryPoint, zeroKnowledgeEncryptionMasterKey);
             if (result == CloudClient.Client.LoginResult.Successful)
             {
                 AutoStart = true;
