@@ -96,7 +96,7 @@ namespace CloudClient
                                         else if (connectedTo == Connection.localhost)
                                             SshIP = IPAddress.Loopback.GetAddressBytes();
                                         else if (connectedTo == Connection.router)
-                                            SshIP = localIP;                                        
+                                            SshIP = localIP;
                                         var ipToConnect = new IPAddress(SshIP).ToString();
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                         {

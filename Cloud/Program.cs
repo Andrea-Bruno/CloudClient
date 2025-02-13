@@ -1,5 +1,4 @@
 ﻿using Cloud;
-using NBitcoin;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -8,7 +7,9 @@ AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException;
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Set(); // Unlock semaphore in exit request
 //AppDomain.CurrentDomain.ProcessExit += new EventHandler(CloudSync.Util.RestartApplication); //restart application on end;
 
+// var x = AntiGitLibrary.Context.GetDefaultBackupPosition();
 
+// SystemExtra.Util.Notify("Test", "Hello word!");
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 

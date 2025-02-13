@@ -3,12 +3,23 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../AntiGit" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../AppSync" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../ClientMobile/cloud-storage-main" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/ActivationPin" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudConsumer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudConsumerLibrary" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../CloudBox/CloudLibraries" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudServer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudServerUISupport" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudServerWebUI" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../CloudBox/CloudUIWeb" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../CloudClientMobile" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../ProxyCloud" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../EncryptedMessaging" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../FullDuplexStreamSupport" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../SecureStorage" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../SystemExtra" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../UISupportGeneric" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../UISupportRazor" vcs="Git" />
   </component>
 </project>
