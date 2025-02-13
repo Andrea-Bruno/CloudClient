@@ -34,7 +34,7 @@ namespace CloudClient
                     {
                         case Command.GetEncryptedQR:
                             var encryptedPubKey = parameters[0];
-                            var serverPublicKey = CloudBox.EncryptionXorAB.Decrypt(EncryptedQR.Item2, encryptedPubKey);
+                            var serverPublicKey = CloudBox.EncryptionXorAB.Decrypt(EncryptedQR.EncryptionKey, encryptedPubKey);
                             EncryptedQR = null;
                             ConnectToServer(serverPublicKey.ToBase64());
                             // CloudBox.Login(qrCode.ToBase64(), CloudBox.Context.SecureStorage.Values.Get("pin", null));
@@ -96,7 +96,7 @@ namespace CloudClient
                                         else if (connectedTo == Connection.localhost)
                                             SshIP = IPAddress.Loopback.GetAddressBytes();
                                         else if (connectedTo == Connection.router)
-                                            SshIP = localIP;                                        
+                                            SshIP = localIP;
                                         var ipToConnect = new IPAddress(SshIP).ToString();
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                         {
