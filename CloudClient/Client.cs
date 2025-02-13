@@ -84,7 +84,7 @@ namespace CloudClient
             if (EncryptedQR != null)
             {
                 // If the login was partially done with an encrypted QR code, once the connection with the router has been established, it asks the cloud for the QR code in order to log in definitively
-                SendCommand(EncryptedQR.Item1, Command.GetEncryptedQR, null);
+                SendCommand(EncryptedQR.ServerId, Command.GetEncryptedQR, null);
                 return;
             }
             serverPublicKey ??= ServerPublicKey; // serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
@@ -123,6 +123,8 @@ namespace CloudClient
                 Logout();
             return result;
         }
+
+        private ServerIdAndEncryptionKey EncryptedQR;
 
         private LoginResult TryLogin(string qrCode, string pin, string entryPoint = null, byte[] zeroKnowledgeEncryptionMasterKey = null)
         {
