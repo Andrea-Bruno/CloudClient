@@ -63,7 +63,7 @@ namespace CloudClient
             var processInfo = new ProcessStartInfo
             {
                 FileName = "osascript",
-                Arguments = $"-e \"{appleScript}\"",
+                Arguments = $"-e '{appleScript}'",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
