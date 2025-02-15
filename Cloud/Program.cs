@@ -237,7 +237,7 @@ else
                 var htmlFile = Path.Combine(CloudSync.Util.DesktopPath(), "Cloud Settings " + Static.Port + ".htm");
                 var html = File.ReadAllText("redirect.html").Replace("{address}", Static.UIAddress);
                 File.WriteAllText(htmlFile, html);
-                SystemExtra.Util.SetPermissions("777", htmlFile);
+                SystemExtra.Util.Chmod("777", htmlFile);
                 var desktopUser = SystemExtra.Util.CurrentUIUser();
                 var userInfo = SystemExtra.Util.GetUserInfo(desktopUser);
                 if (userInfo != null)
