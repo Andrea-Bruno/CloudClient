@@ -6,7 +6,7 @@
 <PageTitle>Security</PageTitle>
 
 <h1>Security</h1>
-<h3>Securely block access to all files in the cloud from this pc</h3>
+<h3>Securely block access to all files in the cloud from this PC</h3>
 <div class="input-group mb-3">
     <div class="input-group-prepend">
         <label class="input-group-text" for="CloudPath">Cloud path</label>
@@ -68,7 +68,7 @@ else
 @functions {
     void DestroyLocalData()
     {
-        var fileinfo = new FileInfo(Static.VirtualDiskFullFileName);
+        var fileinfo = new FileInfo(VirtualDiskManager.VirtualDiskFullFileName);
         foreach (var file in fileinfo.Directory.GetFiles(Path.GetFileNameWithoutExtension(fileinfo.Name) + ".*"))
         {
             try
@@ -84,10 +84,9 @@ else
             cloudPath.Delete(true);
         }
 
-        string? vdPassword = Static.VirtualDiskPassword;
-        SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, new FileInfo(Static.CloudPath).Name, true);
+        string? vdPassword = VirtualDiskManager.VirtualDiskPassword;
+        VirtualDiskManager.CreateVirtualDisk(vdPassword);
         Static.Client?.Sync?.ResetCacheHashFileTable();
-        Static.Client?.SetSyncState(SystemExtra.Util.IsMounted(Static.CloudPath));
         attempts = 0;
     }
     void ButtonClick()
@@ -99,7 +98,7 @@ else
         {
             if (Blocked)
             {
-                string? error = Static.UnlockVirtualDisk(Password);
+                string? error = VirtualDiskManager.UnlockVirtualDisk(Password);
                 if (error != null)
                 {
                     vp = "is-invalid";
@@ -119,7 +118,7 @@ else
             {
                 if (Password == null || Password.Length < chrs)
                     return;
-                Static.LockVirtualDisk(Password, out string? error);
+                VirtualDiskManager.LockVirtualDisk(Password, out string? error);
                 if (error != null)
                 {
                     NotificationStyle = "alert-danger";
@@ -167,7 +166,7 @@ else
     }
     void Reload()
     {
-        Blocked = !Static.VirtualDiskIsMounted;
+        Blocked = !VirtualDiskManager.VirtualDiskIsMounted;
         per = 0;
         percolor = null;
         vp = null;
@@ -188,7 +187,7 @@ else
     private string? vp = null;
     private string? vr = null;
     private bool ButtonEnabled;
-    private bool Blocked = !Static.VirtualDiskIsMounted;
+    private bool Blocked = !VirtualDiskManager.VirtualDiskIsMounted;
     private string? Password;
     private string? RepeatPassword;
     private string? Notification;

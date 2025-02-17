@@ -15,10 +15,8 @@ namespace CloudClient
     {
         /// <param name="cloudPath">Directory position of the cloud (a null value will be considered the default path)</param>
         /// <param name="syncIsEnabled"> False to suspend sync, or true. It is important to suspend synchronization if the path is not available (for example when using virtual disks)! Indicate true if the path to the cloud space is reachable (true), or unmounted virtual disk (false). Use IsReachableDiskStateIsChanged to notify that access to the cloud path has changed.</param>
-        public Client(string cloudPath = null, bool syncIsEnabled = true) : base(cloudPath, syncIsEnabled: syncIsEnabled)
+        public Client(string cloudPath = null, bool syncIsEnabled = true) : base(cloudPath)
         {
-
-
             QrCodeDetector.DisallowDetectQrCode = true;
             OnRouterConnectionChangeEvent = OnRouterConnectionChange;
             OnCommandEvent = OnServerCommand;
@@ -32,7 +30,6 @@ namespace CloudClient
                     System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, AppDomain.CurrentDomain.BaseDirectory);
             }
         }
-
 
         public void EnableOSFeatures(Action openUI)
         {

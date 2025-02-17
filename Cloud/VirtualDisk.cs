@@ -3,10 +3,32 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using CloudSync;
+using static Cloud.Static;
 namespace Cloud
 {
-    static public partial class Static
+    static public partial class VirtualDiskManager
     {
+
+        public static void CreateVirtualDisk(string vdPassword)
+        {
+            new FileInfo(VirtualDiskFullFileName).Directory.Create();
+            var cloudPath = PresetMountingPoint();
+            SystemExtra.Util.CreateVirtualDisk(VirtualDiskFullFileName, cloudPath.FullName, vdPassword, cloudPath.Name, true);
+        }
+
+        private static DirectoryInfo PresetMountingPoint()
+        {
+            var cloudPath = new DirectoryInfo(CloudPath);
+            if (!cloudPath.Exists)
+            {
+                cloudPath.Create();
+                cloudPath.Refresh();
+            }
+            CloudSync.Util.SetMountPointFlag(cloudPath.FullName);
+            cloudPath.Refresh();
+            return cloudPath;
+        }
+
         /// <summary>
         /// If used, the virtual disk path that underlies the cloud path
         /// </summary>
@@ -36,7 +58,12 @@ namespace Cloud
         /// </summary>
         public static bool VirtualDiskIsLocked
         {
-            get { return !File.Exists(VirtualDiskFullFileName); }
+            get
+            {
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? File.Exists(Path.ChangeExtension(VirtualDiskFullFileName, ".sys"))
+                    : VirtualDiskPassword == null;
+            }
         }
 
         /// <summary>
@@ -77,7 +104,6 @@ namespace Cloud
 
             }
         }
-
 
         // public static bool MountVirtualDiskStatus { get { return Storage.Values.Get(nameof(MountVirtualDiskStatus), true); } set { Storage.Values.Set(nameof(MountVirtualDiskStatus), value); } }
 
@@ -139,8 +165,7 @@ namespace Cloud
                             else
                                 File.Move(sysFile, VirtualDiskFullFileName);
                         }
-                        new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.Hidden;
-                        //new DirectoryInfo(CloudPath).Attributes &= ~FileAttributes.ReadOnly;
+                        PresetMountingPoint();
                         if (!SystemExtra.Util.MountVirtualDisk(VirtualDiskFullFileName, CloudPath, vdPassword))
                             Debugger.Break();
                         var isMounted = SystemExtra.Util.IsMounted(CloudPath);
@@ -148,10 +173,6 @@ namespace Cloud
                         {
                             Console.WriteLine("Unable to mount Virtual Disk");
                             Debugger.Break();
-                        }
-                        else
-                        {
-                            Client?.SetSyncState(isMounted);
                         }
                         LockVirtualDiskRunning--;
                         return null;
@@ -175,7 +196,6 @@ namespace Cloud
                 var hash = ParallelHash(Encoding.UTF8.GetBytes(password));
                 Storage.Values.Set("vhdpw", BitConverter.ToUInt64(hash));
                 hash = ParallelHash(hash);
-                Client?.SetSyncState(false);
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SystemExtra.Util.UnmountVirtualDiskWindow(VirtualDiskFullFileName) : SystemExtra.Util.UnmountVirtualDisk(CloudPath))
                 {
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -202,11 +222,6 @@ namespace Cloud
                         Directory.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
                     else
                         File.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
-                    new DirectoryInfo(CloudPath).Attributes |= FileAttributes.Hidden | FileAttributes.ReadOnly;
-                }
-                else
-                {
-                    Client?.SetSyncState(SystemExtra.Util.IsMounted(CloudPath));
                 }
                 LockVirtualDiskRunning--;
                 error = null;

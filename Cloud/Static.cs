@@ -56,7 +56,7 @@ namespace Cloud
         public static void OpenFileExplorer()
         {
             // Open file explorer based on the operating system
-            if (CloudSync.Util.DesktopEnvironmentIsStarted && CloudPathIsReachable())
+            if (CloudSync.Util.DesktopEnvironmentIsStarted && VirtualDiskManager.CloudPathIsReachable())
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     Process.Start("explorer", Static.CloudPath);
@@ -152,7 +152,7 @@ namespace Cloud
         /// <param name="connectToEntryPoint"></param>
         public static void CreateClient(string? connectToEntryPoint = null)
         {
-            Client = new CloudClient.Client(CloudPath, CloudPathIsReachable());
+            Client = new CloudClient.Client(CloudPath, VirtualDiskManager.CloudPathIsReachable());
             if (connectToEntryPoint != null)
             {
                 Client.CreateContext(connectToEntryPoint);

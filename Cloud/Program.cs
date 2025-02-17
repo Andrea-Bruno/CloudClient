@@ -6,12 +6,9 @@ using System.Runtime.InteropServices;
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Set(); // Unlock semaphore in exit request
 //AppDomain.CurrentDomain.ProcessExit += new EventHandler(CloudSync.Util.RestartApplication); //restart application on end;
-
-// var x = AntiGitLibrary.Context.GetDefaultBackupPosition();
-
 // SystemExtra.Util.Notify("Test", "Hello word!");
-
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
+
 
 if (!SystemExtra.Util.IsAdmin())
 {
@@ -89,6 +86,7 @@ if (!Debugger.IsAttached)
 }
 
 
+Debug.Assert(urls != null, nameof(urls) + " != null");
 var firstUrlParts = urls[0].Split(':');
 Static.Port = int.Parse(firstUrlParts[2]);
 //#if DEBUG
@@ -105,41 +103,36 @@ foreach (var url in urls)
 }
 Static.Storage = new SecureStorage.Storage(Static.UIAddress);
 
-var VirtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
+var virtualDisk = (bool)configuration.GetValue(typeof(bool), "VirtualDisk", false);
 var cloudPath = new DirectoryInfo(Static.CloudPath);
-if (VirtualDisk && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux)))
+if (virtualDisk)
 {
-    if (!cloudPath.Exists || cloudPath.LinkTarget != null || cloudPath.Attributes.HasFlag(FileAttributes.ReadOnly) || Static.VirtualDiskIsMounted) // Offline is for non windows OS
+    var virtualDiskRepository = "";
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        virtualDiskRepository = "/Volumes";
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        virtualDiskRepository = Environment.SystemDirectory;
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        virtualDiskRepository = "/var/lib";
+    virtualDiskRepository = Path.Combine([virtualDiskRepository, ".$Sys"]);
+    var hashPath = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
+    var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".sparsebundle" : ".encrypted";
+    VirtualDiskManager.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hashPath + extension);
+    static bool Exists(string fullName) => File.Exists(fullName) || Directory.Exists(fullName);
+    var virtualDiskFileInfo = new FileInfo(VirtualDiskManager.VirtualDiskFullFileName);
+    var vdPassword = VirtualDiskManager.VirtualDiskPassword;
+    if (!Exists(VirtualDiskManager.VirtualDiskFullFileName) && !Exists(Path.ChangeExtension(VirtualDiskManager.VirtualDiskFullFileName, ".sys")))
     {
-        string virtualDiskRepository = "";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            virtualDiskRepository = "/Volumes";
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            virtualDiskRepository = Environment.SystemDirectory;
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            virtualDiskRepository = "/var/lib";
-        virtualDiskRepository = Path.Combine([virtualDiskRepository, ".$Sys"]);
-        var hashPath = CloudSync.Util.HashFileName(Static.CloudPath, true).GetBytes().ToHex();
-        var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".vhdx" : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".sparsebundle" : ".encrypted";
-        Static.VirtualDiskFullFileName = Path.Combine(virtualDiskRepository, hashPath + extension);
-        static bool exists(string fullName) => File.Exists(fullName) || Directory.Exists(fullName);
-        var VirtualDiskFileInfo = new FileInfo(Static.VirtualDiskFullFileName);
-        string? vdPassword = Static.VirtualDiskPassword;
-        if (!Directory.Exists(virtualDiskRepository) || !exists(Static.VirtualDiskFullFileName) && !exists(Path.ChangeExtension(Static.VirtualDiskFullFileName, ".sys")))
-        {
-            cloudPath.Create();
-            cloudPath.Refresh();
-            cloudPath.Attributes |= FileAttributes.Hidden | FileAttributes.ReadOnly;
-            cloudPath.Refresh();
-            SystemExtra.Util.CreateVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword, cloudPath.Name, true);
-        }
+        // Create Encrypted Virtual Disk
+        VirtualDiskManager.CreateVirtualDisk(vdPassword);
+    }
+    else if (!VirtualDiskManager.VirtualDiskIsMounted && !VirtualDiskManager.VirtualDiskIsLocked)
+    {
+        // Mount Encrypted Virtual Disk
+        if (vdPassword == null && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Debugger.Break(); // No password configured!  Investigate!
         else
-        {
-            if (!Static.VirtualDiskIsMounted && !Static.VirtualDiskIsLocked)
-            {
-                SystemExtra.Util.MountVirtualDisk(Static.VirtualDiskFullFileName, Static.CloudPath, vdPassword);
-            }
-        }
+            SystemExtra.Util.MountVirtualDisk(VirtualDiskManager.VirtualDiskFullFileName, Static.CloudPath, vdPassword);
     }
 }
 else
@@ -178,7 +171,7 @@ if (lastEntryPoint != null)
 
 BackupManager.Initialize(Static.CloudPath);
 
-Func<bool> PortIsAvailable = () =>
+Func<bool> portIsAvailable = () =>
 {
     try
     {
@@ -204,7 +197,7 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 
-if (!SpinWait.SpinUntil(PortIsAvailable, TimeSpan.FromSeconds(180)))
+if (!SpinWait.SpinUntil(portIsAvailable, TimeSpan.FromSeconds(180)))
 {
     Debugger.Break();
     throw new Exception("The port " + Static.Port + " is busy!");
@@ -217,7 +210,7 @@ else
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         Task.Run(() =>
         {
-            if (!SpinWait.SpinUntil(() => !PortIsAvailable(), TimeSpan.FromSeconds(180)))
+            if (!SpinWait.SpinUntil(() => !portIsAvailable(), TimeSpan.FromSeconds(180)))
             {
                 Debugger.Break();
                 throw new Exception("Web interface not found on port " + Static.Port);
@@ -237,7 +230,7 @@ else
                 var htmlFile = Path.Combine(CloudSync.Util.DesktopPath(), "Cloud Settings " + Static.Port + ".htm");
                 var html = File.ReadAllText("redirect.html").Replace("{address}", Static.UIAddress);
                 File.WriteAllText(htmlFile, html);
-                SystemExtra.Util.Chmod("777", htmlFile);
+                SystemExtra.Util.Chmod(777, htmlFile);
                 var desktopUser = SystemExtra.Util.CurrentUIUser();
                 var userInfo = SystemExtra.Util.GetUserInfo(desktopUser);
                 if (userInfo != null)

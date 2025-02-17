@@ -31,7 +31,7 @@ namespace Cloud
         public static string Git { get => AntiGithub.GitDir; set => AntiGithub.GitDir = value; }
         public static string StartBackup()
         {
-            if (!Static.CloudPathIsReachable())
+            if (!VirtualDiskManager.CloudPathIsReachable())
                 return "The cloud area is closed, the backup cannot start!";
             var outcome = AntiGithub.StartBackup(true);
             return outcome.ToString();
