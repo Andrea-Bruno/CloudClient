@@ -3,6 +3,7 @@ using EncryptedMessaging;
 using NBitcoin;
 using System;
 using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -129,8 +130,12 @@ namespace CloudClient
             if (string.IsNullOrEmpty(pin))
                 return LoginResult.WrongPassword;
             if (SolveQRCode(qrCode, out string entry, out string serverPublicKey, out EncryptedQR) == false) return LoginResult.WrongQR;
-            if (entry != null)
+            if (entry != null && entryPoint != IPAddress.Loopback.ToString())
                 entryPoint = entry;
+            if (string.IsNullOrEmpty(entryPoint))
+            {
+                throw new Exception("No Entry Point specified in QR code or Setting!");
+            }
             var context = CreateContext(entryPoint);
             // =================
             // NOTE: Login is performed when the context has established the connection with the router

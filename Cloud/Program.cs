@@ -1,5 +1,6 @@
 ﻿using Cloud;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
@@ -70,7 +71,27 @@ if (!new FileInfo(Static.CloudPath).Directory.Exists)
     throw new Exception("ERROR: Invalid cloud path!"); // Restart!
 }
 
+Func<int, bool> PortIsRearchable = (port) => {
+    using var tcpClient = new TcpClient();
+    try
+    {
+        var result = tcpClient.BeginConnect(IPAddress.Loopback.ToString(), port, null, null);
+        var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(500));
+        tcpClient.EndConnect(result);
+    }
+    catch (Exception) { return false; }
+    return true;
+
+};
+
 Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null);
+
+if (Debugger.IsAttached) // In debug mode, If the server is running locally then set localhost as entry point to use the local server
+{
+    if (PortIsRearchable(5050))
+        Static.EntryPoint = IPAddress.Loopback.ToString(); // Connect to local server for debug!
+}
+
 
 var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(';');
 
@@ -89,13 +110,15 @@ if (!Debugger.IsAttached)
 Debug.Assert(urls != null, nameof(urls) + " != null");
 var firstUrlParts = urls[0].Split(':');
 Static.Port = int.Parse(firstUrlParts[2]);
-//#if DEBUG
-//// Increment port of +1 in debug mode
-//Static.Port++;
-//firstUrl[2] = Static.Port.ToString();
-//urls[0] = string.Join(':', firstUrl);
-//Environment.SetEnvironmentVariable("ASPNETCORE_URLS", string.Join(';', urls));
-//#endif
+#if DEBUG
+// if port i busy Increment port of +1 in debug mode
+if (PortIsRearchable(Static.Port)){
+    Static.Port++;
+    firstUrlParts[2] = Static.Port.ToString();
+    urls[0] = string.Join(':', firstUrlParts);
+    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", string.Join(';', urls));
+}
+#endif
 Static.UIAddress = urls[0];
 foreach (var url in urls)
 {
