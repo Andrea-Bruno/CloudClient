@@ -10,7 +10,6 @@ AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Se
 // SystemExtra.Util.Notify("Test", "Hello word!");
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
-
 if (!SystemExtra.Util.IsAdmin())
 {
 #if DEBUG
@@ -37,7 +36,6 @@ if (!SystemExtra.Util.IsAdmin())
     return;
 }
 
-
 if (!SpinWait.SpinUntil(() => !SystemExtra.Util.AppIsAlreadyRunning(), TimeSpan.FromSeconds(5)))
 {
     Debugger.Break();
@@ -46,7 +44,6 @@ if (!SpinWait.SpinUntil(() => !SystemExtra.Util.AppIsAlreadyRunning(), TimeSpan.
     Environment.Exit(1);
     return;
 }
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,7 +89,6 @@ if (Debugger.IsAttached) // In debug mode, If the server is running locally then
         Static.EntryPoint = IPAddress.Loopback.ToString(); // Connect to local server for debug!
 }
 
-
 var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(';');
 
 if (!Debugger.IsAttached)
@@ -105,7 +101,6 @@ if (!Debugger.IsAttached)
             Environment.SetEnvironmentVariable("ASPNETCORE_URLS", string.Join(';', urls));
     }
 }
-
 
 Debug.Assert(urls != null, nameof(urls) + " != null");
 var firstUrlParts = urls[0].Split(':');
@@ -186,7 +181,7 @@ if (SystemExtra.Util.IsService(Static.Port) ==  false)
 }
 #endif
 
-string? lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
+var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
 if (lastEntryPoint != null)
 {
     Static.CreateClient(lastEntryPoint);
@@ -267,7 +262,6 @@ else
         }
     }
 }
-
 
 new Thread(() => app.Run()).Start();
 
