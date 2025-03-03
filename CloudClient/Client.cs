@@ -87,12 +87,13 @@ namespace CloudClient
             }
             serverPublicKey ??= ServerPublicKey; // serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
             SetServerCloudContact(serverPublicKey);
-            LoginCredential credential = TmpLoginData?.Item1 == null ? null : new LoginCredential { Pin = TmpLoginData?.Item1, PublicKey = Context.My.GetPublicKeyBinary() };
-            StartSync(credential, TmpLoginData?.Item2);
+            LoginCredential credential = TmpLoginPin == null ? null : new LoginCredential { Pin = TmpLoginPin, PublicKey = Context.My.GetPublicKeyBinary() };
+            StartSync(credential, ZeroKnowledgeEncryptionMasterKey);
             return;
         }
         private string ServerPublicKey { get { return Context.SecureStorage.Values.Get(nameof(ServerPublicKey), null); } set { Context.SecureStorage.Values.Set(nameof(ServerPublicKey), value); } }
-        private (string, byte[])? TmpLoginData;
+        private string TmpLoginPin;
+        private byte[] ZeroKnowledgeEncryptionMasterKey { get { return Context.SecureStorage.Values.GetBytes(nameof(ZeroKnowledgeEncryptionMasterKey), null); } set { Context.SecureStorage.Values.SetBytes(nameof(ZeroKnowledgeEncryptionMasterKey), value); } }
 
         /// <summary>
         /// Placeholder for a method that will be called when the connection changes  
@@ -140,14 +141,15 @@ namespace CloudClient
             // =================
             // NOTE: Login is performed when the context has established the connection with the router
             // =================
-            TmpLoginData = (pin, zeroKnowledgeEncryptionMasterKey);
+            TmpLoginPin = pin;
+            ZeroKnowledgeEncryptionMasterKey = zeroKnowledgeEncryptionMasterKey;
             ServerPublicKey = serverPublicKey; // context.SecureStorage.Values.Set("ServerPublicKey", serverPublicKey);
             try
             {
                 OnSyncStart = new AutoResetEvent(false);
                 if (OnSyncStart.WaitOne(60000))
                 {
-                    TmpLoginData = null;
+                    TmpLoginPin = null;
                     Sync.OnLoginCompleted = new AutoResetEvent(false);
                     if (Sync.OnLoginCompleted.WaitOne(60000))
                         return Sync.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
@@ -159,12 +161,12 @@ namespace CloudClient
                         return LoginResult.CloudNotResponding;
                     return LoginResult.RemoteHostNotReachable;
                 }
-                TmpLoginData = null;
+                TmpLoginPin = null;
                 return LoginResult.TimeoutError;
             }
             catch (Exception)
             {
-                TmpLoginData = null;
+                TmpLoginPin = null;
                 return LoginResult.ErrorOccurred;
             }
         }
@@ -197,7 +199,7 @@ namespace CloudClient
             StopSync();
             if (Context != null)
             {
-                TmpLoginData = null;
+                TmpLoginPin = null;
                 ServerPublicKey = null;
                 Context.Dispose();
                 Context = null;

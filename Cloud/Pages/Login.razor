@@ -255,12 +255,12 @@ else if (!LoginIsRunning)
 
     private void HandleValidSubmit()
     {
-        byte[] zeroKnowledgeEncryptionMasterKey = null;
+        byte[]? zeroKnowledgeEncryptionMasterKey = null;
         if (passphraseShow && !string.IsNullOrEmpty(Passphrase)){
             try
             {
                 var key = Static.GenerateKeyFromPassphrase(Passphrase);
-                zeroKnowledgeEncryptionMasterKey = key.ToBytes();
+                zeroKnowledgeEncryptionMasterKey = key.PrivateKey.ToBytes();
             }
             catch (Exception)
             {

@@ -1,4 +1,6 @@
-﻿namespace Cloud.Features
+﻿using System.Diagnostics;
+
+namespace Cloud.Features
 {
     /// <summary>
     /// File sharing
@@ -63,14 +65,16 @@
         /// </summary>
         private static string? FileSelected { get; set; }
 
+
         /// <summary>
         /// Select the group to which you want to add the file to share (if the group already exists, or create a new group)
         /// </summary>
+        [DebuggerHidden] // Don't break at throw
         public static string[]? Groups
         {
             get
             {
-                return Static.Client == null ? throw MissingLogin : (Static.Client?.Sync.Share.GetGroups());
+                return Static.Client?.Sync == null ? throw MissingLogin : (Static.Client?.Sync.Share.GetGroups());
             }
         }
 

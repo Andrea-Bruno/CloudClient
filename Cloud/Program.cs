@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime;
 using System.Runtime.InteropServices;
 
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
@@ -59,7 +60,7 @@ Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue
 
 #if DEBUG
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    Static.CloudPath = @"C:\Test4";
+    Static.CloudPath = @"C:\TestCloud";
 #endif
 
 if (!new FileInfo(Static.CloudPath).Directory.Exists)
@@ -139,6 +140,19 @@ if (virtualDisk)
     static bool Exists(string fullName) => File.Exists(fullName) || Directory.Exists(fullName);
     var virtualDiskFileInfo = new FileInfo(VirtualDiskManager.VirtualDiskFullFileName);
     var vdPassword = VirtualDiskManager.VirtualDiskPassword;
+
+    if (false)
+    {   // ====== RESET ======
+        SystemExtra.Util.UnmountVirtualDiskWindow(VirtualDiskManager.VirtualDiskFullFileName);
+        var pathInfo = new DirectoryInfo(Static.CloudPath);
+        pathInfo.Attributes &= ~FileAttributes.ReadOnly;
+        pathInfo.Delete(true);
+        File.Delete(VirtualDiskManager.VirtualDiskFullFileName);
+        Console.WriteLine("Reset done!");
+        Debugger.Break(); // RESET DONE       
+        Environment.Exit(0);
+    }
+
     if (!Exists(VirtualDiskManager.VirtualDiskFullFileName) && !Exists(Path.ChangeExtension(VirtualDiskManager.VirtualDiskFullFileName, ".sys")))
     {
         // Create Encrypted Virtual Disk

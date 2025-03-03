@@ -179,7 +179,6 @@ namespace Cloud
                 AutoStart = true;
                 Client?.Context.SecureStorage.Values.Set("QR", qr);
             }
-
             return result;
         }
 
