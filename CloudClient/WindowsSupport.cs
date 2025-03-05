@@ -171,7 +171,6 @@ namespace CloudClient
 
             Debug.WriteLine("Notify icon added");
 
-            // Aggiungi un ciclo di messaggi per mantenere la finestra attiva e visibile
             MSG msg;
             while (GetMessage(out msg, IntPtr.Zero, 0, 0))
             {

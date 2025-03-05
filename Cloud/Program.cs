@@ -5,10 +5,11 @@ using System.Net.Sockets;
 using System.Runtime;
 using System.Runtime.InteropServices;
 
+#if !DEBUG
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
 AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Set(); // Unlock semaphore in exit request
-//AppDomain.CurrentDomain.ProcessExit += new EventHandler(CloudSync.Util.RestartApplication); //restart application on end;
-// SystemExtra.Util.Notify("Test", "Hello word!");
+#endif
+
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
 if (!SystemExtra.Util.IsAdmin())
@@ -69,7 +70,8 @@ if (!new FileInfo(Static.CloudPath).Directory.Exists)
     throw new Exception("ERROR: Invalid cloud path!"); // Restart!
 }
 
-Func<int, bool> PortIsRearchable = (port) => {
+Func<int, bool> PortIsRearchable = (port) =>
+{
     using var tcpClient = new TcpClient();
     try
     {
@@ -108,7 +110,8 @@ var firstUrlParts = urls[0].Split(':');
 Static.Port = int.Parse(firstUrlParts[2]);
 #if DEBUG
 // if port i busy Increment port of +1 in debug mode
-if (PortIsRearchable(Static.Port)){
+if (PortIsRearchable(Static.Port))
+{
     Static.Port++;
     firstUrlParts[2] = Static.Port.ToString();
     urls[0] = string.Join(':', firstUrlParts);
@@ -207,7 +210,7 @@ Func<bool> portIsAvailable = () =>
 {
     try
     {
-        using TcpClient client = new TcpClient("localhost", Static.Port);
+        using var client = new TcpClient("localhost", Static.Port);
         Thread.Sleep(500);
         return false;
     }
@@ -249,6 +252,7 @@ else
             }
             else
             {
+                // if (!Debugger.IsAttached) // In debug mode the browser is open automatically by the system
                 Static.OpenUI?.Invoke();
             }
         });

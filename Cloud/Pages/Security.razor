@@ -14,7 +14,7 @@
     <input id="CloudPath" readonly class="form-control @vp" value="@Cloud.Static.CloudPath" />
 </div>
 
-@if (!string.IsNullOrEmpty(BackupManager.Target))
+@if (BackupManager.EnabledAutoBackup)
 {
     <div class="alert alert-success my-3" role="alert">
         It is not possible to close the cloud area with a password if the backup operations are active! In terms of privacy, it makes no sense to deny access to this area and have a copy accessible in the backup area!

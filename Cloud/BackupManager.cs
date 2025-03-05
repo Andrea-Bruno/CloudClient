@@ -26,6 +26,9 @@ namespace Cloud
             AntiGitAlertAction?.Invoke(Alert);
         }
         static private AntiGitLibrary.Context AntiGithub;
+        
+        public static bool EnabledAutoBackup { get => AntiGithub.EnabledAutoBackup; set => AntiGithub.EnabledAutoBackup = value; }
+
         public static string Source { get => AntiGithub.SourceDir; set => AntiGithub.SourceDir = value; }
         public static string Target { get => AntiGithub.TargetDir; set => AntiGithub.TargetDir = value; }
         public static string Git { get => AntiGithub.GitDir; set => AntiGithub.GitDir = value; }

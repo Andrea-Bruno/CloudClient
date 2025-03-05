@@ -12,15 +12,15 @@
         {
             StartDetect();
             <div class="alert alert-danger" role="alert">
-                Your cloud box is not connected to the internet!<br />
-                An internet connection is required so that the Cloud is always reachable.
+                Your cloud box is not connected to the Internet!<br />
+                An Internet connection is required so that the Cloud is always reachable.
             </div>
         }
         else
         {
-            QRCodeGenerator qrGenerator = new QRCodeGenerator();
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
-            AsciiQRCode qrCode = new AsciiQRCode(qrCodeData);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(qr, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new AsciiQRCode(qrCodeData);
             string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
             <div style="display:inline-flex">
                 <pre style="font-size:x-small; cursor:none; font-family: monospace, monospace; line-height: initial">@qrCodeAsAsciiArt</pre>

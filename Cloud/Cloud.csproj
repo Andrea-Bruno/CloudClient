@@ -17,10 +17,6 @@
     	<RootNamespace>Cloud</RootNamespace>
 	</PropertyGroup>
 
-  <PropertyGroup>
-<!--    <BaseOutputPath>/tmp/OutputBin/</BaseOutputPath>-->
-  </PropertyGroup>
-
 	<ItemGroup>
 		<Content Include="Cloud.ico" />
 	</ItemGroup>
