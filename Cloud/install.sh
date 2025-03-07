@@ -36,7 +36,7 @@ if (( $EUID == 0 )); then
 fi
 
 # DOTNET runtime
-# NOTE: You can download the runtime from here: https://dotnet.microsoft.com/en-us/download/dotnet/9.0
+# NOTE: You can download the runtime from here: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 #       and unzip the *.tga.gz file in home/$YourUser/.dotnet (or in a different position)
 
 # Download the installer:
