@@ -13,7 +13,7 @@ namespace CloudClient
     public static class QrCodeDetector
     {
         public static string QrDetected { get; private set; }
-        private static readonly List<Action<string>> OnDetected = new List<Action<string>>();
+        private static readonly List<Action<string>> OnDetected = [];
         private static bool DetectQrCodeInProgress;
         public static bool _StopDetectQrCode;
         public static bool DisallowDetectQrCode { get { return _StopDetectQrCode; } set { _StopDetectQrCode = value; if (value == true) OnDetected.Clear(); } }

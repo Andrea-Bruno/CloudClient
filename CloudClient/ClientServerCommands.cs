@@ -14,7 +14,7 @@ namespace CloudClient
     /// </summary>
     public partial class Client : CloudBox.CloudBox
     {
-        public static readonly Dictionary<Command, uint> Counter = new Dictionary<Command, uint>(); // used for statistical purposes(saves numbers of executed commands)
+        public static readonly Dictionary<Command, uint> Counter = []; // used for statistical purposes(saves numbers of executed commands)
         /// <summary>
         /// Generally this method is called when the server responds to a command
         /// </summary>
@@ -170,7 +170,7 @@ namespace CloudClient
             Feedbacks[command] = feedback;
             OnCommandFeedback?.Invoke(command, feedback);
         }
-        private Dictionary<Command, string> Feedbacks = new Dictionary<Command, string>();
+        private Dictionary<Command, string> Feedbacks = [];
         public Action<Command, string> OnCommandFeedback { get; set; }
 
         // ============== StartProgram ===========================
@@ -195,7 +195,7 @@ namespace CloudClient
                 //isLocalhost = default;
                 SSHClientProcess = default;
                 Feedbacks.Remove(Command.GetSSHAccess);
-                if (SendCommand(ServerCloud, Command.GetSSHAccess, new[] { Encoding.UTF8.GetBytes(programToExecute) }))
+                if (SendCommand(ServerCloud, Command.GetSSHAccess, [Encoding.UTF8.GetBytes(programToExecute)]))
                 {
                     GetSSHAccessSemaphore = new AutoResetEvent(false);
                     if (!GetSSHAccessSemaphore.WaitOne(20000))
