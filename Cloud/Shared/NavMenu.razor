@@ -108,7 +108,7 @@
     @{
         var Features = UISupportGeneric.Util.GetAllClassInfoInNamespace("Cloud.Features", System.Reflection.Assembly.GetExecutingAssembly());
     }
-    <UISupportRazor.Menu ClassesInfo="@Features"></UISupportRazor.Menu>
+    <UISupportBlazor.Menu ClassesInfo="@Features"></UISupportBlazor.Menu>
 </div>
 @code {
     private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;

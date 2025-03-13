@@ -39,7 +39,7 @@
     <ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
     <ProjectReference Include="..\..\..\AppSync\AppSync.csproj" />
     <ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
-    <ProjectReference Include="..\..\..\UISupportRazor\UISupportRazor.csproj" />
+    <ProjectReference Include="..\..\..\UISupportBlazor\UISupportBlazor.csproj" />
     <ProjectReference Include="..\CloudClient\CloudClient.csproj" />
   </ItemGroup>
 
