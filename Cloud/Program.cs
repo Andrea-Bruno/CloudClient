@@ -224,9 +224,6 @@ Func<bool> portIsAvailable = () =>
     }
 };
 
-
-
-
 if (!SpinWait.SpinUntil(portIsAvailable, TimeSpan.FromSeconds(180)))
 {
     Debugger.Break();

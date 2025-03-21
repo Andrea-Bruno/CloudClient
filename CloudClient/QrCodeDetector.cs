@@ -45,10 +45,10 @@ namespace CloudClient
                     {
                         int attempt = 0;
                         do
-                        {
+                        {                           
                             attempt++;
                             if (attempt != 1)
-                                Thread.Sleep(60000); //pause for one minute for each attempt to locate the QR code (the device may have been connected in the meantime)
+                                Thread.Sleep(60000); // pause for one minute for each attempt to locate the QR code (the device may have been connected in the meantime)
                             var tasks = new List<Task>();
                             for (byte i = 0; i < 255; i++)
                             {
