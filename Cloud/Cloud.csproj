@@ -1,39 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
-	<PropertyGroup>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<OutputType>WinExe</OutputType>
-		<ApplicationIcon>Cloud.ico</ApplicationIcon>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<DisableScopedCssBundling>False</DisableScopedCssBundling>
-		<StartupObject>
-		</StartupObject>
-		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<TargetFramework>net9.0</TargetFramework>
-    	<RootNamespace>Cloud</RootNamespace>
-	</PropertyGroup>
 
-	<ItemGroup>
-		<Content Include="Cloud.ico" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\LICENSE.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="QRCoder" Version="1.6.0" />
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>WinExe</OutputType>
+    <ApplicationIcon>Cloud.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <RootNamespace>Cloud</RootNamespace>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="Cloud.ico" />
+    <Content Include="Components\Pages\Home.razor_" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md" Link="LICENSE.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+    <None Include="..\README.md" Link="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
@@ -43,49 +37,19 @@
     <ProjectReference Include="..\CloudClient\CloudClient.csproj" />
   </ItemGroup>
 
-
-  <!--=========== START: ONLY IN VS CODE ON LINUX ================-->
-  <!--<ItemGroup>    
-    <PackageReference Include="BytesExtension" Version="1.24.9.13" />
-		<ProjectReference Include="..\..\..\AntiGit\Backup\BackupLibrary.csproj" />
-		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
-		<ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudSync\CloudSync.csproj" />
-		<ProjectReference Include="..\..\..\SecureStorage\SecureStorage.csproj" />
-		<ProjectReference Include="..\..\..\EncryptedMessaging\CommunicationChannel\CommunicationChannel.csproj" />
-		<ProjectReference Include="..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj" />
-		<ProjectReference Include="..\..\..\UISupportGeneric\UISupportGeneric.csproj" />
-	</ItemGroup>-->
-  <!--=========== END: ONLY IN VS CODE ON LINUX ================-->
-
-
   <ItemGroup>
-		<Compile Update="Properties\Resources.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Resources.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-	<ItemGroup>
-		<EmbeddedResource Update="Properties\Resources.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="install.sh">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="INSTALL.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="redirect.html">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="uninstall.sh">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Data\" />
-	</ItemGroup>
+    <None Update="install.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="INSTALL.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="redirect.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="uninstall.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

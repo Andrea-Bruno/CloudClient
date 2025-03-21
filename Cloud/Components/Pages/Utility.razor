@@ -1,0 +1,105 @@
+﻿@page "/utility"
+
+<PageTitle>Utility</PageTitle>
+@if (Static.IsDebug)
+{
+    <button class="btn btn-primary my-3" @onclick=SendContact>Send my contact</button>
+    <br />
+    <button class="btn btn-primary my-3" @onclick=SendHashRoot>Send hash root</button>
+    <br />
+}
+<button class="btn btn-primary my-3" @onclick=OnQuitClick>Quit</button>
+<br />
+<button class="btn btn-primary my-3" @onclick=OnExportClick>Export passphrase</button>
+
+@if (Passphrase != null)
+{
+    <div class="alert alert-info">
+        @Passphrase
+    </div>
+}
+
+<div class="form-check form-switch">
+    <input class="form-check-input" checked="@Static.AutoStart" @onchange=OnChangeAutoStart type="checkbox" id="flexSwitchCheckDefault">
+    <label class="form-check-label" for="flexSwitchCheckDefault">Auto start</label>
+</div>
+
+@functions {
+    void OnExportClick()
+    {
+        Passphrase = Static.Client?.Context.My.GetPassphrase();
+        if (String.IsNullOrEmpty(Passphrase))
+            Passphrase = "The client is not logged in, so it is not possible to export the passphrase";
+    }
+    void OnQuitClick()
+    {
+        CloudSync.Util.DisallowRestartApplicationOnEnd = false;
+        System.Environment.Exit(0);
+    }
+    void SendContact()
+    {
+        var context = Static.Client?.Context;
+        if (context != null)
+        {
+            context.Messaging.SendContact(context.My.Contact, Static.Client.ServerCloud, false);
+        }
+    }
+    void SendHashRoot()
+    {
+        Static.Client?.Sync?.SendHashRoot();
+    }
+    void OnChangeAutoStart(ChangeEventArgs ea)
+    {
+        if (ea.Value is bool value)
+        {
+            Static.AutoStart = value;
+        }
+    }
+}
+
+@if (Directory.Exists(Util.CurrentPublicationPath))
+{
+    if (Util.PackageIsReady())
+    {
+        <button class="btn btn-success m-2" title="You can publish the application on the private store and allow users to update" @onclick=PublishCurrentApplication>Publish application</button>
+    }
+    else
+    {
+        <span class="alert-warning"><a target="_blank" href="https://learn.microsoft.com/en-us/visualstudio/deployment/quickstart-deploy-aspnet-web-app?view=vs-2022&tabs=folder">Publish the application to folder</a> from the development environment, to have the button here to update the application on the online repository</span>
+    }
+}
+<button class="btn btn-success m-2" title="Check for updates" @onclick=CheckForUpdates>Check for updates</button>
+@if (Message != null)
+{
+    <div class="alert @AlertType m-2" role="alert">
+        @Message
+    </div>
+}
+
+@code {
+    private void PublishCurrentApplication()
+    {
+        try
+        {
+            Util.PublishCurrentApplication();
+            SetMassage("Operation performed successfully!");
+        }
+        catch (Exception ex)
+        {
+            SetMassage(ex.Message, true);
+        }
+    }
+    private void CheckForUpdates()
+    {
+        SetMassage(Util.UpdateApplication());
+    }
+    private void SetMassage(string message, bool danger = false)
+    {
+        Message = message;
+        AlertType = danger ? "alert-danger" : "alert-info";
+    }
+    private string? Message = null;
+    private string? AlertType;
+
+    private string? Passphrase = null;
+}

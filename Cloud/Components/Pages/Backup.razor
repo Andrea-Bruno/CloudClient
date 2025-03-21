@@ -1,0 +1,86 @@
+﻿@page "/backup"
+
+<PageTitle>Backup</PageTitle>
+<h1>Backup settings</h1>
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">Source</span>
+    </div>
+    <input type="text" value="@BackupManager.Source" readonly class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+</div>
+
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" checked="@BackupManager.EnabledAutoBackup" @bind-value="@BackupManager.EnabledAutoBackup" id="flexCheckDefault">
+    <label class="form-check-label" for="flexCheckDefault">
+        Enabled automatic backup
+    </label>
+</div>
+
+<SurveyPrompt Title="Select a valid location for the backup (you must select a different disk than the main one, to allow recovery in case of hardware failure)" />
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">Target</span>
+    </div>
+    <input type="text" @onchange="@OnTargetChange" disabled=@DisabledTarget() BackupManager.Target value="@BackupManager.Target" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+</div>
+
+@if (!VirtualDiskManager.CloudPathIsReachable())
+{
+    <div class="alert alert-warning my-3" role="alert">
+        It is not possible to use the backup functions with the cloud area locked by the password!
+    </div>
+}
+else
+{
+    <button type="button" class="btn btn-primary" disabled=@DisabledButton() @onclick="StartBackup">Start Backup</button>
+}
+
+@if (BackupManager.BackupIsRunning)
+{
+    <div class="alert alert-success my-3" role="alert">
+        The backup is in progress, it will be completed soon!
+    </div>
+}
+else if (BackupManager.LastDailyBackupResult != null)
+{
+    var alert = BackupManager.LastDailyBackupResult.Item2 == BackupLibrary.Backup.Outcome.Successful ? "alert-info" : "alert-danger";
+    <div class="alert @alert my-3" role="alert">
+        The last backup was performed at: @BackupManager.LastDailyBackupResult.Item1<br>
+        The outcome was: @BackupManager.LastDailyBackupResult.Item2
+    </div>
+}
+
+<div class="alert alert-primary my-3" role="alert">
+    If the application is running, daily backups will still be performed automatically.
+</div>
+
+@functions {
+    static void OnTargetChange(Microsoft.AspNetCore.Components.ChangeEventArgs e)
+    {
+        if (e.Value is string value)
+        {
+            BackupManager.Target = value;
+        }
+    }
+    static void StartBackup()
+    {
+        StartOutcome = BackupManager.StartBackup();
+    }
+    static bool DisabledTarget()
+    {
+        if (!string.IsNullOrEmpty(BackupManager.Target))
+            return false;
+        return !VirtualDiskManager.CloudPathIsReachable();
+    }
+    static bool DisabledButton()
+    {
+        return BackupManager.BackupIsRunning || string.IsNullOrEmpty(BackupManager.Target);
+    }
+}
+
+
+@code {
+    static string? StartOutcome;
+}
+

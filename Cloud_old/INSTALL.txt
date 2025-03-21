@@ -1,0 +1,20 @@
+﻿Installation is very simple!
+
+========= OSX:
+
+From terminal run the command ./install.sh
+
+========= LINUX:
+
+From terminal run the command ./install-linux.sh
+
+========= WINDOWS:
+
+Unzip this package 
+
+(if it is a zip file)
+Copy all the files in the path where you want to run the application, for example on Windows you can create the directory "C:\Program Files\Cloud", and copy all the files in there.
+At this point run the Cloud.exe or Cloud file, at the first start you will be asked to install the open source frameworks of the dotnet support libraries (if not already installed on your machine), accept and continue.
+Once the installation is complete, you will find a link on your desktop with access to the cloud settings panel from your browser.
+Once you have connected your computer to the cloud using the panel and the pin supplied with the cloud, a Cloud folder will be created (accessible with a link from your desktop), everything placed in this folder and in the folders below will be synchronized in real time with the cloud, and that's it!
+Good day!

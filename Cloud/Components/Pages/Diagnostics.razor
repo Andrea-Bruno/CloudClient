@@ -1,0 +1,38 @@
+﻿@page "/Diagnostics"
+
+<PageTitle>Diagnostics</PageTitle>
+
+<h1>System logs</h1>
+
+
+@if (CloudClient == null)
+{
+    <p><em>Waiting for connection...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>File name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fileError in CloudClient.FileErrors)
+            {
+                <tr>
+                    <td>@fileError.Time.ToLocalTime()</td>
+                    <td>@fileError.Error</td>
+                    <td>@fileError.FileName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+
+    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
+}
+

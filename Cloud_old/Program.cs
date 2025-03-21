@@ -1,11 +1,8 @@
-using Cloud;
-using Cloud.Components;
+﻿using Cloud;
 using System.Diagnostics;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
-// ====================================== preliminary operations == START
 
 #if !DEBUG
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
@@ -49,13 +46,11 @@ if (!SpinWait.SpinUntil(() => !SystemExtra.Util.AppIsAlreadyRunning(), TimeSpan.
     return;
 }
 
-// ====================================== preliminary operations == END
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -225,6 +220,15 @@ Func<bool> portIsAvailable = () =>
 };
 
 
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+}
+app.UseStaticFiles();
+app.UseRouting();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
 
 
 if (!SpinWait.SpinUntil(portIsAvailable, TimeSpan.FromSeconds(180)))
@@ -275,24 +279,6 @@ else
         }
     }
 }
-
-
-
-
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-}
-
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-
-//app.Run();
 
 new Thread(() => app.Run()).Start();
 

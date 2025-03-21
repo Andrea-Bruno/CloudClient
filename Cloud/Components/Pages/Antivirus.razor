@@ -1,0 +1,36 @@
+﻿@page "/antivirus"
+
+<PageTitle>Antivirus warnings</PageTitle>
+
+<h1>Antivirus warnings</h1>
+
+@if (CloudClient == null)
+{
+    <p><em>Waiting for connection...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Warning description</th>
+                <th>File name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var warning in CloudClient.AntivirusWarnings)
+            {
+                <tr>
+                    <td>@warning.Time.ToLocalTime()</td>
+                    <td>@warning.Error</td>
+                    <td>@warning.FileName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;
+}
+
