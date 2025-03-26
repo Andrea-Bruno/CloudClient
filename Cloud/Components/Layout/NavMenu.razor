@@ -99,6 +99,12 @@
         </div>
 
     </nav>
+    @* Component to add for dynamic rendering of AI-generated content *@
+    @{
+        //var panels = UISupportBlazor.Support.GetAllClassInfo(HttpContextAccessor.HttpContext);
+        var panels = UISupportGeneric.Util.GetAllClassInfoInNamespace("Cloud.Panels", System.Reflection.Assembly.GetExecutingAssembly());
+    }
+    <UISupportBlazor.Menu ClassInfoEnumerable="@panels"></UISupportBlazor.Menu>
 </div>
 @code{
     private CloudBox.CloudBox CloudClient = CloudBox.CloudBox.LastInstance;

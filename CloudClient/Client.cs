@@ -44,6 +44,14 @@ namespace CloudClient
             }
         }
 
+        public void Quit()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                WindowsSupport.Quit();
+            }
+        }
+
         private void OnLocalSyncStatusChanges(Sync.SyncStatus syncStatus, int pendingFiles)
         {
             IconStatus currentStatus;

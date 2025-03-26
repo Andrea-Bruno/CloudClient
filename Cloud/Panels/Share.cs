@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Cloud.Features
+namespace Cloud.Panels
 {
     /// <summary>
     /// File sharing

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Cloud.Features
+namespace Cloud.Panels
 {
     /// <summary>
     /// Panel for launching cloud applications in local terminal mode

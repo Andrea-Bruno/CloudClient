@@ -179,6 +179,8 @@ namespace CloudClient
             }
         }
 
+        public static void Quit() => PostQuitMessage(0);
+
         public static void Dispose()
         {
             Shell_NotifyIcon(NIM_DELETE, ref _notifyIconData);
@@ -190,16 +192,12 @@ namespace CloudClient
         {
             var resourceName = "CloudClient.Resources.CloudIcon" + iconStatus.ToString() + ".png";
             var assembly = Assembly.GetExecutingAssembly();
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                    throw new Exception($"Resource '{resourceName}' not found.");
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                throw new Exception($"Resource '{resourceName}' not found.");
 
-                using (var bitmap = new Bitmap(stream))
-                {
-                    return bitmap.GetHicon();
-                }
-            }
+            using var bitmap = new Bitmap(stream);
+            return bitmap.GetHicon();
         }
 
         static private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
@@ -256,10 +254,8 @@ namespace CloudClient
                 CreateNoWindow = true
             };
 
-            using (var process = Process.Start(processInfo))
-            {
-                process.WaitForExit();
-            }
+            using var process = Process.Start(processInfo);
+            process.WaitForExit();
         }
 
         static public void UpdateStatusIcon(Client.IconStatus newStatus)

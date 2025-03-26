@@ -160,7 +160,7 @@ namespace Cloud
             SemaphoreCreateClient.Set();
         }
 
-        public static ManualResetEvent SemaphoreCreateClient = new ManualResetEvent(false);
+        internal static ManualResetEvent SemaphoreCreateClient = new ManualResetEvent(false);
 
         /// <summary>
         /// Create a new account and login to cloud server

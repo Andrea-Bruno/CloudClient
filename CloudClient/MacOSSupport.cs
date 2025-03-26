@@ -69,10 +69,8 @@ namespace CloudClient
                 CreateNoWindow = true
             };
 
-            using (var process = Process.Start(processInfo))
-            {
-                process.WaitForExit();
-            }
+            using var process = Process.Start(processInfo);
+            process.WaitForExit();
         }
 
         static public void UpdateStatusIcon(Client.IconStatus newStatus)
@@ -105,14 +103,12 @@ namespace CloudClient
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                    throw new Exception($"Resource '{resourceName}' not found.");
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+                throw new Exception($"Resource '{resourceName}' not found.");
 
-                var data = NSData.FromStream(stream);
-                return new NSImage(data);
-            }
+            var data = NSData.FromStream(stream);
+            return new NSImage(data);
         }
     }
 }

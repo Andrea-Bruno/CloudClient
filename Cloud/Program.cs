@@ -7,10 +7,16 @@ using System.Runtime.InteropServices;
 
 // ====================================== preliminary operations == START
 
-#if !DEBUG
+//#if !DEBUG
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
-AppDomain.CurrentDomain.ProcessExit += (s, e) => Static.SemaphoreCreateClient.Set(); // Unlock semaphore in exit request
-#endif
+AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+{
+    // Unlock semaphore in exit request
+    Static.SemaphoreCreateClient.Set();
+    Static.Client?.Quit();
+};
+//#endif
+
 
 Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory); // The UI fails if you launch the app from an external path without this command line
 
