@@ -7,6 +7,8 @@ namespace Cloud.Panels
     /// </summary>
     public static class Share
     {
+        internal static bool Hidden => Static.Client?.Sync == null;
+
         /// <summary>
         /// Locate a file to share
         /// </summary>

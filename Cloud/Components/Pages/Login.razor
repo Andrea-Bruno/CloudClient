@@ -84,7 +84,7 @@ else if (!LoginIsRunning)
 
 
             <div contenteditable="true" aria-multiline="true">
-                <label for="Passphrase">Passphrase (important: If you have already used zero knowledge, you must use the same passphrase)</label>
+                <label for="Passphrase">Passphrase (important: A different setting than the one you used for the first time will prevent you from logging into the cloud!)</label>
                 <textarea id="Passphrase" rows="3" class="form-control" @bind="Passphrase" />
             </div>
         }
@@ -103,7 +103,7 @@ else if (!LoginIsRunning)
     if (LoginResult == CloudClient.Client.LoginResult.WrongQR)
         alert = "Wrong QR code: This is not a valid code for this application!";
     else if (LoginResult == CloudClient.Client.LoginResult.WrongPassword)
-        alert = "Wrong pin!";
+        alert = "Wrong pin or passphrase!";
     else if (LoginResult == CloudClient.Client.LoginResult.RemoteHostNotReachable)
         alert = "The cloud is unreachable: Is the cloud active and connected to a stable Internet line?";
     else if (LoginResult == CloudClient.Client.LoginResult.LicenseExpired)
@@ -222,7 +222,6 @@ else if (!LoginIsRunning)
         ErrorCommunication = errorId.ToString() + " (" + description + ")";
         Static.Client?.AddFileError(ErrorCommunication, null);
     }
-
 }
 
 @code {

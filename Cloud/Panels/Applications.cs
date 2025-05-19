@@ -12,6 +12,8 @@ namespace Cloud.Panels
 
         }
 
+        internal static bool Hidden => Static.Client?.Sync == null;
+
         const string notConnected = "The client is not connected to the cloud!";
         const string timeoutError = "Timeout error: The cloud is currently unreachable!";
 

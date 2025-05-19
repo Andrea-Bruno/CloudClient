@@ -95,7 +95,7 @@ namespace CloudClient
             }
             serverPublicKey ??= ServerPublicKey; // serverPublicKey = Context.SecureStorage.Values.Get("ServerPublicKey", null);
             SetServerCloudContact(serverPublicKey);
-            LoginCredential credential = TmpLoginPin == null ? null : new LoginCredential { Pin = TmpLoginPin, PublicKey = Context.My.GetPublicKeyBinary() };
+            LoginCredential credential = TmpLoginPin == null ? null : new LoginCredential { Pin = TmpLoginPin, PublicKey = Context.My.GetPublicKeyBinary()};
             StartSync(credential, ZeroKnowledgeEncryptionMasterKey);
             return;
         }
