@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace CloudClient
 {
@@ -190,15 +191,32 @@ namespace CloudClient
 
         static private IntPtr LoadIconFromResources(Client.IconStatus iconStatus)
         {
-            var resourceName = "CloudClient.Resources.CloudIcon" + iconStatus.ToString() + ".png";
-            var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
-                throw new Exception($"Resource '{resourceName}' not found.");
+            lock (_lock)
+            {
+                var resourceName = "CloudClient.Resources.CloudIcon" + iconStatus.ToString() + ".png";
 
-            using var bitmap = new Bitmap(stream);
-            return bitmap.GetHicon();
+                var assembly = Assembly.GetExecutingAssembly();
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream == null)
+                    throw new Exception($"Resource '{resourceName}' not found.");
+
+                using var bitmap = new Bitmap(stream);
+                try
+                {
+                    Thread.Sleep(100);
+                    return bitmap.GetHicon();
+                }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    throw ex;
+#endif
+                }
+
+            }
         }
+
+        static private object _lock = new object();
 
         static private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
         {
@@ -208,11 +226,11 @@ namespace CloudClient
             {
                 if (lParam.ToInt32() == WM_LBUTTONDOWN)
                 {
-                    OpenFolder(_cloudPath);
+                    _openUI?.Invoke();
                 }
                 else if (lParam.ToInt32() == WM_RBUTTONDOWN)
                 {
-                    _openUI?.Invoke();
+                    OpenFolder(_cloudPath);
                 }
             }
             else if (msg == WM_DESTROY)

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Runtime.InteropServices;
 
-// ====================================== preliminary operations == START
+#region preliminary operations
 
 //#if !DEBUG
 AppDomain.CurrentDomain.UnhandledException += CloudSync.Util.UnhandledException; //it catches application errors in order to prepare a log of the events that cause the crash
@@ -55,7 +55,7 @@ if (!SpinWait.SpinUntil(() => !SystemExtra.Util.AppIsAlreadyRunning(), TimeSpan.
     return;
 }
 
-// ====================================== preliminary operations == END
+#endregion
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -154,8 +154,10 @@ if (virtualDisk)
     var virtualDiskFileInfo = new FileInfo(VirtualDiskManager.VirtualDiskFullFileName);
     var vdPassword = VirtualDiskManager.VirtualDiskPassword;
 
+    
     if (false)
     {   // ====== RESET ======
+        Static.Logout();
         SystemExtra.Util.UnmountVirtualDiskWindow(VirtualDiskManager.VirtualDiskFullFileName);
         var pathInfo = new DirectoryInfo(Static.CloudPath);
         pathInfo.Attributes &= ~FileAttributes.ReadOnly;

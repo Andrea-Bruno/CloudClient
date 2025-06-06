@@ -1,4 +1,5 @@
-﻿@page "/utility"
+﻿@inject NavigationManager NavigationManager
+@page "/utility"
 
 <PageTitle>Utility</PageTitle>
 @if (Static.IsDebug)
@@ -34,6 +35,7 @@
     void OnQuitClick()
     {
         CloudSync.Util.DisallowRestartApplicationOnEnd = false;
+        NavigationManager.NavigateTo("about:blank", true);
         System.Environment.Exit(0);
     }
     void SendContact()

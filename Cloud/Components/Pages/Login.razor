@@ -43,7 +43,7 @@
 @if (Static.Client != null && !LoginIsRunning)
 {
     <button class="btn btn-primary my-3" @onclick="Logout">Logout</button>
-    var ETA = Static.Client?.Sync?.SyncETA();
+    var ETA = Static.Client?.Sync?.ClientToolkit?.SyncETA();
     if (ETA != DateTime.MinValue && ETA is DateTime eta)
     {
         <div class="alert alert-info" role="alert">

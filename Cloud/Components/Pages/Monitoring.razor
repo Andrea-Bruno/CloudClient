@@ -12,7 +12,7 @@
 }
 else
 {
-    var pendingOperations = @Static.Client?.Sync?.PendingOperations;
+    var pendingOperations = @Static.Client?.Sync?.ClientToolkit?.PendingOperations;
     if (pendingOperations != null && pendingOperations != 0)
     {
         <div class="alert alert-info" role="alert">
@@ -77,12 +77,27 @@ else
             }
         </tbody>
     </table>
+    @if (Static.IsDebug)
+    {
+        <button class="btn btn-primary my-3" @onclick=SendHashRoot>Send hash root</button>
+        <button class="btn btn-primary my-3" @onclick=ExecuteNext>Execute Next</button>
+        <br />
+    }
 }
 @functions {
     void Refresh()
     {
         InvokeAsync(StateHasChanged);
     }
+    void SendHashRoot()
+    {
+        Static.Client?.Sync?.SendHashRoot();
+    }
+    void ExecuteNext()
+    {
+        Static.Client?.Sync?.ExecuteNext();
+    }
+
 }
 @code {
 

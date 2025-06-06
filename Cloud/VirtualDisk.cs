@@ -218,9 +218,9 @@ namespace Cloud
                     {
                         Camouflage(VirtualDiskFullFileName, hash);
                     }
-                    if (File.GetAttributes(VirtualDiskFullFileName).HasFlag(FileAttributes.Directory))
+                    if (Directory.Exists(VirtualDiskFullFileName))
                         Directory.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
-                    else
+                    else if (File.Exists(VirtualDiskFullFileName))
                         File.Move(VirtualDiskFullFileName, Path.ChangeExtension(VirtualDiskFullFileName, ".sys"));
                 }
                 LockVirtualDiskRunning--;

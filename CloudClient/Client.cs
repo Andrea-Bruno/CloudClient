@@ -160,7 +160,7 @@ namespace CloudClient
                     TmpLoginPin = null;
                     Sync.OnLoginCompleted = new AutoResetEvent(false);
                     if (Sync.OnLoginCompleted.WaitOne(60000))
-                        return Sync.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
+                        return Sync.ClientToolkit.LoginError ? LoginResult.WrongPassword : LoginResult.Successful;
                     else if (context.LicenseExpired)
                         return LoginResult.LicenseExpired;
                     else if (Sync == null)
