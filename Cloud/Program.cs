@@ -69,10 +69,14 @@ var configuration = app.Configuration;
 
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
-#if DEBUG
+//#if DEBUG
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    Static.CloudPath = @"C:\TestCloud";
-#endif
+{
+    var cloudTestPath = @"C:\TestCloud";
+    if (Directory.Exists(cloudTestPath))
+        Static.CloudPath = cloudTestPath;
+}
+//#endif
 
 if (!new FileInfo(Static.CloudPath).Directory.Exists)
 {
@@ -154,7 +158,7 @@ if (virtualDisk)
     var virtualDiskFileInfo = new FileInfo(VirtualDiskManager.VirtualDiskFullFileName);
     var vdPassword = VirtualDiskManager.VirtualDiskPassword;
 
-    
+
     if (false)
     {   // ====== RESET ======
         Static.Logout();

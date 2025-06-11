@@ -211,6 +211,7 @@ namespace CloudClient
 #if DEBUG
                     throw ex;
 #endif
+                    return default;
                 }
 
             }
