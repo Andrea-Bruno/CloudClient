@@ -69,6 +69,8 @@ var configuration = app.Configuration;
 
 Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue(typeof(string), "CloudPath", null), false);
 
+EncryptedMessaging.Context.UsePullPushDataChannel = (bool)configuration.GetValue(typeof(bool), "UsePullPushDataChannel", true); // Use pull-push data channel for encrypted messaging
+
 //#if DEBUG
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
