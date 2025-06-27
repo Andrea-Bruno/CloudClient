@@ -71,14 +71,14 @@ Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue
 
 EncryptedMessaging.Context.UsePullPushDataChannel = (bool)configuration.GetValue(typeof(bool), "UsePullPushDataChannel", true); // Use pull-push data channel for encrypted messaging
 
-//#if DEBUG
+#if DEBUG
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     var cloudTestPath = @"C:\TestCloud";
     if (Directory.Exists(cloudTestPath))
         Static.CloudPath = cloudTestPath;
 }
-//#endif
+#endif
 
 if (!new FileInfo(Static.CloudPath).Directory.Exists)
 {
@@ -107,6 +107,9 @@ if (Debugger.IsAttached) // In debug mode, If the server is running locally then
     if (PortIsRearchable(5050))
         Static.EntryPoint = IPAddress.Loopback.ToString(); // Connect to local server for debug!
 }
+
+//if (string.IsNullOrEmpty(Static.EntryPoint))
+//    Static.EntryPoint = "server.tc0.it"; // default entry point 
 
 var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(';');
 
@@ -286,10 +289,6 @@ else
         }
     }
 }
-
-
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
