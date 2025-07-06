@@ -81,6 +81,7 @@ else
     {
         <button class="btn btn-primary my-3" @onclick=SendHashRoot>Send hash root</button>
         <button class="btn btn-primary my-3" @onclick=ExecuteNext>Execute Next</button>
+        <button class="btn btn-primary my-3" @onclick=SendReadyMessage>Send ready message</button>
         <br />
     }
 }
@@ -97,7 +98,10 @@ else
     {
         Static.Client?.Sync?.ExecuteNext();
     }
-
+    void SendReadyMessage()
+    {
+        Static.Client?.Sync?.SendReadyMessage();
+    }
 }
 @code {
 

@@ -48,6 +48,41 @@ NOTE: Administrator/root privileges are required to allow the application to syn
 The application does not collect or send personal data, all communication is exclusively with your private cloud or cloud service.
 Since the privacy policy is trustless (you don't have to trust us but it is the code that demonstrates honesty), the source code irrefutably demonstrates that our work is sincere and loyal and that your data is protected, and the communications between client and Cloud server are impossible to intercept because they are covered by military-grade encryption systems with digitally signed packets to prevent "man in the middle" attacks in a preventive manner. The versions that we publish on the store are the same (without any modifications) that you can find here in source format.
 
+
+# The Illusion of Data Protection: How EU Regulations Enable Mass Surveillance and the Trustless Solution
+
+In Europe, the General Data Protection Regulation (GDPR) was introduced with the noble intention of safeguarding citizens' privacy by imposing strict rules on the custody and processing of personal data. On the surface, these regulations appear robust, designed to prevent misuse and unauthorized profiling. Yet, beneath this façade of compliance lies a disturbing reality: these very rules have become a tool for systemic data exploitation. The GDPR, rather than being a shield against surveillance, has instead institutionalized a framework that facilitates the mass profiling of individuals—often under the guise of legality.  
+
+The revelations brought to light by Edward Snowden and the subsequent *Datagate* scandal exposed a global surveillance apparatus where corporations and intelligence agencies collaborated in harvesting and analyzing personal data on an unprecedented scale. This was not mere speculation; the investigative journalism that uncovered these practices was awarded the Pulitzer Prize, cementing its credibility. The scandal revealed that personal data was not just being stored—it was being weaponized for purposes ranging from corporate espionage to political manipulation.  
+
+What makes this even more alarming is that the very entities implicated in these breaches—Amazon, Google, Microsoft—now dominate Europe’s cloud storage market, operating in what amounts to a de facto monopoly. Logically, these corporations should have been barred from handling European citizens' data. Instead, they not only continue to operate but also provide cloud infrastructure to governments and national cybersecurity agencies. This paradox underscores a fundamental truth: the regulatory landscape is not shaped by genuine concern for privacy, but by corporate lobbying power. The result is a system where legislation, rather than protecting individuals, ensures that data flows seamlessly into the hands of those who seek to control and categorize entire populations.  
+
+### The Fallacy of Certifications and the Rise of Trustless Security  
+
+The cybersecurity industry has long relied on certifications and compliance standards as markers of trust. But this approach is fundamentally flawed. If a system requires external validation to prove its security, then it is inherently insecure—because it demands that users place blind faith in the certifying authority. The reality is that true security does not stem from bureaucratic approvals, but from mathematical certainty.  
+
+This is where *trustless* technology revolutionizes data protection. Unlike traditional systems, which depend on centralized trust (and are therefore vulnerable to manipulation), trustless architectures ensure security through cryptographic algorithms that eliminate the need for intermediaries. The concept was pioneered by Bitcoin—a decentralized blockchain network that operates without certifications, where nodes exist in untrusted environments, yet the system remains unhackable because its security is intrinsic, not granted by external validators.  
+
+Our data custody solution is built entirely on this principle. By leveraging *zero-knowledge encryption*, we ensure that no third party—whether a cloud provider, a government, or a malicious actor—can access or analyze user data. Here’s how it works:  
+
+1. **Client-Side Encryption**: Before any data leaves a user’s device, it is encrypted using a 512-bit derived key, generated from a 12 or 24-word passphrase. This means the data is indecipherable the moment it is stored or transmitted.  
+2. **No Server-Side Access**: Even if the data resides on a server, the custodian cannot read it. The encryption keys never leave the user’s control.  
+3. **Secure Key Custody**: We provide hardware solutions, such as encrypted USB tokens, allowing users to physically possess their decryption keys. For example, a patient’s medical records can be stored in the cloud, but a doctor can only access them if the patient authorizes it by connecting their key.  
+
+### A System Designed for a Hostile World  
+
+The current regulatory environment is not an accident—it is a carefully constructed illusion, designed to maintain the dominance of surveillance-capable corporations. The GDPR’s loopholes and certifications serve as a smokescreen, enabling data harvesting under the pretense of compliance. Our solution bypasses this deception entirely by removing trust from the equation.  
+
+Consider this: If a European hospital stores patient records on a "GDPR-compliant" cloud service operated by a Datagate-implicated corporation, those records are only as secure as the corporation’s willingness to follow the rules—rules that have already been proven unreliable. In contrast, with our trustless system, even if the data is stored on that same compromised cloud, it remains encrypted, unreadable, and entirely under the patient’s control.  
+
+### Conclusion: Reclaiming Privacy in an Age of Surveillance  
+
+The fight for true data privacy is not just a technical challenge—it is a battle against systemic exploitation. The existing regulatory framework, far from being a safeguard, is a facilitator of mass profiling. Trustless technology dismantles this machinery by ensuring that security is no longer a matter of policy, but of mathematics.  
+
+We do not ask users to trust us—we ask them to trust encryption. Because in a world where corporations and governments have repeatedly betrayed public trust, the only real security is the kind that requires no faith at all.  
+
+Our solution is not just an alternative. It is the *only* alternative.
+
 ## dependencies:
 
 The libraries that are the engine of this app (and represent a dependency), must be downloaded from here:
