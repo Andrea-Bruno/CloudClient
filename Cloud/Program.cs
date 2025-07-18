@@ -71,14 +71,14 @@ Static.CloudPath = CloudBox.CloudBox.GetCloudPath((string)configuration.GetValue
 
 EncryptedMessaging.Context.UsePullPushDataChannel = (bool)configuration.GetValue(typeof(bool), "UsePullPushDataChannel", true); // Use pull-push data channel for encrypted messaging
 
-#if DEBUG
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-{
-    var cloudTestPath = @"C:\TestCloud";
-    if (Directory.Exists(cloudTestPath))
-        Static.CloudPath = cloudTestPath;
-}
-#endif
+//#if DEBUG
+//if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+//{
+//    var cloudTestPath = @"C:\TestCloud";
+//    if (Directory.Exists(cloudTestPath))
+//        Static.CloudPath = cloudTestPath;
+//}
+//#endif
 
 if (!new FileInfo(Static.CloudPath).Directory.Exists)
 {
