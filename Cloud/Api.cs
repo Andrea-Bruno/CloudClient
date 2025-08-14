@@ -137,5 +137,27 @@ namespace API
             return JsonDocument.Parse(responseData);
         }
 
+        /// <summary>
+        /// Create a new cloud service subscription
+        /// Note: If the cloud with the subscription ID already exists, it will not be created and the subscription period for the existing cloud will be extended.
+        /// </summary>
+        /// <param name="storageSpaceGb">Space required in GB</param>
+        /// <param name="durationOfSubscriptionInDays">Day duration of subscription</param>
+        /// <returns>Returns the encrypted connection QR code and cloud ID</returns>
+        public async Task<JsonDocument> CreateNewSubscription(Int32 storageSpaceGb, Int32 durationOfSubscriptionInDays)
+        {
+            using var httpClient = _clientFactory.CreateClient();
+            var requestData = new
+            {
+                storageSpaceGb = storageSpaceGb,
+                durationOfSubscriptionInDays = durationOfSubscriptionInDays,
+            };
+            var jsonContent = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+            using var response = await httpClient.PostAsync(_apiEntryPoint + "/createnewsubscription", jsonContent).ConfigureAwait(false);
+            var responseData = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(responseData)) return default;
+            return JsonDocument.Parse(responseData);
+        }
+
     }
 }

@@ -18,7 +18,12 @@
     {
         QR = CloudClient.QrCodeDetector.QrDetected;
     }
-    if (string.IsNullOrEmpty(Pin)){
+    if (string.IsNullOrEmpty(QR))
+    {
+        QR = Static.Storage.Values.Get("qrEncrypted", null);
+    }
+    if (string.IsNullOrEmpty(Pin))
+    {
         Pin = System.Diagnostics.Debugger.IsAttached ? "777777" : "";
     }
     if (!UseMyPassphrase && string.IsNullOrEmpty(Passphrase))
@@ -53,7 +58,40 @@
 }
 else if (!LoginIsRunning)
 {
-    <button class="btn btn-primary my-3" @onclick="Exit">Exit</button>
+    <div class="form-check my-2">
+        <p>Create an anonymous account on our cloud with just one click (no personal data required)</p>
+        <input class="form-check-input" type="checkbox" id="TermsAccepted" @bind="TermsAccepted">
+        <label class="form-check-label" for="TermsAccepted">
+            I accept the <a class="link-primary link-underline" style="cursor:pointer;" @onclick="() => ShowTermsModal = true">terms and conditions</a> of the service.
+        </label>
+    </div>
+    <button class="btn btn-primary my-3" @onclick="CreateNewAccount" disabled="@(TermsAccepted == false)">
+        Create anonymous account
+    </button>
+
+
+    @if (ShowTermsModal)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Terms and Conditions of Use</h5>
+                        <button type="button" class="btn-close" @onclick="() => ShowTermsModal = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            We are focused on creating high-tech cybersecurity services, and this project falls within this scope. <br />
+                            The service is offered as is, without any liability. The open-source code shows how synchronizations occur; it is up to the user to check for any bugs. The service may be discontinued at any time without notice, and the data in the cloud may be lost. Users subject to legislation whose use or the service as offered violates the terms of the law are not authorized to use the service.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" @onclick="() => ShowTermsModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <h2>Connect to the cloud server</h2>
 
@@ -108,7 +146,8 @@ else if (!LoginIsRunning)
         alert = "The cloud is unreachable: Is the cloud active and connected to a stable Internet line?";
     else if (LoginResult == CloudClient.Client.LoginResult.LicenseExpired)
         alert = "Connection refused: Check if the license has expired!";
-    else if (customAlert != null){
+    else if (customAlert != null)
+    {
         alert = customAlert;
         customAlert = null;
     }
@@ -146,9 +185,9 @@ else if (!LoginIsRunning)
 
 <style>
     .e-input-eye:before {
-    content: '\01F441';
-    /*        font-family: e-icons; */
-    font-size: 32px;
+        content: '\01F441';
+        /*        font-family: e-icons; */
+        font-size: 32px;
     }
 </style>
 
@@ -164,10 +203,25 @@ else if (!LoginIsRunning)
         Static.Logout();
     }
 
-    private void Exit()
+    private async Task CreateNewAccount()
     {
-        CloudSync.Util.DisallowRestartApplicationOnEnd = false;
-        Environment.Exit(0);
+        var schema = Static.EntryPoint == "127.0.0.1" ? "http://" : "https://";
+        var port = Static.EntryPoint == "127.0.0.1" ? ":5001" : null;
+        var entryPoint = schema + Static.EntryPoint + port + "/api";
+        var api = new API.CloudServerWebUIApiCommandsClient(entryPoint);
+        var result = await api.CreateNewSubscription(50, 90);
+        var pin = result.RootElement.GetProperty("Pin").GetString();
+        var idHex = result.RootElement.GetProperty("IdHex").GetString();
+        var qrEncrypted = result.RootElement.GetProperty("QrEncrypted").GetString();
+        var cloudId = result.RootElement.GetProperty("CloudId").GetUInt64();
+
+        Static.Storage.Values.Set(nameof(idHex), idHex);
+        Static.Storage.Values.Set(nameof(qrEncrypted), qrEncrypted);
+        Static.Storage.Values.Set(nameof(cloudId), cloudId);
+
+
+        // Static.CreateNewAccount();
+        // Refresh();
     }
 
     bool RefreshStatus()
@@ -230,6 +284,8 @@ else if (!LoginIsRunning)
         Status = Static.Client == null ? null : Static.Client.Status;
         StartRefreshStatus();
     }
+    public bool TermsAccepted { get; set; } = false;
+    public bool ShowTermsModal { get; set; } = false;
     string? Status;
     string? OldStatus;
     static CloudClient.Client.LoginResult LoginResult;
@@ -255,7 +311,8 @@ else if (!LoginIsRunning)
     private void HandleValidSubmit()
     {
         byte[]? zeroKnowledgeEncryptionMasterKey = null;
-        if (passphraseShow && !string.IsNullOrEmpty(Passphrase)){
+        if (passphraseShow && !string.IsNullOrEmpty(Passphrase))
+        {
             try
             {
                 var key = Static.GenerateKeyFromPassphrase(Passphrase);
@@ -294,3 +351,4 @@ else if (!LoginIsRunning)
         });
     }
 }
+
