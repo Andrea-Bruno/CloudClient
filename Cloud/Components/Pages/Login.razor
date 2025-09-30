@@ -24,6 +24,10 @@
     }
     if (string.IsNullOrEmpty(Pin))
     {
+        Pin = NewPin;
+    }
+    if (string.IsNullOrEmpty(Pin))
+    {
         Pin = System.Diagnostics.Debugger.IsAttached ? "777777" : "";
     }
     if (!UseMyPassphrase && string.IsNullOrEmpty(Passphrase))
@@ -305,6 +309,7 @@ else if (!LoginIsRunning)
 
     public string QR { get; set; } //   CloudClient.QrCodeDetector.QrDetected;
     public string Pin { get; set; } // System.Diagnostics.Debugger.IsAttached ? "777777" : "";
+    public static string NewPin { get; set; } // The pin that was generated when you created a new account
     public string Passphrase { get; set; }
     string? customAlert { get; set; }
 
