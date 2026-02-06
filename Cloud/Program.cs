@@ -100,7 +100,7 @@ Func<int, bool> PortIsRearchable = (port) =>
 
 };
 
-Static.EntryPoint = (string)configuration.GetValue(typeof(string), "EntryPoint", null);
+Static.EntryPoint = (string?)configuration.GetValue(typeof(string), "EntryPoint", null);
 
 if (Debugger.IsAttached) // In debug mode, If the server is running locally then set localhost as entry point to use the local server
 {
@@ -108,8 +108,8 @@ if (Debugger.IsAttached) // In debug mode, If the server is running locally then
         Static.EntryPoint = IPAddress.Loopback.ToString(); // Connect to local server for debug!
 }
 
-//if (string.IsNullOrEmpty(Static.EntryPoint))
-//    Static.EntryPoint = "server.tc0.it"; // default entry point 
+if (string.IsNullOrEmpty(Static.EntryPoint))
+    Static.EntryPoint = "server.tc0.it"; // default entry point 
 
 var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(';');
 

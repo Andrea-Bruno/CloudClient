@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @using Microsoft.Extensions.Logging
 @using System.Runtime.InteropServices
+@using QRCoder
 @inject ILogger<Index> Logger
 @{
     if (Static.Client != null)
@@ -21,10 +22,6 @@
     if (string.IsNullOrEmpty(QR))
     {
         QR = Static.Storage.Values.Get("qrEncrypted", null);
-    }
-    if (string.IsNullOrEmpty(Pin))
-    {
-        Pin = NewPin;
     }
     if (string.IsNullOrEmpty(Pin))
     {
@@ -62,17 +59,20 @@
 }
 else if (!LoginIsRunning)
 {
-    <div class="form-check my-2">
-        <p>Create an anonymous account on our cloud with just one click (no personal data required)</p>
-        <input class="form-check-input" type="checkbox" id="TermsAccepted" @bind="TermsAccepted">
-        <label class="form-check-label" for="TermsAccepted">
-            I accept the <a class="link-primary link-underline" style="cursor:pointer;" @onclick="() => ShowTermsModal = true">terms and conditions</a> of the service.
-        </label>
-    </div>
-    <button class="btn btn-primary my-3" @onclick="CreateNewAccount" disabled="@(TermsAccepted == false)">
-        Create anonymous account
-    </button>
-
+    string qrEncrypted = Static.Storage.Values.Get(nameof(qrEncrypted), null);
+    if (QR == null || System.Diagnostics.Debugger.IsAttached) // Avoid the abuse of creating multiple free accounts for those who already have one
+    {
+        <div class="form-check my-2">
+            <p>Create an anonymous account on our cloud with just one click (no personal data required)</p>
+            <input class="form-check-input" type="checkbox" id="TermsAccepted" @bind="TermsAccepted">
+            <label class="form-check-label" for="TermsAccepted">
+                I accept the <a class="link-primary link-underline" style="cursor:pointer;" @onclick="() => ShowTermsModal = true">terms and conditions</a> of the service.
+            </label>
+        </div>
+        <button class="btn btn-primary my-3" @onclick="CreateNewAccount" disabled="@(TermsAccepted == false)">
+            Create anonymous account
+        </button>
+    }
 
     @if (ShowTermsModal)
     {
@@ -166,6 +166,10 @@ else if (!LoginIsRunning)
         <div class="alert @NotificationColor" role="alert">
             Cloud notification: <strong>@Notification</strong>
         </div>
+        if (Code2FA != null)
+        {
+            
+        }
     }
     if (SyncStatus != null)
     {
@@ -174,6 +178,52 @@ else if (!LoginIsRunning)
         </div>
     }
 }
+
+@if (Code2FA != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Save Your Credentials</h5>
+                    <button type="button" class="btn-close" @onclick="() => Code2FA = null"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Important:</strong> Save these credentials securely!
+                    </div>
+                    <p>
+                        <strong>1. Setup 2FA App:</strong><br />
+                        Scan this QR code with your mobile 2FA authenticator app:
+                    </p>
+                    <div class="text-center my-3">
+                        @{
+                            using var qrGenerator = new QRCodeGenerator();
+                            using var qrCodeData = qrGenerator.CreateQrCode(Code2FA, QRCodeGenerator.ECCLevel.Q);
+                            using var qrCode = new AsciiQRCode(qrCodeData);
+                            string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
+                        }
+                        <pre style="font-size:x-small; font-family: monospace, monospace; line-height: initial; background-color: white; color: black; padding: 10px;">@qrCodeAsAsciiArt</pre>
+                    </div>
+                    <p>
+                        <strong>2. Save QR Code:</strong><br />
+                        Store this QR code in a secure location. You will need it together with your 2FA app to login:
+                    </p>
+                    <div class="text-center my-3">
+                        <textarea readonly class="form-control" rows="3" style="font-family:monospace;">@QR</textarea>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        Both the 2FA code and QR code are required for future logins.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="() => Code2FA = null">I have saved my credentials</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @* <br />
     <label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
     <br />
@@ -209,23 +259,46 @@ else if (!LoginIsRunning)
 
     private async Task CreateNewAccount()
     {
-        var schema = Static.EntryPoint == "127.0.0.1" ? "http://" : "https://";
-        var port = Static.EntryPoint == "127.0.0.1" ? ":5001" : null;
-        var entryPoint = schema + Static.EntryPoint + port + "/api";
-        var api = new API.CloudServerWebUIApiCommandsClient(entryPoint);
-        var result = await api.CreateNewSubscription(50, 90);
-        var pin = result.RootElement.GetProperty("Pin").GetString();
-        var idHex = result.RootElement.GetProperty("IdHex").GetString();
-        var qrEncrypted = result.RootElement.GetProperty("QrEncrypted").GetString();
-        var cloudId = result.RootElement.GetProperty("CloudId").GetUInt64();
+        bool noSSL = false;
+    retry:
+        try
+        {
+            var schema = Static.EntryPoint == System.Net.IPAddress.Loopback.ToString() || noSSL ? "http://" : "https://";
+            var port = ":5050";
+            var entryPoint = schema + Static.EntryPoint + port + "/api";
+            var api = new API.CloudServerWebUIApiCommandsClient(entryPoint);
+            var result = await api.CreateNewSubscription(50, 90);
+            var pin = result.RootElement.GetProperty("Pin").GetString();
+            var code2FA = result.RootElement.GetProperty("Code2FA").GetString();
+            var idHex = result.RootElement.GetProperty("IdHex").GetString();
+            var qrEncrypted = result.RootElement.GetProperty("QrEncrypted").GetString();
+            var cloudId = result.RootElement.GetProperty("CloudId").GetUInt64();
 
-        Static.Storage.Values.Set(nameof(idHex), idHex);
-        Static.Storage.Values.Set(nameof(qrEncrypted), qrEncrypted);
-        Static.Storage.Values.Set(nameof(cloudId), cloudId);
 
+            Static.Storage.Values.Set(nameof(idHex), idHex);
+            Static.Storage.Values.Set(nameof(qrEncrypted), qrEncrypted);
+            Static.Storage.Values.Set(nameof(cloudId), cloudId);
+            Static.Storage.Values.Set(nameof(code2FA), code2FA);
 
-        // Static.CreateNewAccount();
-        // Refresh();
+            Pin = pin;
+            QR = qrEncrypted;
+            Code2FA = code2FA; // temporarily store 2FA code
+
+            // login automatically after account creation
+            HandleValidSubmit();        
+        }
+        catch (Exception ex)
+        {
+            if (ex.HResult == -2146233087) // SSL connection error
+            {
+                noSSL = true;
+                goto retry;
+            }
+            customAlert = $"Failed to create account: {ex.Message}";
+            await InvokeAsync(StateHasChanged);
+        }
+
+        //        Refresh();
     }
 
     bool RefreshStatus()
@@ -293,6 +366,7 @@ else if (!LoginIsRunning)
     string? Status;
     string? OldStatus;
     static CloudClient.Client.LoginResult LoginResult;
+    static string? Code2FA;
     static bool LoginIsRunning;
     static string? Notification;
     static string? NotificationColor;
@@ -309,7 +383,6 @@ else if (!LoginIsRunning)
 
     public string QR { get; set; } //   CloudClient.QrCodeDetector.QrDetected;
     public string Pin { get; set; } // System.Diagnostics.Debugger.IsAttached ? "777777" : "";
-    public static string NewPin { get; set; } // The pin that was generated when you created a new account
     public string Passphrase { get; set; }
     string? customAlert { get; set; }
 
@@ -356,4 +429,5 @@ else if (!LoginIsRunning)
         });
     }
 }
+
 
