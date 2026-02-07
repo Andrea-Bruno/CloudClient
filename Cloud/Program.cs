@@ -63,6 +63,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
+// ===== REGISTER THEME SERVICE =====
+builder.Services.AddSingleton<Cloud.Services.ThemeService>();
+
 var app = builder.Build();
 
 var configuration = app.Configuration;

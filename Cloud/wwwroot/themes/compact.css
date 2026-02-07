@@ -1,0 +1,339 @@
+/* =============================================
+   COMPACT THEME - Dense Layout
+   Maximum information density
+   Designer: Cloud Theme Team
+   Version: 1.0.0
+   ============================================= */
+
+/* ===== CSS Variables ===== */
+:root {
+    --compact-spacing: 0.5rem;
+    --compact-spacing-sm: 0.25rem;
+    --compact-spacing-lg: 0.75rem;
+    --compact-border-radius: 0.375rem;
+    --compact-primary: #0066cc;
+    --compact-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Global Overrides ===== */
+body {
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* ===== Alert Overrides ===== */
+.alert {
+    padding: var(--compact-spacing) 1rem;
+    border-radius: var(--compact-border-radius);
+    font-size: 0.875rem;
+    margin-bottom: var(--compact-spacing);
+}
+
+/* ===== Button Overrides ===== */
+.btn {
+  padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: var(--compact-border-radius);
+}
+
+.btn-lg {
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+/* ===== Form Controls ===== */
+.form-control, .form-select {
+    padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+    border-radius: var(--compact-border-radius);
+}
+
+.form-label {
+    margin-bottom: var(--compact-spacing-sm);
+    font-size: 0.875rem;
+}
+
+.form-check {
+    margin-bottom: var(--compact-spacing-sm);
+}
+
+/* ===== Modal Overrides ===== */
+.modal-header {
+    padding: 1rem 1.25rem;
+}
+
+.modal-body {
+    padding: 1rem 1.25rem;
+}
+
+.modal-footer {
+    padding: 0.75rem 1.25rem;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+}
+
+/* ===== Card Overrides ===== */
+.card {
+    border-radius: var(--compact-border-radius);
+    margin-bottom: var(--compact-spacing);
+}
+
+.card-header {
+    padding: var(--compact-spacing-lg);
+    font-size: 1rem;
+}
+
+.card-body {
+    padding: var(--compact-spacing-lg);
+}
+
+/* ===== Headings ===== */
+h1 { 
+font-size: 1.75rem; 
+    margin-bottom: var(--compact-spacing-lg);
+}
+
+h2 { 
+    font-size: 1.5rem; 
+    margin-bottom: var(--compact-spacing);
+}
+
+h3 { 
+    font-size: 1.25rem; 
+    margin-bottom: var(--compact-spacing);
+}
+
+h4 { 
+    font-size: 1.125rem; 
+}
+
+h5 { 
+    font-size: 1rem; 
+}
+
+h6 { 
+    font-size: 0.875rem; 
+}
+
+/* ===== Spacing Utilities ===== */
+.my-3 {
+    margin-top: var(--compact-spacing-lg) !important;
+    margin-bottom: var(--compact-spacing-lg) !important;
+}
+
+.my-2 {
+    margin-top: var(--compact-spacing) !important;
+    margin-bottom: var(--compact-spacing) !important;
+}
+
+.mb-3 {
+  margin-bottom: var(--compact-spacing-lg) !important;
+}
+
+.p-3 {
+    padding: var(--compact-spacing-lg) !important;
+}
+
+/* ===== Table Overrides ===== */
+.table {
+  font-size: 0.875rem;
+}
+
+.table th, .table td {
+    padding: var(--compact-spacing);
+}
+
+/* ===== Navigation ===== */
+.nav-item {
+    padding-bottom: var(--compact-spacing-sm);
+}
+
+.nav-link {
+    padding: var(--compact-spacing) var(--compact-spacing-lg);
+    font-size: 0.875rem;
+}
+
+/* ===== Content Area ===== */
+.content {
+    padding: 1rem;
+}
+
+/* ===== Badge ===== */
+.badge {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+}
+
+/* ===== Progress ===== */
+.progress {
+    height: 1rem;
+}
+
+/* ===== Checkbox/Radio ===== */
+.form-check-input {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+/* ===== Pre/Code ===== */
+pre {
+    padding: var(--compact-spacing-lg);
+    font-size: 0.8125rem;
+}
+
+code {
+    font-size: 0.8125rem;
+    padding: 0.125rem 0.375rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    body {
+        font-size: 0.8125rem;
+    }
+    
+    .btn {
+  padding: 0.375rem 0.75rem;
+font-size: 0.8125rem;
+  }
+    
+    .content {
+        padding: 0.75rem;
+    }
+}
+
+/* ===== Optimizations ===== */
+.modal-dialog {
+    max-width: 90%;
+}
+
+.sidebar {
+    min-width: 200px;
+}
+
+/* ===== Sidebar & Navigation Compact Theme ===== */
+
+/* Sidebar container */
+.sidebar {
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+}
+
+/* Top row header */
+.sidebar .top-row {
+    min-height: 2.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+}
+
+.sidebar .navbar-brand {
+    font-size: 1rem;
+    color: white;
+    font-weight: 600;
+}
+
+/* Nav items */
+.sidebar .nav-item {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.sidebar .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border-radius: var(--compact-border-radius);
+    padding: 0.5rem 0.75rem;
+    margin: 0.125rem 0;
+    height: auto;
+    min-height: 2.25rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-item .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(3px);
+}
+
+/* Active nav item */
+.sidebar .nav-item a.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+    border-left: 2px solid white;
+}
+
+/* Nav icons */
+.sidebar .bi {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.625rem;
+}
+
+/* Scrollable area */
+.sidebar .nav-scrollable {
+    padding: 0.5rem 0;
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar-thumb {
+ background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* Navbar toggler (mobile) */
+.sidebar .navbar-toggler {
+    width: 2.5rem;
+    height: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Badge in nav */
+.sidebar .nav-item .text-danger {
+    background: #e53e3e;
+    color: white;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+  margin-left: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .sidebar {
+        min-width: 180px;
+    }
+    
+    .sidebar .nav-item {
+        font-size: 0.8125rem;
+    }
+    
+    .sidebar .nav-item .nav-link {
+        padding: 0.375rem 0.625rem;
+min-height: 2rem;
+    }
+}
+
+/* Compact spacing utilities */
+.sidebar .nav-item {
+    line-height: 1.2;
+}
+
+/* Existing Compact theme code continues below... */

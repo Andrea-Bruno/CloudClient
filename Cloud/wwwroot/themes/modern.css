@@ -1,0 +1,771 @@
+/* =============================================
+   MODERN THEME - Pure CSS Override
+   No component changes required!
+   Designer: Cloud Theme Team
+   Version: 1.0.0
+   ============================================= */
+
+/* ===== CSS Variables ===== */
+:root {
+    --modern-primary: #1b6ec2;
+    --modern-primary-hover: #165a9e;
+    --modern-primary-rgb: 27, 110, 194;
+    --modern-secondary: #5039a0;
+    --modern-secondary-rgb: 80, 57, 160;
+    --modern-success: #26b050;
+    --modern-success-rgb: 38, 176, 80;
+    --modern-danger: #e50000;
+    --modern-danger-rgb: 229, 0, 0;
+    --modern-warning: #ffc107;
+    --modern-warning-rgb: 255, 193, 7;
+    --modern-info: #17a2b8;
+    --modern-info-rgb: 23, 162, 184;
+    --modern-dark: #3a0647;
+--modern-light: #f8f9fa;
+    
+    --modern-gradient-primary: linear-gradient(135deg, #1b6ec2 0%, #5039a0 100%);
+    --modern-gradient-sidebar: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    --modern-gradient-success: linear-gradient(135deg, #26b050 0%, #1d8a3e 100%);
+    --modern-gradient-danger: linear-gradient(135deg, #e50000 0%, #b80000 100%);
+    --modern-gradient-warning: linear-gradient(135deg, #ffc107 0%, #e6a800 100%);
+    
+    --modern-border-radius: 0.75rem;
+    --modern-border-radius-sm: 0.5rem;
+    --modern-border-radius-lg: 1rem;
+    --modern-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --modern-shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --modern-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --modern-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Global Overrides ===== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(to bottom, #f5f7fa 0%, #e4e9f2 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Bootstrap Alert Overrides ===== */
+.alert {
+    border: none;
+    border-left: 4px solid;
+    border-radius: var(--modern-border-radius);
+    padding: 1.25rem 1.5rem;
+ box-shadow: var(--modern-shadow);
+    transition: var(--modern-transition);
+    animation: slideInRight 0.4s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+  background: inherit;
+}
+
+.alert:hover {
+ transform: translateX(-3px);
+    box-shadow: var(--modern-shadow-hover);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(229, 0, 0, 0.12) 0%, rgba(229, 0, 0, 0.05) 100%);
+    border-left-color: var(--modern-danger);
+    color: #721c24;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(38, 176, 80, 0.12) 0%, rgba(38, 176, 80, 0.05) 100%);
+    border-left-color: var(--modern-success);
+    color: #155724;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.12) 0%, rgba(23, 162, 184, 0.05) 100%);
+    border-left-color: var(--modern-info);
+    color: #0c5460;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.12) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border-left-color: var(--modern-warning);
+    color: #856404;
+}
+
+.alert-primary {
+    background: linear-gradient(135deg, rgba(27, 110, 194, 0.12) 0%, rgba(27, 110, 194, 0.05) 100%);
+  border-left-color: var(--modern-primary);
+    color: #004085;
+}
+
+/* ===== Bootstrap Button Overrides ===== */
+.btn {
+    border-radius: var(--modern-border-radius);
+    padding: 0.75rem 1.75rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    transition: var(--modern-transition);
+    border: none;
+    box-shadow: var(--modern-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+  width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: var(--modern-gradient-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+    box-shadow: var(--modern-shadow-hover);
+    filter: brightness(1.1);
+    color: white;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--modern-shadow-hover);
+    color: white;
+}
+
+.btn-success {
+    background: var(--modern-gradient-success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--modern-gradient-danger);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--modern-gradient-warning);
+    color: #212529;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+    font-size: 1.125rem;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ===== Form Controls ===== */
+.form-control, .form-select {
+    border-radius: var(--modern-border-radius-sm);
+    border: 2px solid #e0e6ed;
+    padding: 0.875rem 1.125rem;
+    transition: var(--modern-transition);
+    background: white;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--modern-primary-rgb), 0.15);
+    transform: translateY(-1px);
+  background: white;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.625rem;
+font-size: 0.9375rem;
+}
+
+/* ===== Modal Overrides ===== */
+.modal-content {
+    border: none;
+    border-radius: var(--modern-border-radius-lg);
+    box-shadow: var(--modern-shadow-lg);
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+ to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: var(--modern-gradient-primary);
+    color: white;
+  border: none;
+    padding: 1.75rem 2rem;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.025em;
+}
+
+.modal-body {
+    padding: 2rem;
+    color: #2d3748;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+}
+
+.btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  transition: var(--modern-transition);
+}
+
+.btn-close:hover {
+    opacity: 1;
+ transform: scale(1.1);
+}
+
+/* ===== Card Overrides ===== */
+.card {
+    border: none;
+    border-radius: var(--modern-border-radius-lg);
+    box-shadow: var(--modern-shadow);
+    transition: var(--modern-transition);
+  overflow: hidden;
+  background: white;
+}
+
+.card:hover {
+    box-shadow: var(--modern-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--modern-gradient-primary);
+    color: white;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* ===== Checkbox/Radio Overrides ===== */
+.form-check-input {
+    width: 1.375rem;
+    height: 1.375rem;
+    border: 2px solid #d1d5db;
+    transition: var(--modern-transition);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--modern-primary);
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--modern-primary-rgb), 0.15);
+}
+
+.form-check-input:focus {
+    border-color: var(--modern-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--modern-primary-rgb), 0.15);
+}
+
+.form-check-label {
+    margin-left: 0.625rem;
+    color: #4b5563;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ===== Link Overrides ===== */
+a {
+    color: var(--modern-primary);
+    text-decoration: none;
+    transition: var(--modern-transition);
+    position: relative;
+}
+
+a:hover {
+    color: var(--modern-primary-hover);
+}
+
+a.link-primary::after {
+    content: '';
+  position: absolute;
+    width: 0;
+  height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: var(--modern-primary);
+    transition: width 0.3s ease;
+}
+
+a.link-primary:hover::after {
+    width: 100%;
+}
+
+/* ===== Headings ===== */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+h1 {
+    background: var(--modern-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+h2 {
+    color: #2d3748;
+    font-size: 2rem;
+}
+
+h3 {
+    color: #4a5568;
+  font-weight: 600;
+    font-size: 1.5rem;
+}
+
+/* ===== Page Title ===== */
+.page-title {
+    background: var(--modern-gradient-primary);
+    -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== Pre/Code ===== */
+pre {
+    background: #f8f9fa;
+  border-radius: var(--modern-border-radius-sm);
+    padding: 1.25rem;
+    border-left: 4px solid var(--modern-primary);
+    box-shadow: var(--modern-shadow);
+    overflow-x: auto;
+}
+
+code {
+    background: rgba(var(--modern-primary-rgb), 0.1);
+    color: var(--modern-primary);
+padding: 0.25rem 0.5rem;
+ border-radius: 0.375rem;
+font-family: 'Courier New', Courier, monospace;
+}
+
+/* ===== Table Overrides ===== */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead {
+    background: var(--modern-gradient-primary);
+    color: white;
+}
+
+.table thead th {
+    border: none;
+  padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+
+.table tbody tr {
+    transition: var(--modern-transition);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(var(--modern-primary-rgb), 0.05);
+    transform: translateX(3px);
+}
+
+.table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* ===== Sidebar ===== */
+/* Sidebar container */
+.sidebar {
+    background: var(--modern-gradient-sidebar) !important;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--modern-primary) 0%, var(--modern-secondary) 100%);
+}
+
+/* Top row header */
+.sidebar .top-row {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+ border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--modern-transition);
+}
+
+.sidebar .navbar-brand {
+    color: white;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: var(--modern-transition);
+}
+
+.sidebar .navbar-brand:hover {
+    transform: scale(1.05);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Nav items */
+.sidebar .nav-item {
+    padding: 0.25rem 0.75rem;
+}
+
+.sidebar .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border-radius: var(--modern-border-radius-sm);
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+    transition: var(--modern-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar .nav-item .nav-link::before {
+    content: '';
+ position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--modern-gradient-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.sidebar .nav-item .nav-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar .nav-item .nav-link:hover::before {
+    transform: scaleY(1);
+}
+
+/* Active nav item */
+.sidebar .nav-item a.active {
+    background: linear-gradient(135deg, rgba(27, 110, 194, 0.4) 0%, rgba(80, 57, 160, 0.4) 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(27, 110, 194, 0.3);
+    border-left: 3px solid white;
+}
+
+.sidebar .nav-item a.active::before {
+    transform: scaleY(1);
+}
+
+/* Nav icons */
+.sidebar .bi {
+    width: 1.375rem;
+    height: 1.375rem;
+    margin-right: 1rem;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+  transition: var(--modern-transition);
+}
+
+.sidebar .nav-item .nav-link:hover .bi {
+    filter: drop-shadow(0 3px 6px rgba(255, 255, 255, 0.4));
+    transform: scale(1.1);
+}
+
+/* Scrollable area */
+.sidebar .nav-scrollable {
+    padding: 1rem 0;
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar-thumb {
+    background: var(--modern-gradient-primary);
+    border-radius: 3px;
+}
+
+.sidebar .nav-scrollable::-webkit-scrollbar-thumb:hover {
+    background: var(--modern-primary-hover);
+}
+
+/* Navbar toggler (mobile) */
+.sidebar .navbar-toggler {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    transition: var(--modern-transition);
+}
+
+.sidebar .navbar-toggler:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.sidebar .navbar-toggler:checked {
+    background: var(--modern-gradient-primary);
+    border-color: var(--modern-primary);
+}
+
+/* Badge in nav (e.g., antivirus warnings) */
+.sidebar .nav-item .text-danger {
+    background: var(--modern-gradient-danger);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(229, 0, 0, 0.3);
+    animation: pulse 2s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .sidebar {
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+ .sidebar .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    .sidebar .nav-item .nav-link {
+        padding: 0.625rem 0.875rem;
+    }
+}
+
+/* Animation for sidebar entrance */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+  }
+    to {
+ transform: translateX(0);
+        opacity: 1;
+ }
+}
+
+.sidebar {
+    animation: slideInLeft 0.4s ease-out;
+}
+
+/* ===== Content Area ===== */
+.content {
+    animation: fadeIn 0.5s ease-out;
+    padding: 2rem;
+}
+
+/* ===== Animations ===== */
+@keyframes slideInRight {
+    from {
+      opacity: 0;
+  transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+  from {
+        opacity: 0;
+    }
+    to {
+     opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===== Badge ===== */
+.badge {
+    border-radius: 2rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+}
+
+/* ===== Progress Bar ===== */
+.progress {
+    height: 1.25rem;
+    border-radius: 2rem;
+    background: #e2e8f0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    background: var(--modern-gradient-primary);
+    border-radius: 2rem;
+    transition: width 0.6s ease;
+}
+
+/* ===== Spinner Override ===== */
+.spinner-border {
+    border-color: rgba(var(--modern-primary-rgb), 0.2);
+    border-right-color: var(--modern-primary);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .btn {
+        padding: 0.625rem 1.25rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .content {
+        padding: 1rem;
+    }
+    
+    h1 {
+ font-size: 2rem;
+    }
+    
+    h2 {
+ font-size: 1.5rem;
+    }
+}
+
+/* ===== Utility Classes ===== */
+.text-gradient-modern {
+    background: var(--modern-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-modern {
+    box-shadow: var(--modern-shadow) !important;
+}
+
+.shadow-modern-hover:hover {
+    box-shadow: var(--modern-shadow-hover) !important;
+}
+
+.bg-gradient-modern {
+    background: var(--modern-gradient-primary) !important;
+}
+
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--modern-gradient-primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--modern-primary-hover);
+}
+
+/* ===== Top Row Override ===== */
+.top-row {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}

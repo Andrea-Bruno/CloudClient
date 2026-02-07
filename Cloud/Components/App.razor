@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject Cloud.Services.ThemeService ThemeService
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,6 +10,13 @@
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Cloud.styles.css"]" />
+    
+    @* ===== LOAD THEME CSS IF CONFIGURED ===== *@
+    @if (ThemeService.IsThemeActive)
+    {
+        <link rel="stylesheet" href="@ThemeService.ThemeCssPath" />
+    }
+  
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet @rendermode="InteractiveServer" />
