@@ -178,48 +178,43 @@ else if (!LoginIsRunning)
 @if (Code2FA != null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Save Your Credentials</h5>
                     <button type="button" class="btn-close" @onclick="() => Code2FA = null"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning" role="alert">
+                <div class="modal-body p-3">
+                    <div class="alert alert-warning py-2 mb-2" role="alert">
                         <strong>Important:</strong> Save these credentials securely!
                     </div>
-                    <p>
+                    <p class="mb-2">
                         <strong>1. Setup 2FA App:</strong><br />
                         Scan this QR code with your mobile 2FA authenticator app:
                     </p>
-                    <div class="text-center my-3">
-                        @{
-                            using var qrGenerator = new QRCodeGenerator();
-                            using var qrCodeData = qrGenerator.CreateQrCode(Code2FA, QRCodeGenerator.ECCLevel.Q);
-                            using var qrCode = new AsciiQRCode(qrCodeData);
-                            string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
-                        }
-                        <pre style="font-size:x-small; font-family: monospace, monospace; line-height: initial; background-color: white; color: black; padding: 10px;">@qrCodeAsAsciiArt</pre>
-                    </div>
-                    <p>
+                    @{
+                        using var qrGenerator = new QRCodeGenerator();
+                        using var qrCodeData = qrGenerator.CreateQrCode(Code2FA, QRCodeGenerator.ECCLevel.Q);
+                        using var qrCode = new AsciiQRCode(qrCodeData);
+                        string qrCodeAsAsciiArt = qrCode.GetGraphic(1);
+                    }
+                    <pre style="font-size:0.45rem; font-family:monospace; line-height:0.5rem; background-color:white; color:black; padding:5px; margin:0 auto; display:table;">@qrCodeAsAsciiArt</pre>
+                    <p class="mb-2 mt-3">
                         <strong>2. Save QR Code:</strong><br />
-                        Store this QR code in a secure location. You will need it together with your 2FA app to login:
+                        Store this QR code securely for future logins:
                     </p>
-                    <div class="text-center my-3">
-                        <textarea readonly class="form-control" rows="3" style="font-family:monospace;">@QR</textarea>
-                    </div>
-                    <div class="alert alert-info" role="alert">
-                        Both the 2FA code and QR code are required for future logins.
+                    <textarea readonly class="form-control form-control-sm" rows="2" style="font-family:monospace; font-size:0.75rem;">@QR</textarea>
+                    <div class="alert alert-info py-2 mt-2 mb-0" role="alert">
+                        Both credentials are required for future logins.
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" @onclick="() => Code2FA = null">I have saved my credentials</button>
+                    <button class="btn btn-primary btn-sm" @onclick="() => Code2FA = null">I have saved my credentials</button>
                 </div>
             </div>
         </div>
     </div>
 }
-
 @* <br />
     <label id="Notification" class="card" style="background-color: @NotificationColor">@Notification</label>
     <br />
@@ -255,12 +250,14 @@ else if (!LoginIsRunning)
 
     private async Task CreateNewAccount()
     {
-        bool noSSL = false;
+        var schema = "https://";
+        var port = ":5001";
+        var localServer = Static.EntryPoint == System.Net.IPAddress.Loopback.ToString();
+        bool retry = false;
     retry:
         try
         {
-            var schema = Static.EntryPoint == System.Net.IPAddress.Loopback.ToString() || noSSL ? "http://" : "https://";
-            var port = ":5050";
+            // var schema =  || noSSL ? "http://" : "https://";
             var entryPoint = schema + Static.EntryPoint + port + "/api";
             var api = new API.CloudServerWebUIApiCommandsClient(entryPoint);
             var result = await api.CreateNewSubscription(50, 90);
@@ -281,20 +278,29 @@ else if (!LoginIsRunning)
             Code2FA = code2FA; // temporarily store 2FA code
 
             // login automatically after account creation
-            HandleValidSubmit();        
+            HandleValidSubmit();
         }
         catch (Exception ex)
         {
-            if (ex.HResult == -2146233087) // SSL connection error
+            if (ex.HResult == -2146233087 && !retry) // SSL connection error
             {
-                noSSL = true;
+                retry = true;
+                if (localServer)
+                    port = ":5050";
+                schema=  "http://";       
                 goto retry;
             }
-            customAlert = $"Failed to create account: {ex.Message}";
-            await InvokeAsync(StateHasChanged);
+            else if (ex.HResult == -2146232800)
+            {
+                // Host certificate validation failed, likely due to a self-signed certificate.
+                customAlert = "Failed to create account: There is an error with the server-side certificate";
+            }
+            else
+                customAlert = $"Failed to create account: {ex.Message}";
+            // await InvokeAsync(StateHasChanged);
+            // Refresh();
         }
 
-        //        Refresh();
     }
 
     bool RefreshStatus()

@@ -98,7 +98,7 @@ Func<int, bool> PortIsRearchable = (port) =>
         var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(500));
         tcpClient.EndConnect(result);
     }
-    catch (Exception) { return false; }
+    catch (Exception ex) { return false; }
     return true;
 
 };
@@ -107,7 +107,7 @@ Static.EntryPoint = (string?)configuration.GetValue(typeof(string), "EntryPoint"
 
 if (Debugger.IsAttached) // In debug mode, If the server is running locally then set localhost as entry point to use the local server
 {
-    if (PortIsRearchable(5050))
+    if (PortIsRearchable(5001))
         Static.EntryPoint = IPAddress.Loopback.ToString(); // Connect to local server for debug!
 }
 
@@ -222,10 +222,14 @@ if (SystemExtra.Util.IsService(Static.Port) ==  false)
 }
 #endif
 
-var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint();
+var lastEntryPoint = CloudBox.CloudBox.LastEntryPoint(); // last entry point is a value that is set if the client was previously logged in to the server
+if (Debugger.IsAttached && lastEntryPoint != null && lastEntryPoint != Static.EntryPoint)
+    lastEntryPoint = null; // If the server has been changed in debug, we simulate the log out
+
 if (lastEntryPoint != null)
 {
-    Static.CreateClient(lastEntryPoint);
+    // If you were already logged in then:
+    Static.CreateClient(lastEntryPoint); 
 }
 
 BackupManager.Initialize(Static.CloudPath);

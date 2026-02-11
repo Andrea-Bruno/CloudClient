@@ -317,21 +317,21 @@ code {
 /* Top row header */
 .sidebar .top-row {
     background: rgba(0, 0, 0, 0.2);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    min-height: 3.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  min-height: 3.5rem;
 }
 
 .sidebar .navbar-brand {
     color: white;
-    font-weight: 700;
+  font-weight: 700;
     font-size: 1.25rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-transition: var(--prof-transition);
+    transition: var(--prof-transition);
 }
 
 .sidebar .navbar-brand:hover {
-color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* Nav items */
@@ -345,7 +345,7 @@ color: rgba(255, 255, 255, 0.9);
     border-radius: 0.375rem;
     padding: 0.75rem 1rem;
     margin: 0.25rem 0;
-    transition: var(--prof-transition);
+  transition: var(--prof-transition);
     border: 1px solid transparent;
     font-weight: 500;
     text-transform: uppercase;
@@ -355,14 +355,14 @@ color: rgba(255, 255, 255, 0.9);
 
 .sidebar .nav-item .nav-link:hover {
     background: rgba(255, 255, 255, 0.15);
-    color: white;
-  border-color: rgba(255, 255, 255, 0.2);
+color: white;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Active nav item */
 .sidebar .nav-item a.active {
     background: rgba(255, 255, 255, 0.25);
-    color: white;
+  color: white;
     font-weight: 700;
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -370,7 +370,7 @@ color: rgba(255, 255, 255, 0.9);
 
 /* Nav icons */
 .sidebar .bi {
-    width: 1.25rem;
+  width: 1.25rem;
     height: 1.25rem;
     margin-right: 0.875rem;
     opacity: 0.9;
@@ -400,14 +400,14 @@ color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar .nav-scrollable::-webkit-scrollbar-thumb:hover {
- background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 /* Navbar toggler (mobile) */
 .sidebar .navbar-toggler {
     border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-    transition: var(--prof-transition);
+background: rgba(255, 255, 255, 0.1);
+  transition: var(--prof-transition);
 }
 
 .sidebar .navbar-toggler:hover {
@@ -437,7 +437,7 @@ color: rgba(255, 255, 255, 0.9);
     display: block;
     height: 2px;
     background: rgba(255, 255, 255, 0.1);
-    margin: 0.5rem 1rem;
+  margin: 0.5rem 1rem;
 }
 
 /* Hover effect with subtle animation */
@@ -446,10 +446,10 @@ color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar .nav-item .nav-link::after {
-    content: '';
-position: absolute;
+  content: '';
+    position: absolute;
     right: 1rem;
-    top: 50%;
+ top: 50%;
     transform: translateY(-50%);
     width: 0;
     height: 2px;
@@ -458,7 +458,7 @@ position: absolute;
 }
 
 .sidebar .nav-item .nav-link:hover::after {
-width: 0.5rem;
+    width: 0.5rem;
 }
 
 /* Responsive */
@@ -478,7 +478,7 @@ width: 0.5rem;
 @media print {
     .sidebar {
     display: none;
-    }
+  }
 }
 
 /* ===== Content Area ===== */

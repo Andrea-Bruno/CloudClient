@@ -141,6 +141,9 @@ namespace CloudClient
             if (SolveQRCode(qrCode, out string entry, out string serverPublicKey, out EncryptedQR) == false) return LoginResult.WrongQR;
             if (entry != null && entryPoint != IPAddress.Loopback.ToString())
                 entryPoint = entry;
+            // Generally the entry point in the QR code is that of the proxy for the encrypted JSON protocol, and it's replaced with that of the router (the server), because in some scenarios the proxy might be external to the machine with the router.
+            if (entryPoint != null && entryPoint.StartsWith("proxy."))
+                entryPoint = entryPoint.Replace("proxy.", "server.");
             if (string.IsNullOrEmpty(entryPoint))
             {
                 throw new Exception("No Entry Point specified in QR code or Setting!");

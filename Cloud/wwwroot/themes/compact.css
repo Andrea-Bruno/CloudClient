@@ -218,18 +218,35 @@ font-size: 0.8125rem;
     min-width: 200px;
 }
 
+/* ===== List Groups ===== */
+.list-group-item {
+    padding: var(--compact-spacing) var(--compact-spacing-lg);
+    font-size: 0.875rem;
+}
+
+/* ===== Tooltips ===== */
+.tooltip {
+    font-size: 0.8125rem;
+}
+
+/* ===== Dropdowns ===== */
+.dropdown-item {
+    padding: var(--compact-spacing-sm) var(--compact-spacing-lg);
+    font-size: 0.875rem;
+}
+
 /* ===== Sidebar & Navigation Compact Theme ===== */
 
 /* Sidebar container */
 .sidebar {
-    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     min-width: 200px;
 }
 
 /* Top row header */
 .sidebar .top-row {
-    min-height: 2.5rem;
+  min-height: 2.5rem;
     background: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.5rem 1rem;
@@ -249,7 +266,7 @@ font-size: 0.8125rem;
 
 .sidebar .nav-item .nav-link {
     color: rgba(255, 255, 255, 0.85);
-    background: transparent;
+  background: transparent;
     border-radius: var(--compact-border-radius);
     padding: 0.5rem 0.75rem;
     margin: 0.125rem 0;
@@ -275,7 +292,7 @@ font-size: 0.8125rem;
 /* Nav icons */
 .sidebar .bi {
     width: 1rem;
-    height: 1rem;
+  height: 1rem;
     margin-right: 0.625rem;
 }
 
@@ -293,7 +310,7 @@ font-size: 0.8125rem;
 }
 
 .sidebar .nav-scrollable::-webkit-scrollbar-thumb {
- background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
 }
 
@@ -306,13 +323,13 @@ font-size: 0.8125rem;
 
 /* Badge in nav */
 .sidebar .nav-item .text-danger {
-    background: #e53e3e;
+  background: #e53e3e;
     color: white;
     padding: 0.125rem 0.375rem;
     border-radius: 0.75rem;
     font-size: 0.6875rem;
     font-weight: 700;
-  margin-left: 0.25rem;
+    margin-left: 0.25rem;
 }
 
 /* Responsive */
@@ -322,12 +339,12 @@ font-size: 0.8125rem;
     }
     
     .sidebar .nav-item {
-        font-size: 0.8125rem;
+  font-size: 0.8125rem;
     }
     
     .sidebar .nav-item .nav-link {
         padding: 0.375rem 0.625rem;
-min-height: 2rem;
+        min-height: 2rem;
     }
 }
 
@@ -336,4 +353,4 @@ min-height: 2rem;
     line-height: 1.2;
 }
 
-/* Existing Compact theme code continues below... */
+/* ===== Content Area ===== */

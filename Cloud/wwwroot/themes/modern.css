@@ -446,7 +446,8 @@ font-family: 'Courier New', Courier, monospace;
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* ===== Sidebar ===== */
+/* ===== Sidebar & Navigation Modern Theme ===== */
+
 /* Sidebar container */
 .sidebar {
     background: var(--modern-gradient-sidebar) !important;
@@ -461,7 +462,7 @@ font-family: 'Courier New', Courier, monospace;
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+  height: 4px;
     background: linear-gradient(90deg, var(--modern-primary) 0%, var(--modern-secondary) 100%);
 }
 
@@ -469,7 +470,7 @@ font-family: 'Courier New', Courier, monospace;
 .sidebar .top-row {
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
- border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: var(--modern-transition);
 }
 
@@ -493,7 +494,7 @@ font-family: 'Courier New', Courier, monospace;
 }
 
 .sidebar .nav-item .nav-link {
-    color: rgba(255, 255, 255, 0.85);
+ color: rgba(255, 255, 255, 0.85);
     background: transparent;
     border-radius: var(--modern-border-radius-sm);
     padding: 0.75rem 1rem;
@@ -504,13 +505,13 @@ font-family: 'Courier New', Courier, monospace;
 }
 
 .sidebar .nav-item .nav-link::before {
-    content: '';
- position: absolute;
+content: '';
+    position: absolute;
     left: 0;
     top: 0;
     height: 100%;
     width: 3px;
-    background: var(--modern-gradient-primary);
+  background: var(--modern-gradient-primary);
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -545,7 +546,7 @@ font-family: 'Courier New', Courier, monospace;
     height: 1.375rem;
     margin-right: 1rem;
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-  transition: var(--modern-transition);
+    transition: var(--modern-transition);
 }
 
 .sidebar .nav-item .nav-link:hover .bi {
@@ -559,7 +560,7 @@ font-family: 'Courier New', Courier, monospace;
 }
 
 .sidebar .nav-scrollable::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .sidebar .nav-scrollable::-webkit-scrollbar-track {
@@ -577,7 +578,7 @@ font-family: 'Courier New', Courier, monospace;
 
 /* Navbar toggler (mobile) */
 .sidebar .navbar-toggler {
-  border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
     transition: var(--modern-transition);
@@ -603,18 +604,18 @@ font-family: 'Courier New', Courier, monospace;
     font-size: 0.75rem;
     font-weight: 700;
     box-shadow: 0 2px 4px rgba(229, 0, 0, 0.3);
-    animation: pulse 2s infinite;
+ animation: pulse 2s infinite;
 }
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
     .sidebar {
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     }
     
- .sidebar .navbar-brand {
+    .sidebar .navbar-brand {
         font-size: 1.25rem;
-    }
+  }
     
     .sidebar .nav-item .nav-link {
         padding: 0.625rem 0.875rem;
@@ -624,13 +625,13 @@ font-family: 'Courier New', Courier, monospace;
 /* Animation for sidebar entrance */
 @keyframes slideInLeft {
     from {
-        transform: translateX(-100%);
-        opacity: 0;
-  }
+      transform: translateX(-100%);
+  opacity: 0;
+    }
     to {
- transform: translateX(0);
+        transform: translateX(0);
         opacity: 1;
- }
+    }
 }
 
 .sidebar {
