@@ -253,7 +253,7 @@ else if (!LoginIsRunning)
         var schema = "https://";
         var port = ":5001";
         var localServer = Static.EntryPoint == System.Net.IPAddress.Loopback.ToString();
-        bool retry = false;
+        int retry = 0;
     retry:
         try
         {
@@ -282,9 +282,9 @@ else if (!LoginIsRunning)
         }
         catch (Exception ex)
         {
-            if (ex.HResult == -2146233087 && !retry) // SSL connection error
+            retry++;    
+            if (ex.HResult == -2146233087 && retry == 1) // SSL connection error
             {
-                retry = true;
                 if (localServer)
                     port = ":5050";
                 schema=  "http://";       
@@ -292,6 +292,8 @@ else if (!LoginIsRunning)
             }
             else if (ex.HResult == -2146232800)
             {
+                if (retry == 1)
+                    goto retry; // For some reason worth investigating, the first API call appears to fail, but the second one works even after a reboot. This is likely a problem with negotiating the cryptographic keys for the certificates.
                 // Host certificate validation failed, likely due to a self-signed certificate.
                 customAlert = "Failed to create account: There is an error with the server-side certificate";
             }

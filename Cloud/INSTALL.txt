@@ -10,6 +10,4 @@ From terminal run the command ./install.sh
 
 ========= WINDOWS:
 
-Unpack the package in the directory where you want to run the program, for example
-C:\Program Files\Cloud
-Then run Cloud.exe (if prompted, also install any frameworks)
+Run as administrator (right click) install.bat

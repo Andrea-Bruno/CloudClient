@@ -21,7 +21,7 @@ namespace CloudClient
         private const int WM_RBUTTONDOWN = 0x0204;
         private const int WM_COMMAND = 0x0111;
 
-        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool Shell_NotifyIcon(uint dwMessage, [In] ref NOTIFYICONDATA lpData);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -56,6 +56,9 @@ namespace CloudClient
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr DispatchMessage([In] ref MSG lpMsg);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private struct NOTIFYICONDATA
@@ -121,6 +124,7 @@ namespace CloudClient
         static private WNDCLASS _wndClass;
         static private Action _openUI;
         static private string _cloudPath;
+        static private Icon? _currentIcon;
 
         private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
         static private WndProcDelegate _wndProcDelegate;
@@ -166,7 +170,7 @@ namespace CloudClient
 
             if (!Shell_NotifyIcon(NIM_ADD, ref _notifyIconData))
             {
-                int error = Marshal.GetLastWin32Error();
+                int error = Marshal.GetLastPInvokeError();
                 throw new Exception($"Failed to add notify icon. Error: {error}");
             }
 
@@ -187,6 +191,8 @@ namespace CloudClient
             Shell_NotifyIcon(NIM_DELETE, ref _notifyIconData);
             DestroyWindow(_windowHandle);
             UnregisterClass(_wndClass.lpszClassName, _wndClass.hInstance);
+            _currentIcon?.Dispose();
+            _currentIcon = null;
         }
 
         static private IntPtr LoadIconFromResources(Client.IconStatus iconStatus)
@@ -204,12 +210,17 @@ namespace CloudClient
                 try
                 {
                     Thread.Sleep(100);
-                    return bitmap.GetHicon();
+                    var hIcon = bitmap.GetHicon();
+                    using var tempIcon = Icon.FromHandle(hIcon);
+                    _currentIcon?.Dispose();
+                    _currentIcon = (Icon)tempIcon.Clone();
+                    DestroyIcon(hIcon);
+                    return _currentIcon.Handle;
                 }
                 catch (Exception ex)
                 {
 #if DEBUG
-                    throw ex;
+                    throw;
 #endif
                     return default;
                 }
@@ -280,6 +291,12 @@ namespace CloudClient
         static public void UpdateStatusIcon(Client.IconStatus newStatus)
         {
             _notifyIconData.hIcon = LoadIconFromResources(newStatus);
+            _notifyIconData.uFlags = NIF_ICON;
+            if (!Shell_NotifyIcon(NIM_MODIFY, ref _notifyIconData))
+            {
+                int error = Marshal.GetLastPInvokeError();
+                throw new Exception($"Failed to update notify icon. Error: {error}");
+            }
         }
     }
 }
