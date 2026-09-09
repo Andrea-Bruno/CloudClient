@@ -97,47 +97,56 @@ jobs:
       # The dependency NuGet packages are date-versioned (1.yy.MM.dd) and published by each
       # repo's publish.yml when a v* tag is pushed. CloudClient restores them with 1.*
       # floating, so the release must NOT silently restore a package older than the release
-      # date. The wait checks the packages CloudClient actually restores (the CloudBox closure
-      # + AppSync + AntiGitLibrary + SystemExtra + UISupportBlazor) at the release version.
-      # It exits as soon as they are all visible; a package that never appears is only a HARD
-      # failure when at least one package of the set WAS found today (a lagging publish) —
-      # if none changed today, no package exists at today's version and the wait is a no-op.
-      - name: Wait for dependency packages on NuGet
+      # date when its repo changed today. This step only waits for the packages whose GitHub
+      # repo carries today's tag (v1.26.09.09): a repo tagged today publishes today's
+      # version and nuget.org propagation is not instant (up to 30 min). Repos without
+      # today's tag did not change — their latest published version is exactly what the
+      # release should restore, so they never enter the wait.
+      - name: Wait for changed dependency packages on NuGet
         shell: bash
         env:
           VERSION: ${{ needs.check-version.outputs.version }}
         run: |
+          RAW="$VERSION"
           NVER=$(printf '%s' "$VERSION" | awk -F. '{for(i=1;i<=NF;i++){gsub(/^0+/,"",$i); if($i=="")$i=0; printf "%s%s",(i>1?".":""),$i} print ""}')
-          # Full transitive closure CloudClient restores (CloudBox chain + AppSync +
-          # AntiGitLibrary chain + SystemExtra + UISupportBlazor). Wait only matters for the
-          # packages whose repos changed today; the found_any logic below keeps it a no-op
-          # when none of them publish today's version.
-          PKGS="cloudbox cloudsynclibrary encryptedmessaging securestorage communicationchannel fullduplexstreamsupport bytesextension appsync antigithublibrary backuplibrary dataredundancy systemextra uisupportblazor"
-          echo "Waiting for dependency packages at version $NVER ..."
-          found_any=false
+          # package -> repo that publishes it (same Graphene release convention).
+          declare -A REPO=(
+            [cloudbox]=CloudLibraries [cloudsynclibrary]=CloudLibraries
+            [encryptedmessaging]=EncryptedMessaging [communicationchannel]=EncryptedMessaging
+            [securestorage]=SecureStorage [fullduplexstreamsupport]=FullDuplexStreamSupport
+            [bytesextension]=BytesExtension [appsync]=AppSync
+            [antigithublibrary]=AntiGithub [backuplibrary]=AntiGithub [dataredundancy]=AntiGithub
+            [systemextra]=SystemExtra [uisupportblazor]=UISupportBlazor
+          )
+          PKGS="cloudbox cloudsynclibrary encryptedmessaging communicationchannel securestorage fullduplexstreamsupport bytesextension appsync antigithublibrary backuplibrary dataredundancy systemextra uisupportblazor"
+          WAIT=""
+          for pkg in $PKGS; do
+            repo="${REPO[$pkg]}"
+            # A today-tag on the repo means it publishes today's version and the wait applies.
+            if curl -fsS --max-time 20 "https://api.github.com/repos/Graphene-Lab/$repo/git/refs/tags/v$RAW" >/dev/null 2>&1; then
+              WAIT="$WAIT $pkg"
+            fi
+          done
+          if [ -z "$WAIT" ]; then
+            echo "no dependency repo carries today's tag v$RAW — nothing changed, continuing with the latest published packages"
+            exit 0
+          fi
+          echo "Waiting for today's packages at version $NVER:$WAIT"
           for i in $(seq 1 60); do
             missing=""
-            any=false
-            for pkg in $PKGS; do
+            for pkg in $WAIT; do
               if curl -fsS --max-time 20 "https://api.nuget.org/v3-flatcontainer/$pkg/index.json" | grep -q "\"$NVER\""; then
                 echo "$pkg $NVER available (attempt $i)"
-                any=true
               else
                 missing="$missing $pkg"
               fi
             done
-            if $any; then found_any=true; fi
-            if [ -z "$missing" ]; then echo "all dependency packages available"; break; fi
+            if [ -z "$missing" ]; then echo "all changed dependency packages available"; exit 0; fi
             sleep 30
           done
-          if [ -n "$missing" ] && $found_any; then
-            echo "::error::after 30 min these packages are still not at $NVER:$missing"
-            echo "::error::at least one dependency package IS at $NVER, so these should have been published too — check the failed publish run of the repo above, fix it, then re-run (the release requires today's version of every changed dependency)."
-            exit 1
-          fi
-          if [ -n "$missing" ] && ! $found_any; then
-            echo "no dependency package exists at $NVER yet (dependencies unchanged today) — continuing with the latest published versions"
-          fi
+          echo "::error::after 30 min these packages are still not at $NVER:$missing"
+          echo "::error::their repos carry today's tag v$RAW, so they SHOULD be published — check the failed 'Publish NuGet Package' run of the repo(s) above, fix it, then re-run. Proceeding would restore yesterday's package (misleading build crash or silent stale release)."
+          exit 1
 
       # Builds against the published NuGet packages (CloudBox 1.* closure, AppSync,
       # AntiGitLibrary, SystemExtra, UISupportBlazor) — the sibling repos are never checked
