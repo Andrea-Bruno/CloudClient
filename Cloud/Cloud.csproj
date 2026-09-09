@@ -47,10 +47,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" />
-    <ProjectReference Include="..\..\..\AppSync\AppSync.csproj" />
-    <ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" />
-    <ProjectReference Include="..\..\..\UISupportBlazor\UISupportBlazor.csproj" />
+    <!-- Dual-reference pattern: the local sibling projects win in solution builds; the
+         published NuGet packages are restored when the siblings are absent (public CI
+         cannot check out the private sibling repos). CloudClient.csproj is in this repo. -->
+    <ProjectReference Include="..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj" Condition="Exists('..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj')" />
+    <PackageReference Include="AntiGitLibrary" Version="1.*" Condition="!Exists('..\..\..\AntiGit\AntiGit\AntiGitLibrary.csproj')" />
+    <ProjectReference Include="..\..\..\AppSync\AppSync.csproj" Condition="Exists('..\..\..\AppSync\AppSync.csproj')" />
+    <PackageReference Include="AppSync" Version="1.*" Condition="!Exists('..\..\..\AppSync\AppSync.csproj')" />
+    <ProjectReference Include="..\..\..\SystemExtra\SystemExtra.csproj" Condition="Exists('..\..\..\SystemExtra\SystemExtra.csproj')" />
+    <PackageReference Include="SystemExtra" Version="1.*" Condition="!Exists('..\..\..\SystemExtra\SystemExtra.csproj')" />
+    <ProjectReference Include="..\..\..\UISupportBlazor\UISupportBlazor.csproj" Condition="Exists('..\..\..\UISupportBlazor\UISupportBlazor.csproj')" />
+    <PackageReference Include="UISupportBlazor" Version="1.*" Condition="!Exists('..\..\..\UISupportBlazor\UISupportBlazor.csproj')" />
     <ProjectReference Include="..\CloudClient\CloudClient.csproj" />
   </ItemGroup>
 

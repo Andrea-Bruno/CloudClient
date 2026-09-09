@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" />
+    <!-- Dual-reference pattern: the local sibling project wins in solution builds; the
+         published NuGet package is restored when the sibling is absent (public CI builds
+         cannot check out the CloudBox/CloudLibraries repo). -->
+    <ProjectReference Include="..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj" Condition="Exists('..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj')" />
+    <PackageReference Include="CloudBox" Version="1.*" Condition="!Exists('..\..\CloudBox\CloudLibraries\CloudBox\CloudBox.csproj')" />
   </ItemGroup>
 
   <ItemGroup>
