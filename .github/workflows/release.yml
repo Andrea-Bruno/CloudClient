@@ -115,10 +115,10 @@ jobs:
             [encryptedmessaging]=EncryptedMessaging [communicationchannel]=EncryptedMessaging
             [securestorage]=SecureStorage [fullduplexstreamsupport]=FullDuplexStreamSupport
             [bytesextension]=BytesExtension [appsync]=AppSync
-            [antigithublibrary]=AntiGithub [backuplibrary]=AntiGithub [dataredundancy]=AntiGithub
+            [antigitlibrary]=AntiGithub [backuplibrary]=AntiGithub [dataredundancy]=AntiGithub
             [systemextra]=SystemExtra [uisupportblazor]=UISupportBlazor
           )
-          PKGS="cloudbox cloudsynclibrary encryptedmessaging communicationchannel securestorage fullduplexstreamsupport bytesextension appsync antigithublibrary backuplibrary dataredundancy systemextra uisupportblazor"
+          PKGS="cloudbox cloudsynclibrary encryptedmessaging communicationchannel securestorage fullduplexstreamsupport bytesextension appsync antigitlibrary backuplibrary dataredundancy systemextra uisupportblazor"
           WAIT=""
           for pkg in $PKGS; do
             repo="${REPO[$pkg]}"
