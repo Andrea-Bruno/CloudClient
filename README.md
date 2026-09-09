@@ -41,8 +41,9 @@ The software needs to run in administrator mode for the following reasons:
 Download the archive for your platform from the [Releases page](https://github.com/Graphene-Lab/CloudClient/releases)
 (each release is produced automatically by CI and ships the `cloudclient-<rid>.tar.gz`
 archives — win-x64, linux-x64, linux-arm64, osx-x64, osx-arm64 — containing the
-self-contained executable, the web UI and the `install.bat` / `install.sh` / `uninstall.sh`
-scripts. The web UI is installable as a **PWA**).
+**self-contained** executable (no .NET runtime to install), the web UI and the
+`install.bat` / `install.sh` / `uninstall.sh` scripts. The web UI is installable as a
+**PWA**).
 
 ```bash
 # Linux/macOS (x64) — one line (downloads the latest archive and runs install.sh)
@@ -109,15 +110,24 @@ Our solution is not just an alternative. It is the *only* alternative.
 
 ## dependencies:
 
-The libraries that are the engine of this app (and represent a dependency), must be downloaded from here:
+The libraries that are the engine of this app are published as **NuGet packages**
+(restored automatically at build time — a plain `dotnet build` in a checkout of this repo
+works with no manual step). Their sources are in these public repos:
 
-* [Cloud Library](https://github.com/Graphene-Lab/CloudLibraries) are libraries for the creation of symmetric cloud (with server and equal client).
-
-* [Encrypted Messenging](https://github.com/Graphene-Lab/EncryptedMessaging) are Low-level libraries for trustless encrypted socket connection (derived from bitcoin technology).
-
-* [Secure Storage](https://github.com/Graphene-Lab/SecureStorage) It is a library used to save data and information produced by the application in an encrypted and inaccessible way.
-
-* [AntiGit](https://github.com/Graphene-Lab/AntiGithub) , in this project you will find the libraries used for the data backup and redundancy functions.
+* [Cloud Library](https://github.com/Graphene-Lab/CloudLibraries) — libraries for the
+  creation of a symmetric cloud (server and equal client). Packages: `cloudbox`,
+  `cloudsynclibrary`.
+* [Encrypted Messenging](https://github.com/Graphene-Lab/EncryptedMessaging) — low-level
+  libraries for trustless encrypted socket connection (derived from bitcoin technology).
+  Packages: `encryptedmessaging`, `communicationchannel`.
+* [Secure Storage](https://github.com/Graphene-Lab/SecureStorage) — a library used to save
+  data and information produced by the application in an encrypted and inaccessible way.
+  Package: `securestorage`.
+* [AntiGit](https://github.com/Graphene-Lab/AntiGithub) — libraries used for the data backup
+  and redundancy functions. Packages: `AntiGitLibrary`, `backuplibrary`, `dataredundancy`.
+* [AppSync](https://github.com/Graphene-Lab/AppSync), [SystemExtra](https://github.com/Graphene-Lab/SystemExtra),
+  [UISupportBlazor](https://github.com/Graphene-Lab/UISupportBlazor) — update/utility/UI
+  support. Packages: `appsync`, `systemextra`, `uisupportblazor`.
 
 NOTE: Any other (possible) dependencies are on [our GitHub](https://github.com/Graphene-Lab) in source format.
 
