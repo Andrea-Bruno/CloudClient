@@ -46,11 +46,23 @@ archives — win-x64, linux-x64, linux-arm64, osx-x64, osx-arm64 — containing 
 **PWA**).
 
 ```bash
-# Linux/macOS (x64) — one line (downloads the latest archive and runs install.sh)
+# Linux x64 — one line (downloads the latest archive and runs install.sh)
 curl -fsSL -o cloudclient.tar.gz \
   https://github.com/Graphene-Lab/CloudClient/releases/latest/download/cloudclient-linux-x64.tar.gz \
   && tar -xzf cloudclient.tar.gz && chmod +x install.sh && ./install.sh
 ```
+
+```bash
+# macOS x64 — same, with the osx archive
+curl -fsSL -o cloudclient.tar.gz \
+  https://github.com/Graphene-Lab/CloudClient/releases/latest/download/cloudclient-osx-x64.tar.gz \
+  && tar -xzf cloudclient.tar.gz && chmod +x install.sh && ./install.sh
+```
+
+The archive is **self-contained**: `Cloud` (or `Cloud.exe` on Windows) runs without installing
+a .NET runtime. `install.sh` installs the app to `/usr/share/cloud` (Linux) or
+`/usr/local/share/cloud` (macOS) and launches it; alternatively you can run `./Cloud`
+directly from the extracted folder. For ARM64 replace `x64` with `arm64` in the URL.
 
 > The app is a Blazor **PWA** served by the local client: after launching you can install
 > it as a desktop app from the browser ("Install app"). Administrator/root is required

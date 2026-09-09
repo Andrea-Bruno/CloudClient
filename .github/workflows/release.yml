@@ -118,7 +118,9 @@ jobs:
             pkg="${entry%%:*}"
             repo="${entry##*:}"
             # A today-tag on the repo means it publishes today's version and the wait applies.
-            if curl -fsS --max-time 20 "https://api.github.com/repos/Graphene-Lab/$repo/git/refs/tags/v$RAW" >/dev/null 2>&1; then
+            # gh api (authenticated via GITHUB_TOKEN) — anonymous curl would hit the 60/h
+            # rate limit because this step runs once per matrix job (5×13 requests).
+            if gh api "repos/Graphene-Lab/$repo/git/refs/tags/v$RAW" >/dev/null 2>&1; then
               WAIT="$WAIT $pkg"
             fi
           done

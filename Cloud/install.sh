@@ -29,6 +29,13 @@ fi
 
 sudo chmod 755 "$INSTALL_PATH"
 
+# Self-contained single-file release archive (./Cloud present, no Cloud.dll): the .NET
+# runtime is already bundled — install nothing, launch the executable directly. The app
+# requires root, hence sudo.
+if [ -x "./Cloud" ] && [ ! -f "./Cloud.dll" ]; then
+    sudo "./Cloud" "$@"
+    exit $?
+fi
 
 if (( $EUID == 0 )); then
     echo "WARNING: Don't run as root!"
