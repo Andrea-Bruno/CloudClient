@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local-only TODO file (Linux store accounts pending etc.) — never pushed
+TODO-LOCAL.md

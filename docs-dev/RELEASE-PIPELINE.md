@@ -1,26 +1,33 @@
 # CloudClient — release pipeline & Linux distribution plan (technical reference)
 
-Status: 2026-09-09 (plan phase 1 applied). Scope mirrors the AgentBridge system **minus the
-Microsoft Store**: automatic updates with the `IsPrerelease` gate + date versioning,
-dependency NuGet packages for CI, platform archives on GitHub Releases, Linux desktop
-channels, easy README install.
+Status: 2026-09-09 (phases 1–3 + 6 applied; 4–5 external/product-gated). Scope mirrors the
+AgentBridge system **minus the Microsoft Store**: automatic updates with the `IsPrerelease`
+gate + date versioning, dependency NuGet packages for CI, platform archives on GitHub
+Releases, Linux desktop channels, easy README install.
 
-## Current state (verified 2026-09-09)
+## Current state (verified 2026-09-09, post phases 1–3)
 
 - Solution `CloudClient.sln` at repo root; two projects:
   - `Cloud/Cloud.csproj` — the app: **Blazor web + PWA** (`wwwroot/service-worker.js`),
     `Microsoft.NET.Sdk.Web`, `OutputType=WinExe`, **requires administrator/root**
-    (exits otherwise), .NET **10**, framework-dependent (expects a system .NET runtime on
-    Linux/macOS), ships `install.bat` / `install.sh` / `uninstall.sh` / `INSTALL.txt`.
+    (exits otherwise), .NET **10**, self-contained single-file per-RID on release
+    (previously framework-dependent; release.yml publishes `--self-contained true`),
+    ships `install.bat` / `install.sh` / `uninstall.sh` / `INSTALL.txt`.
   - `CloudClient/CloudClient.csproj` — helper library (MonoMac.NetStandard, System.Drawing).
-- Dependencies (ProjectReference to sibling repos, not on NuGet): **CloudBox** (from
-  `CloudBox/CloudLibraries`), **AppSync** (Andrea-Bruno/AppSync, private), **AntiGithub**
-  (Andrea-Bruno/AntiGithub), **UISupportBlazor** (published: `uisupportblazor` 1.25.x),
-  **SystemExtra** (published: `systemextra`).
-- GitHub: public `Graphene-Lab/CloudClient`, branch `master`, **no workflows** (CI absent),
-  no versioning/version gate, README has a basic "Installation" section only.
-- NuGet check: `cloudbox`, `appsync`, `antigithub` **absent** from nuget.org →
-  a public CI cannot restore the sibling repos → **they must be published first**.
+- Dependencies: **dual-reference** — local sibling ProjectReference wins in dev; published
+  NuGet package (`1.*`) in CI. All published 2026-09-09 at 1.26.9.9 (closure:
+  `cloudbox`, `cloudsynclibrary`, `encryptedmessaging`, `communicationchannel`,
+  `securestorage`, `fullduplexstreamsupport`, `bytesextension`, `appsync`, `AntiGitLibrary`,
+  `backuplibrary`, `dataredundancy`, plus the pre-existing `systemextra`,
+  `uisupportblazor`).
+- GitHub: public `Graphene-Lab/CloudClient`, branch `master`, **release.yml active**:
+  gate `IsPrerelease` → (optional) NuGet wait → 5 per-RID archives → GitHub release +
+  changelog + tag. First release **v1.26.09.09** produced and verified.
+- App auto-update: CloudClient keeps its existing AppSync updater against its private
+  update server (product decision, not rewired to GitHub — see TODO-LOCAL.md).
+- Linux store channels: all account-gated externally (Snap/Ubuntu SSO approval pending,
+  AUR registration suspended, Flathub closed to this family) → tracked in TODO-LOCAL.md;
+  the primary Linux channel is the GitHub release archive + `install.sh`.
 
 ## Architecture to implement (AgentBridge model)
 
@@ -63,9 +70,31 @@ they go live.
 ## Phase checklist
 - [x] Phase 1 (repo-local): version gate + date versioning in `Cloud.csproj`; README
       "Install & Download" section; this plan doc.
-- [ ] Phase 2: publish `cloudbox`/`appsync`/`antigithub` NuGet packages (per-repo,
-      needs NUGET_API_KEY) + dual-reference switch in the csprojs.
-- [ ] Phase 3: `release.yml` (archives + tag + release notes) and validation build.
-- [ ] Phase 4: AppSync auto-update wiring to releases.
-- [ ] Phase 5: Flatpak (self-hosted + Flathub later), Snap classic, AUR; README final.
-- [ ] Phase 6: end-to-end green run + verification (WSL where possible).
+- [x] Phase 2: dependency NuGet publishing + dual-reference switch in the csprojs.
+      Published 2026-09-09 at 1.26.9.9 (transitive closure, bottom-up):
+      `securestorage`, `fullduplexstreamsupport`, `communicationchannel`,
+      `encryptedmessaging`, `cloudsynclibrary` (id `cloudsync` is squatted on nuget.org —
+      see CloudLibraries commit), `cloudbox`, `backuplibrary`, `dataredundancy`,
+      `AntiGitLibrary`, `appsync`. Every repo got its `publish.yml` (pack + push on a `v*`
+      tag, NUGET_API_KEY secret) and the cross-repo csprojs were switched to the
+      dual-reference pattern (local ProjectReference wins in dev, published package 1.* in
+      CI). CloudClient's own csprojs dual-ref CloudBox / AppSync / AntiGitLibrary /
+      SystemExtra / UISupportBlazor.
+- [x] Phase 3: `release.yml` — gate IsPrerelease → (optional) NuGet wait for the dependency
+      repos that carry today's tag → per-RID self-contained single-file publish (win-x64,
+      linux-x64, linux-arm64, osx-x64, osx-arm64) → GitHub release + auto changelog + tag
+      `v1.yy.MM.dd` pinned to the gate-off commit. E2E verified 2026-09-09: release
+      `v1.26.09.09` with all five `cloudclient-<rid>.tar.gz` archives (the CloudClient.wpp
+      zip hook is gated to Windows so Linux/macOS publishes are not affected).
+- [ ] Phase 4: in-app auto-update — CloudClient keeps its existing AppSync updater
+      (`Util.MonitorUpdates`) pointed at its private update server; wiring it to the GitHub
+      release tags is a product decision (the app is root-required, server-style) and is
+      intentionally NOT changed here — see TODO-LOCAL.md.
+- [ ] Phase 5: Linux store channels — see TODO-LOCAL.md (local, gitignored). All store
+      accounts are external gates: Snap classic needs the Ubuntu SSO approval (same account
+      as AgentBridge, pending), AUR registration is suspended, Flathub rejects submissions
+      for the AgentBridge family. Primary Linux channel = the GitHub release archives with
+      `install.sh` (active and tested). README final done.
+- [x] Phase 6: end-to-end green run — release `v1.26.09.09` produced by release.yml from a
+      clean CI checkout (NuGet-only restore, no sibling repos), all five archives attached,
+      prerelease gate restored afterwards with `[skip ci]`.
