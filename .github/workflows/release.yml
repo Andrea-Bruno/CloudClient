@@ -1,0 +1,199 @@
+name: Build and Release CloudClient
+
+# The release is AUTOMATIC: pushing master with IsPrerelease=false in Cloud/Cloud.csproj
+# (in the pushed commit) triggers the wait for the dependency NuGet packages, the build of the
+# platform archives and the GitHub release — the tag v1.yy.MM.dd is created on the fly. No tag
+# push is needed. With IsPrerelease=true, or when today's tag already exists, the run is
+# skipped. CloudClient has no Microsoft Store channel (unlike AgentBridge).
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Serializes runs of this workflow per branch so a quick double push never races the release
+# run (AgentBridge 2026-08-26: runs created in inverted order, the release run failed while
+# queued). The gate-restore commit carries [skip ci] so it creates no run at all.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Release gate: when IsPrerelease=true in Cloud/Cloud.csproj the version carries a
+  # "-prerelease" suffix and no GitHub release is created. See docs-dev/RELEASE-PIPELINE.md.
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      do_release: ${{ steps.gate.outputs.do_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: CloudClient
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Detect version + release gate
+        id: ver
+        shell: bash
+        run: |
+          VER=$(dotnet msbuild CloudClient/Cloud/Cloud.csproj -getProperty:Version -nologo | grep -oE '[0-9]+(\.[0-9]+)*(-[a-z0-9]+)?' | head -n1)
+          PREREL=$(dotnet msbuild CloudClient/Cloud/Cloud.csproj -getProperty:IsPrerelease -nologo | grep -oE 'true|false' | head -n1)
+          echo "version=$VER"
+          echo "prerelease=${PREREL:-false}" >> "$GITHUB_OUTPUT"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+      - name: Decide whether to release
+        id: gate
+        working-directory: CloudClient
+        shell: bash
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          PRERELEASE: ${{ steps.ver.outputs.prerelease }}
+        run: |
+          if [ "$PRERELEASE" = "true" ]; then
+            echo "IsPrerelease=true -> prerelease build, no GitHub release"
+            echo "do_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git ls-remote --tags origin "refs/tags/v$VERSION" | grep -q .; then
+            echo "Tag v$VERSION already exists -> no second release for this version"
+            echo "do_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "do_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check-version
+    if: needs.check-version.outputs.do_release == 'true'
+    name: Build ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: ubuntu-latest
+            rid: linux-arm64
+          - os: macos-latest
+            rid: osx-x64
+          - os: macos-latest
+            rid: osx-arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: CloudClient
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # The dependency NuGet packages are date-versioned (1.yy.MM.dd) and published by each
+      # repo's publish.yml when a v* tag is pushed. CloudClient restores them with 1.*
+      # floating, so the release must NOT silently restore a package older than the release
+      # date. The wait checks the packages CloudClient actually restores (the CloudBox closure
+      # + AppSync + AntiGitLibrary + SystemExtra + UISupportBlazor) at the release version.
+      # It exits as soon as they are all visible; a package that never appears is only a HARD
+      # failure when at least one package of the set WAS found today (a lagging publish) —
+      # if none changed today, no package exists at today's version and the wait is a no-op.
+      - name: Wait for dependency packages on NuGet
+        shell: bash
+        env:
+          VERSION: ${{ needs.check-version.outputs.version }}
+        run: |
+          NVER=$(printf '%s' "$VERSION" | awk -F. '{for(i=1;i<=NF;i++){gsub(/^0+/,"",$i); if($i=="")$i=0; printf "%s%s",(i>1?".":""),$i} print ""}')
+          # Full transitive closure CloudClient restores (CloudBox chain + AppSync +
+          # AntiGitLibrary chain + SystemExtra + UISupportBlazor). Wait only matters for the
+          # packages whose repos changed today; the found_any logic below keeps it a no-op
+          # when none of them publish today's version.
+          PKGS="cloudbox cloudsynclibrary encryptedmessaging securestorage communicationchannel fullduplexstreamsupport bytesextension appsync antigithublibrary backuplibrary dataredundancy systemextra uisupportblazor"
+          echo "Waiting for dependency packages at version $NVER ..."
+          found_any=false
+          for i in $(seq 1 60); do
+            missing=""
+            any=false
+            for pkg in $PKGS; do
+              if curl -fsS --max-time 20 "https://api.nuget.org/v3-flatcontainer/$pkg/index.json" | grep -q "\"$NVER\""; then
+                echo "$pkg $NVER available (attempt $i)"
+                any=true
+              else
+                missing="$missing $pkg"
+              fi
+            done
+            if $any; then found_any=true; fi
+            if [ -z "$missing" ]; then echo "all dependency packages available"; break; fi
+            sleep 30
+          done
+          if [ -n "$missing" ] && $found_any; then
+            echo "::error::after 30 min these packages are still not at $NVER:$missing"
+            echo "::error::at least one dependency package IS at $NVER, so these should have been published too — check the failed publish run of the repo above, fix it, then re-run (the release requires today's version of every changed dependency)."
+            exit 1
+          fi
+          if [ -n "$missing" ] && ! $found_any; then
+            echo "no dependency package exists at $NVER yet (dependencies unchanged today) — continuing with the latest published versions"
+          fi
+
+      # Builds against the published NuGet packages (CloudBox 1.* closure, AppSync,
+      # AntiGitLibrary, SystemExtra, UISupportBlazor) — the sibling repos are never checked
+      # out here. Self-contained single-file per RID, like AgentBridge: the archives run on a
+      # machine without a system .NET runtime (the PWA/web client and install scripts ship
+      # next to the executable).
+      - name: Publish
+        shell: bash
+        run: |
+          dotnet publish CloudClient/Cloud/Cloud.csproj -c Release -r ${{ matrix.rid }} \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:DebugType=None -p:DebugSymbols=false \
+            -o ./publish
+
+      - name: Package
+        shell: bash
+        run: |
+          cd publish
+          tar -czf ../cloudclient-${{ matrix.rid }}.tar.gz .
+          cd ..
+          ls -lh cloudclient-${{ matrix.rid }}.tar.gz
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudclient-${{ matrix.rid }}
+          path: cloudclient-${{ matrix.rid }}.tar.gz
+
+  release:
+    needs: [check-version, build]
+    if: needs.check-version.outputs.do_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download archives
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      # Pin the tag to the commit that triggered this run (github.sha = the gate-off commit) so
+      # a later master push (e.g. the IsPrerelease restore after a button release) cannot move
+      # it. The GITHUB_TOKEN push does not re-trigger workflows. The tag is informational:
+      # nothing listens on it (auto-update reads the GitHub release, see docs).
+      - name: Tag the triggering commit
+        shell: bash
+        run: |
+          git tag "v${{ needs.check-version.outputs.version }}" "$GITHUB_SHA"
+          git push origin "v${{ needs.check-version.outputs.version }}"
+      - name: Create GitHub Release v${{ needs.check-version.outputs.version }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.version }}
+          files: |
+            artifacts/**/*.tar.gz
+          generate_release_notes: true
