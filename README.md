@@ -39,13 +39,16 @@ The software needs to run in administrator mode for the following reasons:
 [![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/Graphene-Lab/CloudClient/releases/latest)
 
 Download the archive for your platform from the [Releases page](https://github.com/Graphene-Lab/CloudClient/releases)
-(each release is produced automatically and includes the `install.bat` / `install.sh` /
-`uninstall.sh` scripts and a web UI that is installable as a **PWA**).
+(each release is produced automatically by CI and ships the `cloudclient-<rid>.tar.gz`
+archives — win-x64, linux-x64, linux-arm64, osx-x64, osx-arm64 — containing the
+self-contained executable, the web UI and the `install.bat` / `install.sh` / `uninstall.sh`
+scripts. The web UI is installable as a **PWA**).
 
 ```bash
-# Linux / macOS — one line (downloads the latest release and runs install.sh)
-curl -fsSL -o install.sh https://github.com/Graphene-Lab/CloudClient/releases/latest/download/install.sh \
-  && chmod +x install.sh && ./install.sh
+# Linux/macOS (x64) — one line (downloads the latest archive and runs install.sh)
+curl -fsSL -o cloudclient.tar.gz \
+  https://github.com/Graphene-Lab/CloudClient/releases/latest/download/cloudclient-linux-x64.tar.gz \
+  && tar -xzf cloudclient.tar.gz && chmod +x install.sh && ./install.sh
 ```
 
 > The app is a Blazor **PWA** served by the local client: after launching you can install
