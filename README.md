@@ -31,6 +31,27 @@ The software needs to run in administrator mode for the following reasons:
 * Automatic date and time adjustment in your computer (if the date is wrong the files will be recorded with wrong dates and could be mistakenly mistaken as older than versions contained on the cloud).
 * Create hard links for backups (this saves a lot of space during backups).
 
+## Install & Download
+
+[![Latest release](https://img.shields.io/github/v/release/Graphene-Lab/CloudClient?style=for-the-badge&color=1f6feb)](https://github.com/Graphene-Lab/CloudClient/releases/latest)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/Graphene-Lab/CloudClient/releases/latest)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/Graphene-Lab/CloudClient/releases/latest)
+[![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/Graphene-Lab/CloudClient/releases/latest)
+
+Download the archive for your platform from the [Releases page](https://github.com/Graphene-Lab/CloudClient/releases)
+(each release is produced automatically and includes the `install.bat` / `install.sh` /
+`uninstall.sh` scripts and a web UI that is installable as a **PWA**).
+
+```bash
+# Linux / macOS â€” one line (downloads the latest release and runs install.sh)
+curl -fsSL -o install.sh https://github.com/Graphene-Lab/CloudClient/releases/latest/download/install.sh \
+  && chmod +x install.sh && ./install.sh
+```
+
+> The app is a Blazor **PWA** served by the local client: after launching you can install
+> it as a desktop app from the browser ("Install app"). Administrator/root is required
+> (clock sync + hard-link backups), as described below.
+
 # Installation
 If you want to customize the cloud folder path, enable or disable virtual disk and other settings, you need to edit the **appsettings.json** file and read the notes inside for more clarifications. The default configuration is fine for most users.
 If you are a Linux and MacOS user, you can simply run install.sh to install the application:
@@ -51,35 +72,35 @@ Since the privacy policy is trustless (you don't have to trust us but it is the 
 
 # The Illusion of Data Protection: How EU Regulations Enable Mass Surveillance and the Trustless Solution
 
-In Europe, the General Data Protection Regulation (GDPR) was introduced with the noble intention of safeguarding citizens' privacy by imposing strict rules on the custody and processing of personal data. On the surface, these regulations appear robust, designed to prevent misuse and unauthorized profiling. Yet, beneath this façade of compliance lies a disturbing reality: these very rules have become a tool for systemic data exploitation. The GDPR, rather than being a shield against surveillance, has instead institutionalized a framework that facilitates the mass profiling of individuals—often under the guise of legality.  
+In Europe, the General Data Protection Regulation (GDPR) was introduced with the noble intention of safeguarding citizens' privacy by imposing strict rules on the custody and processing of personal data. On the surface, these regulations appear robust, designed to prevent misuse and unauthorized profiling. Yet, beneath this faï¿½ade of compliance lies a disturbing reality: these very rules have become a tool for systemic data exploitation. The GDPR, rather than being a shield against surveillance, has instead institutionalized a framework that facilitates the mass profiling of individualsï¿½often under the guise of legality.  
 
-The revelations brought to light by Edward Snowden and the subsequent *Datagate* scandal exposed a global surveillance apparatus where corporations and intelligence agencies collaborated in harvesting and analyzing personal data on an unprecedented scale. This was not mere speculation; the investigative journalism that uncovered these practices was awarded the Pulitzer Prize, cementing its credibility. The scandal revealed that personal data was not just being stored—it was being weaponized for purposes ranging from corporate espionage to political manipulation.  
+The revelations brought to light by Edward Snowden and the subsequent *Datagate* scandal exposed a global surveillance apparatus where corporations and intelligence agencies collaborated in harvesting and analyzing personal data on an unprecedented scale. This was not mere speculation; the investigative journalism that uncovered these practices was awarded the Pulitzer Prize, cementing its credibility. The scandal revealed that personal data was not just being storedï¿½it was being weaponized for purposes ranging from corporate espionage to political manipulation.  
 
-What makes this even more alarming is that the very entities implicated in these breaches—Amazon, Google, Microsoft—now dominate Europe’s cloud storage market, operating in what amounts to a de facto monopoly. Logically, these corporations should have been barred from handling European citizens' data. Instead, they not only continue to operate but also provide cloud infrastructure to governments and national cybersecurity agencies. This paradox underscores a fundamental truth: the regulatory landscape is not shaped by genuine concern for privacy, but by corporate lobbying power. The result is a system where legislation, rather than protecting individuals, ensures that data flows seamlessly into the hands of those who seek to control and categorize entire populations.  
+What makes this even more alarming is that the very entities implicated in these breachesï¿½Amazon, Google, Microsoftï¿½now dominate Europeï¿½s cloud storage market, operating in what amounts to a de facto monopoly. Logically, these corporations should have been barred from handling European citizens' data. Instead, they not only continue to operate but also provide cloud infrastructure to governments and national cybersecurity agencies. This paradox underscores a fundamental truth: the regulatory landscape is not shaped by genuine concern for privacy, but by corporate lobbying power. The result is a system where legislation, rather than protecting individuals, ensures that data flows seamlessly into the hands of those who seek to control and categorize entire populations.  
 
 ### The Fallacy of Certifications and the Rise of Trustless Security  
 
-The cybersecurity industry has long relied on certifications and compliance standards as markers of trust. But this approach is fundamentally flawed. If a system requires external validation to prove its security, then it is inherently insecure—because it demands that users place blind faith in the certifying authority. The reality is that true security does not stem from bureaucratic approvals, but from mathematical certainty.  
+The cybersecurity industry has long relied on certifications and compliance standards as markers of trust. But this approach is fundamentally flawed. If a system requires external validation to prove its security, then it is inherently insecureï¿½because it demands that users place blind faith in the certifying authority. The reality is that true security does not stem from bureaucratic approvals, but from mathematical certainty.  
 
-This is where *trustless* technology revolutionizes data protection. Unlike traditional systems, which depend on centralized trust (and are therefore vulnerable to manipulation), trustless architectures ensure security through cryptographic algorithms that eliminate the need for intermediaries. The concept was pioneered by Bitcoin—a decentralized blockchain network that operates without certifications, where nodes exist in untrusted environments, yet the system remains unhackable because its security is intrinsic, not granted by external validators.  
+This is where *trustless* technology revolutionizes data protection. Unlike traditional systems, which depend on centralized trust (and are therefore vulnerable to manipulation), trustless architectures ensure security through cryptographic algorithms that eliminate the need for intermediaries. The concept was pioneered by Bitcoinï¿½a decentralized blockchain network that operates without certifications, where nodes exist in untrusted environments, yet the system remains unhackable because its security is intrinsic, not granted by external validators.  
 
-Our data custody solution is built entirely on this principle. By leveraging *zero-knowledge encryption*, we ensure that no third party—whether a cloud provider, a government, or a malicious actor—can access or analyze user data. Here’s how it works:  
+Our data custody solution is built entirely on this principle. By leveraging *zero-knowledge encryption*, we ensure that no third partyï¿½whether a cloud provider, a government, or a malicious actorï¿½can access or analyze user data. Hereï¿½s how it works:  
 
-1. **Client-Side Encryption**: Before any data leaves a user’s device, it is encrypted using a 512-bit derived key, generated from a 12 or 24-word passphrase. This means the data is indecipherable the moment it is stored or transmitted.  
-2. **No Server-Side Access**: Even if the data resides on a server, the custodian cannot read it. The encryption keys never leave the user’s control.  
-3. **Secure Key Custody**: We provide hardware solutions, such as encrypted USB tokens, allowing users to physically possess their decryption keys. For example, a patient’s medical records can be stored in the cloud, but a doctor can only access them if the patient authorizes it by connecting their key.  
+1. **Client-Side Encryption**: Before any data leaves a userï¿½s device, it is encrypted using a 512-bit derived key, generated from a 12 or 24-word passphrase. This means the data is indecipherable the moment it is stored or transmitted.  
+2. **No Server-Side Access**: Even if the data resides on a server, the custodian cannot read it. The encryption keys never leave the userï¿½s control.  
+3. **Secure Key Custody**: We provide hardware solutions, such as encrypted USB tokens, allowing users to physically possess their decryption keys. For example, a patientï¿½s medical records can be stored in the cloud, but a doctor can only access them if the patient authorizes it by connecting their key.  
 
 ### A System Designed for a Hostile World  
 
-The current regulatory environment is not an accident—it is a carefully constructed illusion, designed to maintain the dominance of surveillance-capable corporations. The GDPR’s loopholes and certifications serve as a smokescreen, enabling data harvesting under the pretense of compliance. Our solution bypasses this deception entirely by removing trust from the equation.  
+The current regulatory environment is not an accidentï¿½it is a carefully constructed illusion, designed to maintain the dominance of surveillance-capable corporations. The GDPRï¿½s loopholes and certifications serve as a smokescreen, enabling data harvesting under the pretense of compliance. Our solution bypasses this deception entirely by removing trust from the equation.  
 
-Consider this: If a European hospital stores patient records on a "GDPR-compliant" cloud service operated by a Datagate-implicated corporation, those records are only as secure as the corporation’s willingness to follow the rules—rules that have already been proven unreliable. In contrast, with our trustless system, even if the data is stored on that same compromised cloud, it remains encrypted, unreadable, and entirely under the patient’s control.  
+Consider this: If a European hospital stores patient records on a "GDPR-compliant" cloud service operated by a Datagate-implicated corporation, those records are only as secure as the corporationï¿½s willingness to follow the rulesï¿½rules that have already been proven unreliable. In contrast, with our trustless system, even if the data is stored on that same compromised cloud, it remains encrypted, unreadable, and entirely under the patientï¿½s control.  
 
 ### Conclusion: Reclaiming Privacy in an Age of Surveillance  
 
-The fight for true data privacy is not just a technical challenge—it is a battle against systemic exploitation. The existing regulatory framework, far from being a safeguard, is a facilitator of mass profiling. Trustless technology dismantles this machinery by ensuring that security is no longer a matter of policy, but of mathematics.  
+The fight for true data privacy is not just a technical challengeï¿½it is a battle against systemic exploitation. The existing regulatory framework, far from being a safeguard, is a facilitator of mass profiling. Trustless technology dismantles this machinery by ensuring that security is no longer a matter of policy, but of mathematics.  
 
-We do not ask users to trust us—we ask them to trust encryption. Because in a world where corporations and governments have repeatedly betrayed public trust, the only real security is the kind that requires no faith at all.  
+We do not ask users to trust usï¿½we ask them to trust encryption. Because in a world where corporations and governments have repeatedly betrayed public trust, the only real security is the kind that requires no faith at all.  
 
 Our solution is not just an alternative. It is the *only* alternative.
 
